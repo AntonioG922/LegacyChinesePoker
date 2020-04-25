@@ -13,6 +13,7 @@ export default function(containerRef) {
           HowToPlay: 'howToPlay',
           JoinGame: 'joinGameMenu',
           PlayMenu: 'playMenu',
+          CustomGameMenu: 'customGameMenu'
         },
       },
     },

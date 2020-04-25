@@ -15,6 +15,7 @@ import HowToPlayScreen from './screens/HowToPlayScreen';
 import PlayMenuScreen from './screens/PlayMenuScreen';
 import HostGameOptionsScreen from './screens/HostGameOptionsScreen';
 import JoinGameMenuScreen from './screens/JoinGameMenuScreen';
+import CustomGameMenuScreen from './screens/CustomGameMenuScreen';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -89,6 +90,7 @@ export default function App(props) {
                 <Stack.Screen name="PlayMenu" component={PlayMenuScreen} />
                 <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
                 <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
+                <Stack.Screen name="CustomGameMenu" component={CustomGameMenuScreen} />
               </Stack.Navigator>
             </NavigationContainer>
           </View>
