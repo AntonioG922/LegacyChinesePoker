@@ -11,7 +11,7 @@ export default function JoinGameMenuScreen({ navigation }) {
       case "add":
         return [...activeGames, value];
       case "remove":
-        return activeGames.filter((doc) => doc !== value);
+        return activeGames.filter((doc) => doc.gameName !== value.gameName);
       default:
         return activeGames;
     }
