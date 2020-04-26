@@ -9,10 +9,39 @@ import { TitledPage } from "../components/Template";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function JoinGameMenuScreen({ navigation }) {
+
+  function joinGame(gameName) {
+    const doc = firebase.firestore()
+      .collection('ActiveGames')
+      .doc(gameName);
+
+    doc.update({
+      players: firebase.firestore.FieldValue.increment(1)
+    })
+      .then(() => {
+        doc.get()
+          .then(doc => {
+            if (doc.data().players === doc.data().numberOfPlayers) {
+              navigation.navigate('Game');
+            }
+          })
+          .catch({
+            alert: ('Error getting game data. Please try again.')
+          });
+      })
+      .catch({
+        alert: ('Error joining game. Please try again.')
+      })
+  }
+
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
       case "add":
         return [...activeGames, value];
+      case "modified":
+        const index = activeGames.findIndex(x => x.gameName === value.gameName);
+        activeGames.splice(index, 1, value);
+        return [...activeGames];
       case "remove":
         return activeGames.filter((doc) => doc.gameName !== value.gameName);
       default:
@@ -28,7 +57,7 @@ export default function JoinGameMenuScreen({ navigation }) {
             dispatch({ type: "add", value: change.doc.data() });
           }
           if (change.type === "modified") {
-            console.log("Fuck you: ", change.doc.data());
+            dispatch({ type: "modified", value: change.doc.data() });
           }
           if (change.type === "removed") {
             dispatch({ type: "remove", value: change.doc.data() });
@@ -46,28 +75,32 @@ export default function JoinGameMenuScreen({ navigation }) {
           <HeaderText><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
         </View>
         {activeGames.length && activeGames.map((game) =>
-          (<View>
-            <TextButton key={game.gameName} labelStyle={styles.menuOption} onPress={() => joinGame(game.gameName)}>
+          (<View key={game.gameName}>
+            <TextButton labelStyle={styles.menuOption} onPress={() => joinGame(game.gameName)}>
               {game.gameName}
             </TextButton>
             <View style={styles.menuOptionIcons}>
-              <HeaderText style={styles.menuOptionIcon} key={game.numberOfPlayers}>{game.numberOfPlayers}</HeaderText>
-              {game.useJoker && <HeaderText style={styles.menuOptionIcon} key={game.useJoker}>
+              <HeaderText style={styles.menuOptionIcon}>{game.players} : {game.numberOfPlayers}</HeaderText>
+              {game.useJoker && <HeaderText style={styles.menuOptionIcon}>
                 <MaterialCommunityIcons size={25} name={'cards-playing-outline'} />
               </HeaderText> || <Text>      </Text>}
-              {Boolean(game.password) && <HeaderText style={styles.menuOptionIcon} key={game.password}>
+              {Boolean(game.password) && <HeaderText style={styles.menuOptionIcon}>
                 <MaterialCommunityIcons size={25} name={'lock'} />
               </HeaderText> || <Text>      </Text>}
             </View>
           </View>
           )) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
-
       </TitledPage>
     </ScrollView>
   );
 }
 
-function joinGame() { }
+
+function moveFBDocument(fromPath, toPath) {
+  const doc = fromPath.get();
+  toPath.set(doc);
+  fromPath.delete()
+}
 
 const styles = StyleSheet.create({
   container: {
