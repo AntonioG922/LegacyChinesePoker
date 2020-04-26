@@ -22,6 +22,9 @@ export default function JoinGameMenuScreen({ navigation }) {
         doc.get()
           .then(doc => {
             if (doc.data().players === doc.data().numberOfPlayers) {
+              moveFBDocument(firebase.firestore()
+                .collection('ActiveGames')
+                .doc(gameName), firebase.firestore().collection('PlayingGames').doc(gameName));
               navigation.navigate('Game');
             }
           })
@@ -97,9 +100,11 @@ export default function JoinGameMenuScreen({ navigation }) {
 
 
 function moveFBDocument(fromPath, toPath) {
-  const doc = fromPath.get();
-  toPath.set(doc);
-  fromPath.delete()
+  fromPath.get().then((doc) => {
+    toPath.set(doc.data()).then(() => {
+      fromPath.delete();
+    })
+  });
 }
 
 const styles = StyleSheet.create({
