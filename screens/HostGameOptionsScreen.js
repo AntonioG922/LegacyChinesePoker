@@ -43,7 +43,8 @@ function createGame(gameName, password, numberOfPlayers, useJoker) {
     gameName: gameName,
     password: password,
     numberOfPlayers: numberOfPlayers,
-    useJoker: useJoker
+    useJoker: useJoker,
+    players: 1
   }).then(() => {
     console.log('Game added!');
   });
