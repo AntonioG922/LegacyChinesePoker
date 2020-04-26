@@ -16,7 +16,7 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.menuOptionContainer}>
-        <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Play Now</TextButton>
+        <TextButton onPress={() => navigation.navigate('Game')}>Play Now</TextButton>
         <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Host Game</TextButton>
         <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton>Stats</TextButton>
