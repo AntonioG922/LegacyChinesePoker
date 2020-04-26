@@ -11,14 +11,15 @@ export default function HomeScreen({ navigation }) {
           source={require('../assets/images/dragon.png')}
           style={styles.headerImage}
         >
-            <HeaderText style={styles.title}>Chinese Poker</HeaderText>
+          <HeaderText style={styles.title}>Chinese Poker</HeaderText>
         </ImageBackground>
       </View>
 
       <View style={styles.menuOptionContainer}>
-        <TextButton onPress={() => navigation.navigate('PlayMenu')}>Play</TextButton>
+        <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Play Now</TextButton>
+        <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Host Game</TextButton>
+        <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton>Stats</TextButton>
-        <TextButton>Options</TextButton>
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
     </View>

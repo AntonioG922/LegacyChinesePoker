@@ -10,12 +10,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import useLinking from './navigation/useLinking';
 import HomeScreen from './screens/HomeScreen';
-import LinksScreen from './screens/LinksScreen';
 import HowToPlayScreen from './screens/HowToPlayScreen';
-import PlayMenuScreen from './screens/PlayMenuScreen';
 import HostGameOptionsScreen from './screens/HostGameOptionsScreen';
 import JoinGameMenuScreen from './screens/JoinGameMenuScreen';
-import CustomGameMenuScreen from './screens/CustomGameMenuScreen';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -79,22 +76,19 @@ export default function App(props) {
     return null;
   } else {
     return (
-        <PaperProvider theme={theme}>
-          <View style={styles.container}>
-            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-            <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
-              <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Links" component={LinksScreen} />
-                <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
-                <Stack.Screen name="PlayMenu" component={PlayMenuScreen} />
-                <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
-                <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
-                <Stack.Screen name="CustomGameMenu" component={CustomGameMenuScreen} />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </View>
-        </PaperProvider>
+      <PaperProvider theme={theme}>
+        <View style={styles.container}>
+          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+          <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+              <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
+              <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </PaperProvider>
     );
   }
 }
