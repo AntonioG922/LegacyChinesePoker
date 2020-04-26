@@ -1,15 +1,14 @@
 import * as React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import {PageTitle, TextButton} from '../components/StyledText';
+import {TextButton} from '../components/StyledText';
 import {TitledPage} from '../components/Template';
-import {ScrollView} from "react-native-gesture-handler";
 
 export default function PlayMenuScreen({ navigation }) {
   return (
       <TitledPage pageTitle={'Play'} contentContainerStyle={styles.container}>
-        <TextButton labelStyle={styles.menuOption} onPress={() => navigation.navigate('HostGameOptions')}>Host Game</TextButton>
-        <TextButton labelStyle={styles.menuOption} onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
+        <TextButton labelStyle={styles.menuOption} onPress={() => navigation.navigate('HostGameOptions')}>Play Now</TextButton>
+        <TextButton labelStyle={styles.menuOption} onPress={() => navigation.navigate('CustomGameMenu')}>Custom Game</TextButton>
         <TextButton disabled={true} labelStyle={[styles.menuOption, styles.disabled]}>Vs. AI</TextButton>
       </TitledPage>
   );
