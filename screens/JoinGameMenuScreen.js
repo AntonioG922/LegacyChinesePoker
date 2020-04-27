@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from "react";
+import React, { useState, useReducer, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -7,36 +7,10 @@ import firebase from 'firebase'
 import { TextButton, HeaderText } from "../components/StyledText";
 import { TitledPage } from "../components/Template";
 import { ScrollView } from "react-native-gesture-handler";
+import Loader from '../components/Loader'
 
 export default function JoinGameMenuScreen({ navigation }) {
-
-  function joinGame(gameName) {
-    const doc = firebase.firestore()
-      .collection('ActiveGames')
-      .doc(gameName);
-
-    doc.update({
-      players: firebase.firestore.FieldValue.increment(1)
-    })
-      .then(() => {
-        doc.get()
-          .then(doc => {
-            if (doc.data().players === doc.data().numberOfPlayers) {
-              moveFBDocument(firebase.firestore()
-                .collection('ActiveGames')
-                .doc(gameName), firebase.firestore().collection('PlayingGames').doc(gameName));
-              navigation.navigate('Game');
-            }
-          })
-          .catch({
-            alert: ('Error getting game data. Please try again.')
-          });
-      })
-      .catch({
-        alert: ('Error joining game. Please try again.')
-      })
-  }
-
+  const [loading, setLoading] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
       case "add":
@@ -51,6 +25,35 @@ export default function JoinGameMenuScreen({ navigation }) {
         return activeGames;
     }
   }, []);
+
+  function joinGame(gameName) {
+    setLoading(true);
+    const doc = firebase.firestore()
+      .collection('ActiveGames')
+      .doc(gameName);
+
+    doc.update({
+      players: firebase.firestore.FieldValue.increment(1)
+    })
+      .then(() => {
+        doc.get()
+          .then(doc => {
+            if (doc.data().players === doc.data().numberOfPlayers) {
+              moveFBDocument(firebase.firestore().collection('ActiveGames').doc(gameName),
+                firebase.firestore().collection('PlayingGames').doc(gameName));
+              setLoading(false);
+              navigation.navigate('Game');
+            }
+            setLoading(false);
+          })
+          .catch({
+            alert: ('Error getting game data. Please try again.')
+          });
+      })
+      .catch({
+        alert: ('Error joining game. Please try again.')
+      })
+  }
 
   useEffect(() => {
     firebase.firestore().collection("ActiveGames")
@@ -72,6 +75,7 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <Loader loading={loading} />
       <TitledPage pageTitle={"Join Game"} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
           <HeaderText><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
