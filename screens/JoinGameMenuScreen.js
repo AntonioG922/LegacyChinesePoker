@@ -75,7 +75,7 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
-      <Loader loading={loading} />
+      <Loader loading={loading} message={'Entering Game'} />
       <TitledPage pageTitle={"Join Game"} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
           <HeaderText><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>

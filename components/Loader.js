@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, Modal } from 'react-native';
 import { ActivityIndicator, Colors } from 'react-native-paper';
+import { HeaderText } from "../components/StyledText";
 
 export default function Loader(props) {
   const {
     loading,
+    message,
     ...attributes
   } = props;
 
@@ -14,10 +16,12 @@ export default function Loader(props) {
       animationType={'none'}
       visible={loading}>
       <View style={styles.modalBackground}>
+        <HeaderText style={styles.loaderMessage}>{message}</HeaderText>
         <ActivityIndicator
           animating={loading}
           color={Colors.red800}
-          size={150} />
+          size={150}
+          style={styles.activityIcon} />
       </View>
     </Modal>
   )
@@ -30,5 +34,12 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-around',
     backgroundColor: '#00000040'
+  },
+  loaderMessage: {
+    fontSize: 50
+  },
+  activityIcon: {
+    position: 'relative',
+    bottom: '20%'
   }
 });
