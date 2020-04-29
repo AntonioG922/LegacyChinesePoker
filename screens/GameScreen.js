@@ -6,17 +6,19 @@ export default function GameScreen({ route, navigation }) {
   const params = route.params;
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
+
+    });
+
+    const unsubscribe2 = navigation.addListener('blur', () => {
       let coll = params.numberOfPlayers === params.players ? 'CustomGames' : 'CustomGamesLobby';
       firebase.firestore().collection(coll).doc(params.gameName).update({
         players: firebase.firestore.FieldValue.increment(-1)
       })
     });
 
-    return unsubscribe;
+    return unsubscribe, unsubscribe2;
   }, [navigation]);
-
-  console.log(params);
 
   return (
     <ImageBackground

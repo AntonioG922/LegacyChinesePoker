@@ -44,9 +44,8 @@ export default function JoinGameMenuScreen({ navigation }) {
             if (doc.data().players === doc.data().numberOfPlayers) {
               const newDoc = db.collection('CustomGames').doc(gameName);
               moveFBDocument(db.collection('CustomGamesLobby').doc(gameName), newDoc).then(() => {
-                setLoading(false);
                 db.collection('CustomGames').doc(gameName).get().then((doc) => {
-                  console.log(doc.data());
+                  setLoading(false);
                   navigation.navigate('Game', doc.data());
                 });
               }).catch((error) => {
@@ -54,17 +53,19 @@ export default function JoinGameMenuScreen({ navigation }) {
                 alert(error);
               });
             }
-            setLoading(false);
             db.collection('CustomGamesLobby').doc(gameName).get().then((doc) => {
+              setLoading(false);
               navigation.navigate('Game', doc.data());
             });
           })
-          .catch({
-            alert: ('Error getting game data. Please try again.')
+          .catch(() => {
+            setLoading(false);
+            alert('Error getting game data. Please try again.');
           });
       })
-      .catch({
-        alert: ('Error joining game. Please try again.')
+      .catch(() => {
+        setLoading(false);
+        alert('Error joining game. Please try again.');
       })
   }
 
