@@ -42,19 +42,17 @@ export default function JoinGameMenuScreen({ navigation }) {
             if (doc.data().players === doc.data().numberOfPlayers) {
               const newDoc = db.collection('CustomGames').doc(gameName);
               moveFBDocument(db.collection('CustomGamesLobby').doc(gameName), newDoc).then(() => {
-                db.collection('CustomGames').doc(gameName).get().then((doc) => {
-                  setLoading(false);
-                  navigation.navigate('Game', doc.data());
-                });
+                const index = activeGames.findIndex(x => x.gameName === gameName);
+                setLoading(false);
+                navigation.navigate('Game', activeGames[index]);
               }).catch((error) => {
                 setLoading(false);
                 alert(error);
               });
             }
-            db.collection('CustomGamesLobby').doc(gameName).get().then((doc) => {
-              setLoading(false);
-              navigation.navigate('Game', doc.data());
-            });
+            const index = activeGames.findIndex(x => x.gameName === gameName);
+            setLoading(false);
+            navigation.navigate('Game', activeGames[index]);
           })
           .catch(() => {
             setLoading(false);

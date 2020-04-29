@@ -16,6 +16,7 @@ export default function GameScreen({ route, navigation }) {
         players: firebase.firestore.FieldValue.increment(-1)
       })
     });
+    console.log(params);
 
     return unsubscribe, unsubscribe2;
   }, [navigation]);
