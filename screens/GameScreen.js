@@ -1,25 +1,51 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import firebase from 'firebase';
 
 export default function GameScreen({ route, navigation }) {
-  const params = route.params;
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameData, setGameData] = useState(route.params);
+  const db = firebase.firestore();
+
+  let coll = gameData.numberOfPlayers === gameData.players ? 'CustomGames' : 'CustomGamesLobby';
+
+  useEffect(() => {
+    const unsubscribe = db.collection(coll).doc(gameData.gameName)
+      .onSnapshot((doc) => {
+        setGameData(doc.data());
+      });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (gameStarted) {
+
+    } else {
+      if (gameData.numberOfPlayers === gameData.players) {
+        setGameStarted(true);
+      }
+    }
+  }, [gameData]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      db.collection(coll).doc(gameData.gameName).update({
+        players: firebase.firestore.FieldValue.increment(-1)
+      })
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
 
     });
 
-    const unsubscribe2 = navigation.addListener('blur', () => {
-      let coll = params.numberOfPlayers === params.players ? 'CustomGames' : 'CustomGamesLobby';
-      firebase.firestore().collection(coll).doc(params.gameName).update({
-        players: firebase.firestore.FieldValue.increment(-1)
-      })
-    });
-    console.log(params);
-
-    return unsubscribe, unsubscribe2;
+    return unsubscribe;
   }, [navigation]);
+
 
   return (
     <ImageBackground

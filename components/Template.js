@@ -1,11 +1,13 @@
 import * as React from 'react';
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'
 
 import { HeaderText } from './StyledText';
 
 export function TitledPage(props) {
-  return <View style={[ styles.container, props.containerStyle ]}>
-    <HeaderText style={[ styles.pageTitle, props.titleStyle ]} >{ props.pageTitle }</HeaderText>
+  return <View style={[styles.container, props.containerStyle]}>
+    {props.navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} /></HeaderText>}
+    <HeaderText style={[styles.pageTitle, props.titleStyle]} >{props.pageTitle}</HeaderText>
     <View style={props.contentContainerStyle}>
       {props.children}
     </View>
@@ -25,4 +27,9 @@ const styles = StyleSheet.create({
     marginTop: 75,
     marginBottom: 50,
   },
+  backArrow: {
+    position: 'absolute',
+    top: 30,
+    left: 30
+  }
 });

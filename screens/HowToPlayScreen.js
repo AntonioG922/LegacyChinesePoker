@@ -4,11 +4,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { RectButton, ScrollView } from 'react-native-gesture-handler';
 
 import { HeaderText, PageTitle } from '../components/StyledText';
+import { TitledPage } from '../components/Template';
 
-export default function HowToPlayScreen() {
+export default function HowToPlayScreen({ navigation }) {
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <PageTitle style={styles.pageTitle}>How To Play</PageTitle>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <TitledPage pageTitle={'How To Play'} navigation={navigation}>
         <HeaderText style={styles.sectionHeader}>Objective</HeaderText>
         <Text style={styles.sectionText}>
           The goal of the game is to be the first player to get rid of all their cards.
@@ -44,22 +45,8 @@ export default function HowToPlayScreen() {
           this feat immediately claims victory over their opponents, leaving
           them in a bitter dusty trail of defeat.
         </Text>
-      </ScrollView>
-  );
-}
-
-function OptionButton({ icon, label, onPress, isLastOption }) {
-  return (
-      <RectButton style={[styles.option, isLastOption && styles.lastOption]} onPress={onPress}>
-        <View style={{ flexDirection: 'row' }}>
-          <View style={styles.optionIconContainer}>
-            <Ionicons name={icon} size={22} color="rgba(0,0,0,0.35)" />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={styles.optionText}>{label}</Text>
-          </View>
-        </View>
-      </RectButton>
+      </TitledPage>
+    </ScrollView>
   );
 }
 
@@ -67,7 +54,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fafafa',
-    paddingHorizontal: 30,
     paddingBottom: 30,
   },
   contentContainer: {

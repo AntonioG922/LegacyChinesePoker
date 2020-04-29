@@ -66,7 +66,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    db.collection('CustomGamesLobby')
+    const unsubscribe = db.collection('CustomGamesLobby')
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
@@ -80,12 +80,14 @@ export default function JoinGameMenuScreen({ navigation }) {
           }
         });
       });
+
+    return unsubscribe;
   }, []);
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <Loader loading={loading} message={'Entering Game'} />
-      <TitledPage pageTitle={"Join Game"} contentStyleContainer={styles.container}>
+      <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
           <HeaderText><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
           <HeaderText><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>

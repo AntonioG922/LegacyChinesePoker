@@ -11,14 +11,14 @@ import {
 } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
 
-export default function HostGameOptionsScreen() {
+export default function HostGameOptionsScreen({ navigation }) {
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [useJoker, setUseJoker] = useState(true);
 
   return (
-    <TitledPage pageTitle={'Host Game'} contentContainerStyle={styles.container}>
+    <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
       <View style={styles.form}>
         <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
         <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
