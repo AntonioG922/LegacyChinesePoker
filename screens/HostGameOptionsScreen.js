@@ -39,7 +39,7 @@ export default function HostGameOptionsScreen() {
 }
 
 function createGame(gameName, password, numberOfPlayers, useJoker) {
-  firebase.firestore().collection("ActiveGames").doc(gameName).set({
+  firebase.firestore().collection('CustomGamesLobby').doc(gameName).set({
     gameName: gameName,
     password: password,
     numberOfPlayers: numberOfPlayers,

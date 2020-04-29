@@ -32,7 +32,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   function joinGame(gameName) {
     setLoading(true);
     const doc = db
-      .collection('ActiveGames')
+      .collection('CustomGamesLobby')
       .doc(gameName);
 
     doc.update({
@@ -43,7 +43,7 @@ export default function JoinGameMenuScreen({ navigation }) {
           .then(doc => {
             if (doc.data().players === doc.data().numberOfPlayers) {
               const newDoc = db.collection('CustomGames').doc(gameName);
-              moveFBDocument(db.collection('ActiveGames').doc(gameName), newDoc).then(() => {
+              moveFBDocument(db.collection('CustomGamesLobby').doc(gameName), newDoc).then(() => {
                 setLoading(false);
                 db.collection('CustomGames').doc(gameName).get().then((doc) => {
                   console.log(doc.data());
@@ -55,7 +55,7 @@ export default function JoinGameMenuScreen({ navigation }) {
               });
             }
             setLoading(false);
-            db.collection('ActiveGames').doc(gameName).get().then((doc) => {
+            db.collection('CustomGamesLobby').doc(gameName).get().then((doc) => {
               navigation.navigate('Game', doc.data());
             });
           })
@@ -69,7 +69,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    db.collection("ActiveGames")
+    db.collection('CustomGamesLobby')
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {

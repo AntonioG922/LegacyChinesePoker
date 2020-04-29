@@ -7,7 +7,7 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
-      let coll = params.numberOfPlayers === params.players ? 'CustomGames' : 'ActiveGames';
+      let coll = params.numberOfPlayers === params.players ? 'CustomGames' : 'CustomGamesLobby';
       firebase.firestore().collection(coll).doc(params.gameName).update({
         players: firebase.firestore.FieldValue.increment(-1)
       })
