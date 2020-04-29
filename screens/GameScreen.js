@@ -22,10 +22,11 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (gameStarted) {
-
+      //****** Add in game logic here (playing cards, opponents hands shrinking, etc.) *******/
     } else {
       if (gameData.numberOfPlayers === gameData.players) {
         setGameStarted(true);
+        //***** Add game start logic here (deal/render cards, show other players, etc.) ******/
       }
     }
   }, [gameData]);

@@ -10,15 +10,38 @@ import {
   TextButton
 } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
+import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [useJoker, setUseJoker] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  function createGame(gameName, password, numberOfPlayers, useJoker) {
+    setLoading(true);
+    firebase.firestore().collection('CustomGamesLobby').doc(gameName).set({
+      gameName: gameName,
+      password: password,
+      numberOfPlayers: numberOfPlayers,
+      useJoker: useJoker,
+      players: 1
+    }).then(() => {
+      setLoading(false);
+      navigation.navigate('Game', {
+        gameName: gameName,
+        password: password,
+        numberOfPlayers: numberOfPlayers,
+        useJoker: useJoker,
+        players: 1
+      })
+    });
+  }
 
   return (
     <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
+      <Loader loading={loading} message={'Creating Game'} />
       <View style={styles.form}>
         <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
         <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
@@ -36,18 +59,6 @@ export default function HostGameOptionsScreen({ navigation }) {
       <TextButton style={styles.createButton} onPress={() => createGame(gameName, password, numberOfPlayers, useJoker)} >Create Game</TextButton>
     </TitledPage>
   );
-}
-
-function createGame(gameName, password, numberOfPlayers, useJoker) {
-  firebase.firestore().collection('CustomGamesLobby').doc(gameName).set({
-    gameName: gameName,
-    password: password,
-    numberOfPlayers: numberOfPlayers,
-    useJoker: useJoker,
-    players: 1
-  }).then(() => {
-    console.log('Game added!');
-  });
 }
 
 const styles = StyleSheet.create({
