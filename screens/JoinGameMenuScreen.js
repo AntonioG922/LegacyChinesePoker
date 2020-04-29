@@ -1,5 +1,6 @@
 import React, { useState, useReducer, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import firebase from 'firebase'
@@ -10,6 +11,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader'
 
 export default function JoinGameMenuScreen({ navigation }) {
+  const db = firebase.firestore();
+
   const [loading, setLoading] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
@@ -28,7 +31,7 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   function joinGame(gameName) {
     setLoading(true);
-    const doc = firebase.firestore()
+    const doc = db
       .collection('ActiveGames')
       .doc(gameName);
 
@@ -39,12 +42,22 @@ export default function JoinGameMenuScreen({ navigation }) {
         doc.get()
           .then(doc => {
             if (doc.data().players === doc.data().numberOfPlayers) {
-              moveFBDocument(firebase.firestore().collection('ActiveGames').doc(gameName),
-                firebase.firestore().collection('PlayingGames').doc(gameName));
-              setLoading(false);
-              navigation.navigate('Game');
+              const newDoc = db.collection('CustomGames').doc(gameName);
+              moveFBDocument(db.collection('ActiveGames').doc(gameName), newDoc).then(() => {
+                setLoading(false);
+                db.collection('CustomGames').doc(gameName).get().then((doc) => {
+                  console.log(doc.data());
+                  navigation.navigate('Game', doc.data());
+                });
+              }).catch((error) => {
+                setLoading(false);
+                alert(error);
+              });
             }
             setLoading(false);
+            db.collection('ActiveGames').doc(gameName).get().then((doc) => {
+              navigation.navigate('Game', doc.data());
+            });
           })
           .catch({
             alert: ('Error getting game data. Please try again.')
@@ -56,7 +69,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    firebase.firestore().collection("ActiveGames")
+    db.collection("ActiveGames")
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
@@ -71,7 +84,6 @@ export default function JoinGameMenuScreen({ navigation }) {
         });
       });
   }, []);
-
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
@@ -104,10 +116,23 @@ export default function JoinGameMenuScreen({ navigation }) {
 
 
 function moveFBDocument(fromPath, toPath) {
-  fromPath.get().then((doc) => {
-    toPath.set(doc.data()).then(() => {
-      fromPath.delete();
+  return new Promise((resolve, reject) => {
+    fromPath.get().then((doc) => {
+      toPath.set(doc.data()).then(() => {
+        fromPath.delete().then(() => {
+          resolve();
+        })
+          .catch(() => {
+            reject('Error deleting document')
+          });
+      })
+        .catch(() => {
+          reject('Error setting document')
+        });
     })
+      .catch(() => {
+        reject('Error getting document')
+      });
   });
 }
 
