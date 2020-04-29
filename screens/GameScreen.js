@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import firebase from 'firebase';
 
+import Loader from '../components/Loader'
+
 export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
@@ -30,6 +32,7 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
+      setGameStarted(true);
       db.collection(coll).doc(gameData.gameName).update({
         players: firebase.firestore.FieldValue.increment(-1)
       })
@@ -38,20 +41,12 @@ export default function GameScreen({ route, navigation }) {
     return unsubscribe;
   }, [navigation]);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-
   return (
     <ImageBackground
       source={require('../assets/images/felt.jpg')}
       style={styles.headerImage}
     >
+      <Loader loading={!gameStarted} message={`Waiting for ${gameData.numberOfPlayers - gameData.players} more players`} navigation={navigation} />
       <View style={styles.container}>
       </View>
     </ImageBackground>
