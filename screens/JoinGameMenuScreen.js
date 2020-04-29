@@ -31,9 +31,7 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   function joinGame(gameName) {
     setLoading(true);
-    const doc = db
-      .collection('CustomGamesLobby')
-      .doc(gameName);
+    const doc = db.collection('CustomGamesLobby').doc(gameName);
 
     doc.update({
       players: firebase.firestore.FieldValue.increment(1)
