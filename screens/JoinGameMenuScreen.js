@@ -75,8 +75,8 @@ export default function JoinGameMenuScreen({ navigation }) {
       <Loader loading={loading} message={'Entering Game'} />
       <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
-          <HeaderText><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
-          <HeaderText><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
+          <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
+          <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
         </View>
         {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
           (<View key={game.gameName}>
@@ -84,11 +84,11 @@ export default function JoinGameMenuScreen({ navigation }) {
               {game.gameName}
             </TextButton>
             <View style={styles.menuOptionIcons}>
-              <HeaderText style={styles.menuOptionIcon}>{game.players} : {game.numberOfPlayers}</HeaderText>
-              {game.useJoker && <HeaderText style={styles.menuOptionIcon}>
+              <HeaderText style={styles.numPlayers}>{game.players} <Text style={{ fontSize: 15 }}>of</Text> {game.numberOfPlayers}</HeaderText>
+              {game.useJoker && <HeaderText style={styles.useJoker}>
                 <MaterialCommunityIcons size={25} name={'cards-playing-outline'} />
               </HeaderText> || <Text>      </Text>}
-              {Boolean(game.password) && <HeaderText style={styles.menuOptionIcon}>
+              {Boolean(game.password) && <HeaderText style={styles.password}>
                 <MaterialCommunityIcons size={25} name={'lock'} />
               </HeaderText> || <Text>      </Text>}
             </View>
@@ -122,8 +122,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 25
   },
-  menuOptionIcon: {
+  numPlayers: {
+    color: '#A27035',
     fontSize: 25
+  },
+  password: {
+    color: '#273043'
+  },
+  useJoker: {
+    color: 'purple'
   },
   noGames: {
     fontSize: 30,
