@@ -8,7 +8,7 @@ import { TitledPage } from '../components/Template';
 
 export default function HowToPlayScreen({ navigation }) {
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView style={styles.container} >
       <TitledPage pageTitle={'How To Play'} navigation={navigation}>
         <HeaderText style={styles.sectionHeader}>Objective</HeaderText>
         <Text style={styles.sectionText}>
@@ -55,9 +55,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fafafa',
     paddingBottom: 30,
-  },
-  contentContainer: {
-    paddingTop: 15,
   },
   lastSection: {
     paddingBottom: 30,
