@@ -21,12 +21,13 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
-    firebase.firestore().collection('CustomGamesLobby').doc(gameName).set({
+    firebase.firestore().collection('CustomGames').doc(gameName).set({
       gameName: gameName,
       password: password,
       numberOfPlayers: numberOfPlayers,
       useJoker: useJoker,
-      players: 1
+      players: 1,
+      playersLeftToJoin: numberOfPlayers - 1
     }).then(() => {
       setLoading(false);
       navigation.navigate('Game', {
@@ -34,7 +35,8 @@ export default function HostGameOptionsScreen({ navigation }) {
         password: password,
         numberOfPlayers: numberOfPlayers,
         useJoker: useJoker,
-        players: 1
+        players: 1,
+        playersLeftToJoin: numberOfPlayers - 1
       })
     });
   }

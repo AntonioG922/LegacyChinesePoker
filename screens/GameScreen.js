@@ -8,11 +8,10 @@ export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const db = firebase.firestore();
-
-  let coll = gameData.numberOfPlayers === gameData.players ? 'CustomGames' : 'CustomGamesLobby';
+  console.log(gameData);
 
   useEffect(() => {
-    const unsubscribe = db.collection(coll).doc(gameData.gameName)
+    const unsubscribe = db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
         setGameData(doc.data());
       });
@@ -34,8 +33,9 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       setGameStarted(true);
-      db.collection(coll).doc(gameData.gameName).update({
-        players: firebase.firestore.FieldValue.increment(-1)
+      db.collection('CustomGames').doc(gameData.gameName).update({
+        players: firebase.firestore.FieldValue.increment(-1),
+        playersLeftToJoin: firebase.firestore.FieldValue.increment(1)
       })
     });
 
@@ -47,7 +47,7 @@ export default function GameScreen({ route, navigation }) {
       source={require('../assets/images/felt.jpg')}
       style={styles.headerImage}
     >
-      <Loader loading={!gameStarted} message={`Waiting for ${gameData.numberOfPlayers - gameData.players} more players`} navigation={navigation} />
+      <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
       <View style={styles.container}>
       </View>
     </ImageBackground>

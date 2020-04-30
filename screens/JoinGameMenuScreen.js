@@ -1,14 +1,13 @@
 import React, { useState, useReducer, useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
 import firebase from 'firebase'
 
 import { TextButton, HeaderText } from "../components/StyledText";
 import { TitledPage } from "../components/Template";
 import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader';
+import { dealCards } from '../components/helperFunctions';
 
 export default function JoinGameMenuScreen({ navigation }) {
   const db = firebase.firestore();
@@ -31,33 +30,19 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   function joinGame(gameName) {
     setLoading(true);
-    const doc = db.collection('CustomGamesLobby').doc(gameName);
-
-    doc.update({
-      players: firebase.firestore.FieldValue.increment(1)
+    db.collection('CustomGames').doc(gameName).update({
+      players: firebase.firestore.FieldValue.increment(1),
+      playersLeftToJoin: firebase.firestore.FieldValue.increment(-1)
     })
       .then(() => {
-        doc.get()
-          .then(doc => {
-            if (doc.data().players === doc.data().numberOfPlayers) {
-              const newDoc = db.collection('CustomGames').doc(gameName);
-              moveFBDocument(db.collection('CustomGamesLobby').doc(gameName), newDoc).then(() => {
-                const index = activeGames.findIndex(x => x.gameName === gameName);
-                setLoading(false);
-                navigation.navigate('Game', activeGames[index]);
-              }).catch((error) => {
-                setLoading(false);
-                alert(error);
-              });
-            }
-            const index = activeGames.findIndex(x => x.gameName === gameName);
-            setLoading(false);
-            navigation.navigate('Game', activeGames[index]);
-          })
-          .catch(() => {
-            setLoading(false);
-            alert('Error getting game data. Please try again.');
-          });
+        const index = activeGames.findIndex(x => x.gameName === gameName);
+        if (activeGames[index].playersLeftToJoin === 0) {
+          setLoading(false);
+          navigation.navigate('Game', activeGames[index]);
+        } else {
+          setLoading(false);
+          navigation.navigate('Game', activeGames[index]);
+        }
       })
       .catch(() => {
         setLoading(false);
@@ -66,7 +51,8 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    const unsubscribe = db.collection('CustomGamesLobby')
+    const unsubscribe = db.collection('CustomGames')
+      .where('playersLeftToJoin', '>', 0)
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
@@ -92,7 +78,7 @@ export default function JoinGameMenuScreen({ navigation }) {
           <HeaderText><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
           <HeaderText><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
         </View>
-        {activeGames.length && activeGames.map((game) =>
+        {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
           (<View key={game.gameName}>
             <TextButton labelStyle={styles.menuOption} onPress={() => joinGame(game.gameName)}>
               {game.gameName}
@@ -113,27 +99,6 @@ export default function JoinGameMenuScreen({ navigation }) {
   );
 }
 
-
-function moveFBDocument(fromPath, toPath) {
-  return new Promise((resolve, reject) => {
-    fromPath.get().then((doc) => {
-      toPath.set(doc.data()).then(() => {
-        fromPath.delete().then(() => {
-          resolve();
-        })
-          .catch(() => {
-            reject('Error deleting document')
-          });
-      })
-        .catch(() => {
-          reject('Error setting document')
-        });
-    })
-      .catch(() => {
-        reject('Error getting document')
-      });
-  });
-}
 
 const styles = StyleSheet.create({
   container: {
