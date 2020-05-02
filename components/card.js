@@ -32,7 +32,7 @@ export function HorizontalCardContainer(props) {
       {props.cards.map((card, index) => (
         <Card key={card} rank={card}
           style={{
-            left: `${0 + (100 / props.cards.length * (index + 1 / props.cards.length * index))}%`,
+            left: `${100 / (props.cards.length - 1) * index}%`,
             ...styles.containerCard
           }} />
       ))}
@@ -46,10 +46,10 @@ export function FanCardContainer(props) {
       {props.cards.map((card, index) => (
         <Card key={card} rank={card}
           style={{
-            left: `${0 + (80 / props.cards.length * index)}%`,
-            bottom: Number(`${0 + ((Math.sin(Math.PI / props.cards.length * index)) * 60)}`),
+            left: `${80 / (props.cards.length - 1) * index}%`,
+            bottom: Number(`${(Math.sin(Math.PI / (props.cards.length - 1) * index) * 60)}`),
             transform: [
-              { rotate: `${-90 + (180 / props.cards.length * index)}deg` }
+              { rotate: `${-90 + (180 / (props.cards.length - 1) * index)}deg` }
             ],
             ...styles.containerCard
           }} />
@@ -64,7 +64,7 @@ function getCardInfo(rank) {
   const suits = ['club', 'diamond', 'heart', 'spade'];
   const nums = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
   if (rank === 53)
-    return { suit: '$', number: 'J', color: 'purple' }
+    return { suit: '$', number: 'J', color: 'purple' };
   cardInfo.suit = suits[(rank - 1) % 4];
   if (cardInfo.suit === 'diamond' || cardInfo.suit === 'heart')
     cardInfo.color = 'red';
