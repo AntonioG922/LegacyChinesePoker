@@ -7,7 +7,6 @@ import { TextButton, HeaderText } from "../components/StyledText";
 import { TitledPage } from "../components/Template";
 import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader';
-import { dealCards } from '../components/helperFunctions';
 
 export default function JoinGameMenuScreen({ navigation }) {
   const db = firebase.firestore();
