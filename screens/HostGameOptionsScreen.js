@@ -36,7 +36,8 @@ export default function HostGameOptionsScreen({ navigation }) {
       useJoker: useJoker,
       players: 1,
       playersLeftToJoin: numberOfPlayers - 1,
-      hands: dealtCards
+      hands: dealtCards,
+      lastPlayerToPlay: ''
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {
