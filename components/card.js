@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
 export function Card(props) {
+  // cards are positioned based off their center
   const [cardInfo, setSuitAndNum] = useState(getCardInfo(props.rank));
+  const [selected, setSelected] = useState(false);
+  const [played, setPlayed] = useState(false);
 
   return (
     <View style={{ borderColor: cardInfo.color, ...styles.cardContainer, ...props.style }}>
@@ -23,13 +26,45 @@ export function CardBack(props) {
   )
 }
 
+export function HorizontalCardContainer(props) {
+  return (
+    <View key={props.cards} style={{ ...styles.horizontalContainer, ...props.style }}>
+      {props.cards.map((card, index) => (
+        <Card key={card} rank={card}
+          style={{
+            left: `${0 + (100 / props.cards.length * (index + 1 / props.cards.length * index))}%`,
+            ...styles.containerCard
+          }} />
+      ))}
+    </View>
+  )
+}
+
+export function FanCardContainer(props) {
+  return (
+    <View key={props.cards} style={{ ...styles.fanContainer, ...props.style }}>
+      {props.cards.map((card, index) => (
+        <Card key={card} rank={card}
+          style={{
+            left: `${0 + (80 / props.cards.length * index)}%`,
+            bottom: Number(`${0 + ((Math.sin(Math.PI / props.cards.length * index)) * 60)}`),
+            transform: [
+              { rotate: `${-90 + (180 / props.cards.length * index)}deg` }
+            ],
+            ...styles.containerCard
+          }} />
+      ))}
+    </View>
+  )
+}
+
 
 function getCardInfo(rank) {
   let cardInfo = { suit: '', number: '', color: 'black' };
   const suits = ['club', 'diamond', 'heart', 'spade'];
   const nums = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
   if (rank === 53)
-    return { suit: '$', number: '$', color: 'purple' }
+    return { suit: '$', number: 'J', color: 'purple' }
   cardInfo.suit = suits[(rank - 1) % 4];
   if (cardInfo.suit === 'diamond' || cardInfo.suit === 'heart')
     cardInfo.color = 'red';
@@ -67,4 +102,16 @@ const styles = StyleSheet.create({
     fontSize: 25
   },
 
+  cardBack: {
+    width: 75,
+    height: 100.5,
+    borderWidth: 1.5,
+    borderRadius: 10
+  },
+
+  horizontalContainer: {
+  },
+  containerCard: {
+    position: 'absolute'
+  }
 });
