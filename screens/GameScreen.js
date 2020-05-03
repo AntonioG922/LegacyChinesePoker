@@ -51,7 +51,7 @@ export default function GameScreen({ route, navigation }) {
 
       }} style={styles.tapToPlay} >Tap here to play cards</Text>
       {gameStarted && <View style={styles.container}>
-        <HorizontalCardContainer cards={gameData.hands[0].cards} style={{ ...styles.playerHand, ...styles.player1Hand }} />
+        <HorizontalCardContainer cards={gameData.hands[0].cards} style={styles.player1Hand} />
 
       </View>}
     </ImageBackground>
@@ -81,12 +81,6 @@ const styles = StyleSheet.create({
     ],
     textAlign: 'center',
     fontSize: 21
-  },
-  playerHand: {
-    position: 'absolute',
-  },
-  playerCards: {
-    position: 'absolute',
   },
   player1Hand: {
     bottom: 100,
