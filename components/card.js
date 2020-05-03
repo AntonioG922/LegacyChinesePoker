@@ -80,7 +80,7 @@ function getCardInfo(rank) {
   const suits = ['club', 'diamond', 'heart', 'spade'];
   const nums = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
   if (rank === 53)
-    return { suit: '$', number: 'J', color: 'purple' }
+    return { suit: '$', number: 'J', color: 'purple' };
   cardInfo.suit = suits[(rank - 1) % 4];
   if (cardInfo.suit === 'diamond' || cardInfo.suit === 'heart')
     cardInfo.color = 'red';
