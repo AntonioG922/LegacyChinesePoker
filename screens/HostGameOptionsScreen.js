@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox, TextInput, Title } from 'react-native-paper';
 
-import { dealCards } from '../components/helperFunctions';
+import { dealCards } from '../functions/HelperFunctions';
 
 import {
   HeaderText, FlatTextInput,
