@@ -1,5 +1,6 @@
 import * as firebase from 'firebase';
-import "firebase/firestore";
+import 'firebase/firestore';
+import 'firebase/auth';
 import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
@@ -14,6 +15,8 @@ import HowToPlayScreen from './screens/HowToPlayScreen';
 import HostGameOptionsScreen from './screens/HostGameOptionsScreen';
 import JoinGameMenuScreen from './screens/JoinGameMenuScreen';
 import GameScreen from './screens/GameScreen';
+import LoginOptions from './screens/LoginOptions';
+import EmailLogin from './screens/EmailLogin';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -87,6 +90,8 @@ export default function App(props) {
               <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
               <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
               <Stack.Screen name="Game" component={GameScreen} />
+              <Stack.Screen name="LoginOptions" component={LoginOptions} />
+              <Stack.Screen name="EmailLogin" component={EmailLogin} />
             </Stack.Navigator>
           </NavigationContainer>
         </View>

@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton>Stats</TextButton>
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
+        <TextButton onPress={() => navigation.navigate('LoginOptions')}>Login</TextButton>
       </View>
     </View>
   );
