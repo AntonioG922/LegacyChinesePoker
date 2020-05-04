@@ -23,12 +23,6 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
-    let deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-      37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52];
-    if (useJoker)
-      deck.push(53);
-    const dealtCards = dealCards(numberOfPlayers, Math.floor(deck.length / numberOfPlayers), deck);
     const gameData = {
       gameName: gameName,
       password: password,
@@ -36,8 +30,8 @@ export default function HostGameOptionsScreen({ navigation }) {
       useJoker: useJoker,
       players: 1,
       playersLeftToJoin: numberOfPlayers - 1,
-      hands: dealtCards,
-      lastPlayerToPlay: ''
+      hands: dealCards(numberOfPlayers, useJoker),
+      lastPlayerToPlay: '',
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {

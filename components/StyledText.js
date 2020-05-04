@@ -15,6 +15,10 @@ export function TextButton(props) {
   return <Button {...props} labelStyle={[styles.styledText, { fontSize: 32 }, props.labelStyle]} />;
 }
 
+export function ContainedButton(props) {
+  return <Button {...props} mode='contained' labelStyle={[ styles.styledText, styles.containedButtonText, { fontSize: 32 }, props.labelStyle ]} />;
+}
+
 export function FlatTextInput(props) {
   return <TextInput {...props} underlineColor={'rgb(217, 56, 27)'} style={styles.flatTextInput} />;
 }
@@ -55,6 +59,9 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 2,
+  },
+  containedButtonText: {
+    color: '#bbb'
   },
   pageTitle: {
     fontSize: 48,
