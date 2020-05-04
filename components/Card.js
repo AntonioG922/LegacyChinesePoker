@@ -1,50 +1,44 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import {getCardInfo} from './helperFunctions';
 
-export function Card(props) {
+export function Card({rank, style, toggleSelected, }) {
   // cards are positioned based off their center
-  const [cardInfo, setSuitAndNum] = useState(getCardInfo(props.rank));
+  const [cardInfo, setSuitAndNum] = useState(getCardInfo(rank));
   const [selected, setSelected] = useState(false);
   const [played, setPlayed] = useState(false);
 
   return (
-    <TouchableHighlight underlayColor='#ddd' style={[styles.card, selected && styles.selected, props.style]} onPress={selectCard}>
+    <TouchableHighlight underlayColor='#ddd' style={[styles.card, selected && styles.selected, style]} onPress={selectCard}>
       <View style={styles.cardWrapper}>
-        <View style={styles.upperIcon}>
-          <Text style={[{ color: cardInfo.color }, styles.cardNumber ]}>{cardInfo.number}</Text>
-          <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
-        </View>
-        <View style={styles.bottomIcon}>
-          <Text style={[{ color: cardInfo.color }, styles.cardNumber ]}>{cardInfo.number}</Text>
-          <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
-        </View>
+        <SuitAndRank cardNumber={rank} containerStyle={styles.upperIcon} numberStyle={styles.cardNumber} />
+        <SuitAndRank cardNumber={rank} containerStyle={styles.bottomIcon} numberStyle={styles.cardNumber} />
       </View>
     </TouchableHighlight>
   );
 
   function selectCard() {
     setSelected(!selected);
+    toggleSelected(rank);
   }
+}
+
+export function SuitAndRank({cardNumber, containerStyle, numberStyle}) {
+  const cardInfo = getCardInfo(cardNumber);
+
+  return (
+      <View style={containerStyle}>
+        <Text style={[{ color: cardInfo.color }, numberStyle ]}>{cardInfo.number}</Text>
+        <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
+      </View>
+  );
 }
 
 export function CardBack(props) {
   return (
     <Image source={require('../assets/images/cardBacks/redDragon.png')} style={styles.cardBack} />
   )
-}
-
-function getCardInfo(rank) {
-  let cardInfo = { suit: '', number: '', color: 'black' };
-  const suits = ['club', 'diamond', 'heart', 'spade'];
-  const nums = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
-  if (rank === 53)
-    return { suit: '$', number: 'J', color: 'purple' };
-  cardInfo.suit = suits[(rank - 1) % 4];
-  if (cardInfo.suit === 'diamond' || cardInfo.suit === 'heart')
-    cardInfo.color = 'red';
-  cardInfo.number = nums[Math.floor((rank - 1) / 4)];
-  return cardInfo;
 }
 
 const styles = StyleSheet.create({
@@ -56,7 +50,6 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 1.5,
     borderRadius: 10,
-    top: 75,
     transform: [
       { translateY: -50 },
       { translateX: -37.5 }
@@ -86,7 +79,7 @@ const styles = StyleSheet.create({
     borderRadius: 10
   },
   selected: {
-    top: 50
+    top: -25
   },
   cardWrapper: {
     height: 100,

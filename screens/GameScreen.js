@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Text, ImageBackground, StyleSheet, View } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import firebase from 'firebase';
 
 import Loader from '../components/Loader';
-import { dealCards } from '../components/helperFunctions';
-import { Card, CardBack, FanCardContainer } from '../components/Card';
-import { UserCardContainer } from '../components/CardContainer';
+import {
+  PlayedCardsContainer,
+  UserCardContainer
+} from '../components/CardContainer';
 
 export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
@@ -13,17 +14,17 @@ export default function GameScreen({ route, navigation }) {
   const db = firebase.firestore();
 
   useEffect(() => {
-    const unsubscribe = db.collection('CustomGames').doc(gameData.gameName)
-      .onSnapshot((doc) => {
-        setGameData(doc.data());
-      });
-
-    return unsubscribe;
+    return db.collection('CustomGames').doc(gameData.gameName)
+        .onSnapshot((doc) => {
+          setGameData(doc.data());
+        });
   }, []);
 
   useEffect(() => {
     if (gameStarted) {
       //****** Add in game logic here (playing cards, opponents hands shrinking, etc.) *******/
+
+      db.collection('CustomGames').doc(gameData.gameName).set(gameData)
     } else {
       if (!gameData.playersLeftToJoin) {
         setGameStarted(true);
@@ -34,25 +35,32 @@ export default function GameScreen({ route, navigation }) {
   }, [gameData]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
+    return navigation.addListener('blur', () => {
       setGameStarted(true);
       db.collection('CustomGames').doc(gameData.gameName).update({
         players: firebase.firestore.FieldValue.increment(-1),
         playersLeftToJoin: firebase.firestore.FieldValue.increment(1)
       })
     });
-
-    return unsubscribe;
   }, [navigation]);
+
+  function playCards(selectedCards, player) {
+    let hands = gameData.hands;
+    hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
+
+    db.collection('CustomGames').doc(gameData.gameName).update({
+      playedCards: firebase.firestore.FieldValue.arrayUnion(...selectedCards),
+      lastPlayed: selectedCards,
+      hands: hands,
+    });
+  }
 
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
-      <Text onPress={() => {
-
-      }} style={styles.tapToPlay} >Tap here to play cards</Text>
+      <PlayedCardsContainer cards={gameData.playedCards} lastPlayed={gameData.lastPlayed} style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
-        <UserCardContainer cards={gameData.hands[0].cards} style={styles.player1Hand} />
+        <UserCardContainer cards={gameData.hands[0].cards} player={gameData.hands[0].player} playCards={playCards} style={styles.player1Hand} />
 
       </View>}
     </ImageBackground>
@@ -68,9 +76,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  tapToPlay: {
+  playedCards: {
     width: 80,
-    height: 107.5,
+    height: 106,
     borderWidth: 3,
     borderRadius: 10,
     position: 'absolute',
@@ -80,8 +88,7 @@ const styles = StyleSheet.create({
       { translateX: -40 },
       { translateY: -53.75 }
     ],
-    textAlign: 'center',
-    fontSize: 21
+    alignItems: 'center',
   },
   player1Hand: {
     bottom: 100,
@@ -104,7 +111,5 @@ const styles = StyleSheet.create({
   }
 
 });
-
-// Make cards go towards center of table when played but they are off from the center by a small random amount, so that it looks more scattered like a real game of cards
 
 // Have loser of the hand send the game data to the DB stats collector to minimize the # of writes

@@ -2,25 +2,63 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import { Card } from './Card'
+import {Card, SuitAndRank} from './Card'
 
-export function UserCardContainer(props) {
-  const [selectedCards, setSelectedCard] = useState([]);
+export function UserCardContainer({cards, player, style, playCards}) {
+  const [selectedCards, setSelectedCards] = useState([]);
 
   return (
-      <View key={props.cards} style={[styles.horizontalContainer, props.style ]}>
+      <View key={cards} style={[styles.horizontalContainer, style ]}>
         <View style={styles.actionsContainer}>
-          <ContainedButton style={styles.actionButton}>Play</ContainedButton>
+          <ContainedButton style={styles.actionButton} onPress={playSelectedCards}>Play</ContainedButton>
           <ContainedButton style={styles.actionButton}>Pass</ContainedButton>
         </View>
         <View style={styles.cardContainer}>
-          {sortCards(props.cards).map((card, index) => (
-              <Card key={card} rank={card} setSelected={setSelectedCard}
-                    style={{left: `${(100 / props.cards.length * (index + 1 / props.cards.length * index))}%`}}/>
+          {sortCards(cards).map((rank, index) => (
+              <Card key={rank} rank={rank} toggleSelected={toggleSelected}
+                    style={{left: `${(100 / cards.length * (index + 1 / cards.length * index))}%`}}/>
           ))}
         </View>
       </View>
-  )
+  );
+
+  function playSelectedCards() {
+    if (selectedCards.length > 0) {
+      playCards(selectedCards, player);
+      setSelectedCards([]);
+    }
+  }
+
+  function toggleSelected(rank) {
+    if (selectedCards.includes(rank)) {
+      setSelectedCards(selectedCards.filter((r) => r !== rank));
+    } else {
+      setSelectedCards(selectedCards.concat(rank));
+    }
+  }
+}
+
+export function PlayedCardsContainer({cards, lastPlayed, style}) {
+  lastPlayed = Array.isArray(lastPlayed) ? lastPlayed : [];
+  cards = Array.isArray(cards) ? cards : [];
+
+  return (
+      <View key={cards} style={style}>
+        <View style={styles.lastPlayed}>
+          {lastPlayed.map((card) =>
+            <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
+          )}
+        </View>
+        {cards.map((rank) => {
+            const maxOffset = 50;
+            const verticalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+            const horizontalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+            const rotation = Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg';
+
+            return <Card key={rank} rank={rank} style={{top: verticalOffset, left: horizontalOffset, transform: [{rotateZ: rotation}] }}/>
+        })}
+      </View>
+  );
 }
 
 export function FanCardContainer(props) {
@@ -52,7 +90,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   cardContainer: {
-    alignSelf: 'stretch',
+    top: 75,
     height: 75,
   },
   actionsContainer: {
@@ -62,4 +100,26 @@ const styles = StyleSheet.create({
   actionButton: {
     margin: 10,
   },
+  lastPlayed: {
+    position: 'absolute',
+    width: 250,
+    top: -100,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderColor: 'black',
+    borderWidth: 2,
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  suitAndRank: {
+    flexDirection: 'row',
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
+  suitAndRankText: {
+    fontSize: 18
+  }
 });
