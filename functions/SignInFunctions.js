@@ -19,7 +19,6 @@ export async function signInWithFacebook(setLoadStatus, navigation) {
       firebase.auth().signInWithCredential(credential)
         .then(() => {
           setLoadStatus(false);
-          navigation.navigate('Home');
         })
         .catch((error) => {
           setLoadStatus(false);
@@ -46,14 +45,13 @@ export async function signInWithGoogle(setLoadStatus, navigation) {
       firebase.auth().signInWithCredential(credential)
         .then(() => {
           setLoadStatus(false);
-          navigation.navigate('Home');
         })
         .catch((error) => {
           setLoadStatus(false);
           alert(error);
         });
     }
-  } catch (e) {
-    return { error: true };
+  } catch (error) {
+    alert(error);
   }
 }
