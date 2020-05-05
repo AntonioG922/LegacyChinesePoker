@@ -17,6 +17,7 @@ import JoinGameMenuScreen from './screens/JoinGameMenuScreen';
 import GameScreen from './screens/GameScreen';
 import LoginOptions from './screens/LoginOptions';
 import EmailLogin from './screens/EmailLogin';
+import InitialLoadScreen from './screens/InitialLoadScreen';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -64,8 +65,8 @@ export default function App(props) {
         await Font.loadAsync({
           'gang-of-three': require('./assets/fonts/GangOfThree.ttf'),
         });
+
       } catch (e) {
-        // We might want to provide this error information to an error reporting service
         console.warn(e);
       } finally {
         setLoadingComplete(true);
@@ -84,7 +85,8 @@ export default function App(props) {
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
           <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName={'InitialLoadScreen'} screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="InitialLoadScreen" component={InitialLoadScreen} />
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
               <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />

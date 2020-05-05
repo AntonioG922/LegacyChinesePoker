@@ -13,7 +13,7 @@ export default function LoginOptions({ navigation }) {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
       if (user != null) {
-        console.log("We are authenticated now!");
+        navigation.navigate('Home');
       }
     });
   }, [])

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import firebase from 'firebase';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { HeaderText, TextButton, LogInOptionButton } from '../components/StyledText';
 
@@ -20,14 +21,6 @@ export default function HomeScreen({ navigation }) {
       if (user) {
         console.log(user);
         setLoggedIn(true);
-        var displayName = user.displayName;
-        var email = user.email;
-        var emailVerified = user.emailVerified;
-        var photoURL = user.photoURL;
-        var isAnonymous = user.isAnonymous;
-        var uid = user.uid;
-        var providerData = user.providerData;
-        // ...
       } else {
         setLoggedIn(false);
       }
@@ -51,13 +44,9 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton>Stats</TextButton>
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
-        <TextButton onPress={() => {
-          loggedIn ? signOut() :
-            navigation.navigate('LoginOptions')
-        }}>
-          {loggedIn ? 'Logout' : 'Login'}
-        </TextButton>
       </View>
+      <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => { signOut() }} />
+
     </View>
   );
 }
@@ -87,4 +76,10 @@ const styles = StyleSheet.create({
     lineHeight: 65,
     textAlign: 'center',
   },
+  logoutIcon: {
+    color: 'rgb(96,100,109)',
+    position: 'absolute',
+    top: 30,
+    right: 10
+  }
 });
