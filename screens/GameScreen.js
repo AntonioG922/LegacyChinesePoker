@@ -4,6 +4,7 @@ import firebase from 'firebase';
 
 import Loader from '../components/Loader';
 import {
+  FaceDownCardsContainer,
   PlayedCardsContainer,
   UserCardContainer
 } from '../components/CardContainer';
@@ -61,6 +62,9 @@ export default function GameScreen({ route, navigation }) {
       <PlayedCardsContainer cards={gameData.playedCards} lastPlayed={gameData.lastPlayed} style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[0].cards} player={gameData.hands[0].player} playCards={playCards} style={styles.player1Hand} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[1].cards.length} style={styles.player2Hand} isPlayer2={true} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[2].cards.length} style={styles.player3Hand} isPlayer3={true} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[3].cards.length} style={styles.player4Hand} isPlayer4={true} />
 
       </View>}
     </ImageBackground>
@@ -91,21 +95,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   player1Hand: {
-    bottom: 100,
+    bottom: 40,
     width: '80%'
   },
   player2Hand: {
-    left: -30,
+    position: 'absolute',
+    left: -45,
     top: '20%',
-    height: '40%'
+    height: '40%',
   },
   player3Hand: {
-    top: -30,
-    right: '10%',
-    width: '70%'
+    position: 'absolute',
+    top: -45,
+    right: '5%',
+    width: '80%',
+    flexDirection: 'row',
   },
   player4Hand: {
-    right: -30,
+    position: 'absolute',
+    right: 30,
     top: '20%',
     height: '40%'
   }

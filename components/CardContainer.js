@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import {Card, SuitAndRank} from './Card'
+import {Card, CardBack, SuitAndRank} from './Card'
 
 export function UserCardContainer({cards, player, style, playCards}) {
   const [selectedCards, setSelectedCards] = useState([]);
@@ -36,6 +36,18 @@ export function UserCardContainer({cards, player, style, playCards}) {
       setSelectedCards(selectedCards.concat(rank));
     }
   }
+}
+
+export function FaceDownCardsContainer({numberOfCards, style, isPlayer2, isPlayer3, isPlayer4}) {
+  return (
+      <View style={style}>
+        {Array.from({length: numberOfCards}, (v, i) => i).map(index =>
+            <CardBack key={index} style={[{position: 'absolute'},
+              isPlayer2 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '90deg'}]},
+              isPlayer3 && {right: `${(index / numberOfCards * 100)}%`},
+              isPlayer4 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '-90deg'}]}]} />)}
+      </View>
+  )
 }
 
 export function PlayedCardsContainer({cards, lastPlayed, style}) {
