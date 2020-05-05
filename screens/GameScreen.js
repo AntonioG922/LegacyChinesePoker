@@ -10,11 +10,20 @@ import {
 } from '../components/CardContainer';
 
 export default function GameScreen({ route, navigation }) {
+  const [user, setUser] = useState({});
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const db = firebase.firestore();
 
   useEffect(() => {
+    firebase.auth().onAuthStateChanged(function(currentUser) {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        // No user is signed in.
+      }
+    });
+
     return db.collection('CustomGames').doc(gameData.gameName)
         .onSnapshot((doc) => {
           setGameData(doc.data());
@@ -38,12 +47,13 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return navigation.addListener('blur', () => {
       setGameStarted(true);
-      db.collection('CustomGames').doc(gameData.gameName).update({
-        players: firebase.firestore.FieldValue.increment(-1),
-        playersLeftToJoin: firebase.firestore.FieldValue.increment(1)
-      })
+
+      let updates = {};
+      updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
+      db.collection('CustomGames').doc(gameData.gameName).update(updates)
     });
-  }, [navigation]);
+  }, [navigation, user]);
 
   function playCards(selectedCards, player) {
     let hands = gameData.hands;
@@ -52,6 +62,7 @@ export default function GameScreen({ route, navigation }) {
     db.collection('CustomGames').doc(gameData.gameName).update({
       playedCards: firebase.firestore.FieldValue.arrayUnion(...selectedCards),
       lastPlayed: selectedCards,
+      lastPlayerToPlay: user.displayName,
       hands: hands,
     });
   }
@@ -59,13 +70,12 @@ export default function GameScreen({ route, navigation }) {
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
-      <PlayedCardsContainer cards={gameData.playedCards} lastPlayed={gameData.lastPlayed} style={styles.playedCards} />
+      <PlayedCardsContainer cards={gameData.playedCards} lastPlayedCards={gameData.lastPlayed} lastPlayerToPlay={gameData.lastPlayerToPlay} style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
-        <UserCardContainer cards={gameData.hands[0].cards} player={gameData.hands[0].player} playCards={playCards} style={styles.player1Hand} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[1].cards.length} style={styles.player2Hand} isPlayer2={true} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[2].cards.length} style={styles.player3Hand} isPlayer3={true} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[3].cards.length} style={styles.player4Hand} isPlayer4={true} />
-
+        <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards} player={gameData.players[user.uid]} playCards={playCards} style={styles.player1Hand} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % 4].cards.length} style={styles.player2Hand} isPlayer2={true} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % 4].cards.length} style={styles.player3Hand} isPlayer3={true} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % 4].cards.length} style={styles.player4Hand} isPlayer4={true} />
       </View>}
     </ImageBackground>
   );

@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   containedButtonText: {
-    color: '#bbb'
+    color: '#ddd'
   },
   pageTitle: {
     fontSize: 48,

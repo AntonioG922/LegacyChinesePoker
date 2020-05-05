@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 
 import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
+import {HeaderText} from './StyledText';
 
 export function UserCardContainer({cards, player, style, playCards}) {
   const [selectedCards, setSelectedCards] = useState([]);
@@ -50,16 +51,19 @@ export function FaceDownCardsContainer({numberOfCards, style, isPlayer2, isPlaye
   )
 }
 
-export function PlayedCardsContainer({cards, lastPlayed, style}) {
-  lastPlayed = Array.isArray(lastPlayed) ? lastPlayed : [];
+export function PlayedCardsContainer({cards, lastPlayedCards, lastPlayerToPlay, style}) {
+  lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
 
   return (
       <View key={cards} style={style}>
         <View style={styles.lastPlayed}>
-          {lastPlayed.map((card) =>
-            <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
-          )}
+          <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
+          <View style={styles.lastPlayedCards}>
+            {lastPlayedCards.map((card) =>
+                <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
+            )}
+          </View>
         </View>
         {cards.map((rank) => {
             const maxOffset = 50;
@@ -115,7 +119,9 @@ const styles = StyleSheet.create({
   lastPlayed: {
     position: 'absolute',
     width: 250,
-    top: -100,
+    top: -120,
+  },
+  lastPlayedCards: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: 'white',
@@ -125,6 +131,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  lastPlayedText: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginBottom: 10,
   },
   suitAndRank: {
     flexDirection: 'row',

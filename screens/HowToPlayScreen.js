@@ -39,7 +39,7 @@ export default function HowToPlayScreen({ navigation }) {
           Legends have been told of the dragon. Tales as tall as giants. It's
           been said to be an untameable beast with nothing that can possibly
           stop it. They say those who have seen it have never lived to tell the
-          tale. Only the rider of the dragon can speak to its glory as it they
+          tale. Only the rider of the dragon can speak to its glory as they
           leave nothing but ash in their wake. To glimpse the dragon, one must
           be dealt 1 card of every rank, 3-through-2. The knave who manages
           this feat immediately claims victory over their opponents, leaving

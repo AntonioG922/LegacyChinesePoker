@@ -1,25 +1,35 @@
 import * as firebase from 'firebase';
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Checkbox, TextInput, Title } from 'react-native-paper';
+import { Button, Checkbox } from 'react-native-paper';
 
 import { dealCards } from '../functions/HelperFunctions';
 
 import {
   HeaderText, FlatTextInput,
-  OutlineTextInput,
   TextButton
 } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
+  const [userId, setUserId] = useState('');
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [useJoker, setUseJoker] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        // No user is signed in.
+      }
+    });
+  }, []);
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
@@ -28,8 +38,9 @@ export default function HostGameOptionsScreen({ navigation }) {
       password: password,
       numberOfPlayers: numberOfPlayers,
       useJoker: useJoker,
-      players: numberOfPlayers,
-      playersLeftToJoin: 0,
+      players: {[userId]: 0},
+      currentPlayerTurn: 0,
+      playersLeftToJoin: numberOfPlayers - 1,
       hands: dealCards(numberOfPlayers, useJoker),
       lastPlayerToPlay: '',
       playedCards: [],

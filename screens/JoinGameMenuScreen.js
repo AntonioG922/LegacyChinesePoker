@@ -1,16 +1,17 @@
-import React, { useState, useReducer, useEffect } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, {useEffect, useReducer, useState} from "react";
+import {StyleSheet, Text, View} from "react-native";
+import {MaterialCommunityIcons} from '@expo/vector-icons';
 import firebase from 'firebase'
 
-import { TextButton, HeaderText } from "../components/StyledText";
-import { TitledPage } from "../components/Template";
-import { ScrollView } from "react-native-gesture-handler";
+import {HeaderText, TextButton} from "../components/StyledText";
+import {TitledPage} from "../components/Template";
+import {ScrollView} from "react-native-gesture-handler";
 import Loader from '../components/Loader';
 
 export default function JoinGameMenuScreen({ navigation }) {
   const db = firebase.firestore();
 
+  const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
@@ -27,12 +28,15 @@ export default function JoinGameMenuScreen({ navigation }) {
     }
   }, []);
 
-  function joinGame(gameName) {
+  function joinGame(game) {
     setLoading(true);
-    db.collection('CustomGames').doc(gameName).update({
-      players: firebase.firestore.FieldValue.increment(1),
-      playersLeftToJoin: firebase.firestore.FieldValue.increment(-1)
-    })
+    const gameName = game.gameName;
+    const playerNumber = game.numberOfPlayers - game.playersLeftToJoin;
+
+    let updates = {};
+    updates[`players.${userId}`] = playerNumber;
+    updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
+    db.collection('CustomGames').doc(gameName).update(updates)
       .then(() => {
         const index = activeGames.findIndex(x => x.gameName === gameName);
         if (activeGames[index].playersLeftToJoin === 0) {
@@ -50,23 +54,29 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    const unsubscribe = db.collection('CustomGames')
-      .where('playersLeftToJoin', '>', 0)
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            dispatch({ type: "add", value: change.doc.data() });
-          }
-          if (change.type === "modified") {
-            dispatch({ type: "modified", value: change.doc.data() });
-          }
-          if (change.type === "removed") {
-            dispatch({ type: "remove", value: change.doc.data() });
-          }
-        });
-      });
+    firebase.auth().onAuthStateChanged(function (currentUser) {
+      if (currentUser) {
+        setUserId(currentUser.uid);
+      } else {
+        // No user is signed in.
+      }
+    });
 
-    return unsubscribe;
+    return db.collection('CustomGames')
+        .where('playersLeftToJoin', '>', 0)
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              dispatch({type: "add", value: change.doc.data()});
+            }
+            if (change.type === "modified") {
+              dispatch({type: "modified", value: change.doc.data()});
+            }
+            if (change.type === "removed") {
+              dispatch({type: "remove", value: change.doc.data()});
+            }
+          });
+        });
   }, []);
 
   return (
@@ -79,11 +89,11 @@ export default function JoinGameMenuScreen({ navigation }) {
         </View>
         {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
           (<View key={game.gameName}>
-            <TextButton labelStyle={styles.menuOption} onPress={() => joinGame(game.gameName)}>
+            <TextButton labelStyle={styles.menuOption} onPress={() => joinGame(game)}>
               {game.gameName}
             </TextButton>
             <View style={styles.menuOptionIcons}>
-              <HeaderText style={styles.numPlayers}>{game.players} <Text style={{ fontSize: 15 }}>of</Text> {game.numberOfPlayers}</HeaderText>
+              <HeaderText style={styles.numPlayers}>{Object.keys(game.players).length} <Text style={{ fontSize: 15 }}>of</Text> {game.numberOfPlayers}</HeaderText>
               {game.useJoker && <HeaderText style={styles.useJoker}>
                 <MaterialCommunityIcons size={25} name={'cards-playing-outline'} />
               </HeaderText> || <Text>      </Text>}
@@ -106,7 +116,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   iconInfo: {
-    justifyContent: "center",
     position: "relative",
     bottom: 40,
     flexDirection: 'row',
