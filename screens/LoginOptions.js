@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import firebase from 'firebase';
 
-import { FlatTextInput, TextButton, HeaderText, PasswordTextInput, LogInOptionButton } from '../components/StyledText';
+import { LogInOptionButton, HeaderText } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
+import { signInWithFacebook, signInWithGoogle } from '../functions/SignInFunctions';
 
 export default function LoginOptions({ navigation }) {
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user != null) {
+        console.log("We are authenticated now!");
+      }
+    });
+  }, [])
+
   return (
-    <TitledPage pageTitle={'Sign in'} navigation={navigation} >
+    <TitledPage pageTitle={'Sign in'} >
+      <Loader loading={loading} message={'Signing In'} />
       <LogInOptionButton
         icon={'google'}
         textColor={'gray'}
         message={'Sign in with Google'}
         style={[styles.logInOptionButton, { backgroundColor: '#fbfbfb' }]}
+        onPress={() => signInWithGoogle(setLoading, navigation)}
       />
       <LogInOptionButton
         icon={'facebook'}
         textColor={'white'}
         message={'Sign in with Facebook'}
         style={[styles.logInOptionButton, { backgroundColor: '#3b5998' }]}
+        onPress={() => signInWithFacebook(setLoading, navigation)}
       />
       <LogInOptionButton
         icon={'twitter'}
@@ -34,13 +48,10 @@ export default function LoginOptions({ navigation }) {
         style={[styles.logInOptionButton, { backgroundColor: '#ce0211' }]}
         onPress={() => navigation.navigate('EmailLogin', { signingUp: false })}
       />
-      <LogInOptionButton
-        icon={'email'}
-        textColor={'white'}
-        message={'Sign up with Email'}
-        style={[styles.logInOptionButton, { backgroundColor: '#42aa68', marginTop: 50 }]}
+      <Text
+        style={styles.signUpButton}
         onPress={() => navigation.navigate('EmailLogin', { signingUp: true })}
-      />
+      >Don't have any of these accounts?{'\n'} Sign Up</Text>
     </TitledPage>
   )
 }
@@ -48,5 +59,12 @@ export default function LoginOptions({ navigation }) {
 const styles = StyleSheet.create({
   logInOptionButton: {
     marginBottom: 15
+  },
+  signUpButton: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 18,
+    fontFamily: 'gang-of-three',
+    color: 'rgb(217, 56, 27)',
   }
 })

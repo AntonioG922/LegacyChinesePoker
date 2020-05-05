@@ -1,9 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
-import {getCardInfo} from './helperFunctions';
+import { getCardInfo } from '../functions/HelperFunctions';
 
-export function Card({rank, style, toggleSelected, }) {
+export function Card({ rank, style, toggleSelected, }) {
   // cards are positioned based off their center
   const [cardInfo, setSuitAndNum] = useState(getCardInfo(rank));
   const [selected, setSelected] = useState(false);
@@ -24,14 +24,14 @@ export function Card({rank, style, toggleSelected, }) {
   }
 }
 
-export function SuitAndRank({cardNumber, containerStyle, numberStyle}) {
+export function SuitAndRank({ cardNumber, containerStyle, numberStyle }) {
   const cardInfo = getCardInfo(cardNumber);
 
   return (
-      <View style={containerStyle}>
-        <Text style={[{ color: cardInfo.color }, numberStyle ]}>{cardInfo.number}</Text>
-        <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
-      </View>
+    <View style={containerStyle}>
+      <Text style={[{ color: cardInfo.color }, numberStyle]}>{cardInfo.number}</Text>
+      <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
+    </View>
   );
 }
 
