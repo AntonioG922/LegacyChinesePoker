@@ -3,7 +3,7 @@ import firebase from 'firebase';
 import * as Facebook from 'expo-facebook';
 import * as Google from 'expo-google-app-auth';
 
-export async function signInWithFacebook(setLoadStatus, navigation) {
+export async function signInWithFacebook(setLoadStatus) {
   try {
     await Facebook.initializeAsync(
       '335846934057579',
@@ -30,7 +30,7 @@ export async function signInWithFacebook(setLoadStatus, navigation) {
   }
 }
 
-export async function signInWithGoogle(setLoadStatus, navigation) {
+export async function signInWithGoogle(setLoadStatus) {
   try {
     const result = await Google.logInAsync({
       androidClientId: '602907791506-bsslqf0jonrtt6t489ct4q7hm8f7iibu.apps.googleusercontent.com',

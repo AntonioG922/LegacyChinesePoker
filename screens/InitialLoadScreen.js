@@ -3,6 +3,7 @@ import { View, Image, StyleSheet } from 'react-native';
 import firebase from 'firebase';
 
 export default function InitialLoaderScreen({ navigation }) {
+
   useEffect(() => {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged((user) => {

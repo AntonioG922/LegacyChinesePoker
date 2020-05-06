@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ImageBackground, StyleSheet, View } from 'react-native';
+import { NavigationActions } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/stack';
 import firebase from 'firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { HeaderText, TextButton, LogInOptionButton } from '../components/StyledText';
+import { HeaderText, TextButton } from '../components/StyledText';
 
 export default function HomeScreen({ navigation }) {
-  const [loggedIn, setLoggedIn] = useState(false);
-
   function signOut() {
     firebase.auth().signOut().then(() => {
       console.log('Sign out successful!');
@@ -15,17 +15,6 @@ export default function HomeScreen({ navigation }) {
       alert(error);
     });
   }
-
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        console.log(user);
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false);
-      }
-    });
-  }, [])
 
   return (
     <View style={styles.container}>
@@ -45,6 +34,7 @@ export default function HomeScreen({ navigation }) {
         <TextButton>Stats</TextButton>
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
+
       <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => { signOut() }} />
 
     </View>

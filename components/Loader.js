@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Modal } from 'react-native';
 import { ActivityIndicator, Colors } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons';
 
 import { HeaderText } from "../components/StyledText";
 
@@ -15,8 +15,10 @@ export default function Loader(props) {
   return (
     <Modal
       transparent={true}
-      animationType={'none'}
-      visible={loading}>
+      animationType={'fade'}
+      statusBarTranslucent={true}
+      visible={loading}
+      onRequestClose={() => loading = false}>
       <View style={styles.modalBackground}>
         {props.navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} /></HeaderText>}
         <HeaderText style={styles.loaderMessage}>{message}</HeaderText>

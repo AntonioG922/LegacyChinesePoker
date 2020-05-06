@@ -10,14 +10,6 @@ import { signInWithFacebook, signInWithGoogle } from '../functions/SignInFunctio
 export default function LoginOptions({ navigation }) {
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user != null) {
-        navigation.navigate('Home');
-      }
-    });
-  }, [])
-
   return (
     <TitledPage pageTitle={'Sign in'} >
       <Loader loading={loading} message={'Signing In'} />
@@ -26,14 +18,14 @@ export default function LoginOptions({ navigation }) {
         textColor={'gray'}
         message={'Sign in with Google'}
         style={[styles.logInOptionButton, { backgroundColor: '#fbfbfb' }]}
-        onPress={() => signInWithGoogle(setLoading, navigation)}
+        onPress={() => signInWithGoogle(setLoading)}
       />
       <LogInOptionButton
         icon={'facebook'}
         textColor={'white'}
         message={'Sign in with Facebook'}
         style={[styles.logInOptionButton, { backgroundColor: '#3b5998' }]}
-        onPress={() => signInWithFacebook(setLoading, navigation)}
+        onPress={() => signInWithFacebook(setLoading)}
       />
       <LogInOptionButton
         icon={'twitter'}
@@ -58,7 +50,8 @@ export default function LoginOptions({ navigation }) {
 
 const styles = StyleSheet.create({
   logInOptionButton: {
-    marginBottom: 15
+    marginBottom: 15,
+    maxWidth: 360
   },
   signUpButton: {
     textAlign: 'center',
