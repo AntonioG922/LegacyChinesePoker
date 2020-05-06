@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, Platform, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -16,7 +16,7 @@ export function TextButton(props) {
 }
 
 export function ContainedButton(props) {
-  return <Button {...props} mode='contained' labelStyle={[ styles.styledText, styles.containedButtonText, { fontSize: 32 }, props.labelStyle ]} />;
+  return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.containedButtonText, { fontSize: 32 }, props.labelStyle]} />;
 }
 
 export function FlatTextInput(props) {
@@ -43,6 +43,7 @@ export function LogInOptionButton({ textColor, icon, style, message, ...rest }) 
   return (
     <TouchableOpacity {...rest} style={[styles.logInOptionButton, style]}>
       {icon === 'email' && <MaterialCommunityIcons name={icon} size={30} style={[styles.logInOptionIcon, { color: textColor }]} />
+        || icon === 'google' && <View style={styles.logInOptionIcon}><Image source={require('../assets/images/google-icon.png')} style={styles.googleImage} /></View>
         || <FontAwesome5 name={icon} size={30} style={[styles.logInOptionIcon, { color: textColor }]} />}
       <Text style={[styles.logInOptionMessage, { color: textColor }]}>{message}</Text>
     </TouchableOpacity>
@@ -107,5 +108,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white'
+  },
+  googleImage: {
+    width: 27,
+    height: 28
   }
 });

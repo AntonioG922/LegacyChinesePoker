@@ -59,5 +59,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'gang-of-three',
     color: 'rgb(217, 56, 27)',
-  }
+  },
 })
