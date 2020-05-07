@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import firebase from 'firebase';
 
 import { FlatTextInput, TextButton, HeaderText, PasswordTextInput } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
+import { Card } from '../components/Card';
 
 export default function Login({ route, navigation }) {
   const [signingUp, setSigningUp] = useState(route.params.signingUp);
@@ -52,8 +53,12 @@ export default function Login({ route, navigation }) {
   }
 
   return (
-    <TitledPage pageTitle={signingUp ? 'Sign Up' : 'Log In'} navigation={navigation} contentContainerStyle={styles.container}>
+    <TitledPage
+      pageTitle={' '}
+      navigation={navigation}
+      contentContainerStyle={styles.container}>
       <Loader loading={loading} message={signingUp ? 'Signing Up' : 'Logging In'} />
+      <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
       <View style={styles.form}>
         {signingUp && <FlatTextInput label={'Username'} onChangeText={text => setUsername(text)} />}
         <FlatTextInput label={'Email'} onChangeText={text => setEmail(text)} />
@@ -85,5 +90,37 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'gang-of-three',
     color: 'rgb(217, 56, 27)',
+  },
+  backgroundImage: {
+    width: 120,
+    height: 265,
+    position: 'absolute',
+    right: -20,
+    top: -85,
+    zIndex: 2
+  },
+  card1: {
+    position: 'absolute',
+    left: 100,
+    top: -135,
+    transform: [
+      { rotate: '30deg' }
+    ]
+  },
+  card2: {
+    position: 'absolute',
+    left: 0,
+    bottom: 40,
+    transform: [
+      { rotate: '75deg' }
+    ]
+  },
+  card3: {
+    position: 'absolute',
+    right: -50,
+    bottom: 0,
+    transform: [
+      { rotate: '-40deg' }
+    ]
   }
 })

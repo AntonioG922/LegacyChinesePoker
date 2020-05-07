@@ -6,7 +6,10 @@ import { HeaderText } from './StyledText';
 
 export function TitledPage(props) {
   return <View style={[styles.container, props.containerStyle]}>
-    {props.navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} /></HeaderText>}
+    {props.navigation &&
+      <HeaderText style={styles.backArrow}>
+        <Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} />
+      </HeaderText>}
     <HeaderText style={[styles.pageTitle, props.titleStyle]} >{props.pageTitle}</HeaderText>
     <View style={props.contentContainerStyle}>
       {props.children}

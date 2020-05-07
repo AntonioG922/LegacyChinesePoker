@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import firebase from 'firebase';
+import React, { useState } from 'react';
+import { StyleSheet, Text } from 'react-native';
 
-import { LogInOptionButton, HeaderText } from '../components/StyledText';
+import { LogInOptionButton } from '../components/StyledText';
 import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
 import { signInWithFacebook, signInWithGoogle } from '../functions/SignInFunctions';
