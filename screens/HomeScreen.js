@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { ImageBackground, StyleSheet, View } from 'react-native';
-import { NavigationActions } from '@react-navigation/native';
-import { StackActions } from '@react-navigation/stack';
+import React, { useState } from 'react';
+import { ImageBackground, StyleSheet, View, Text } from 'react-native';
 import firebase from 'firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Dialog, { DialogContent, DialogButton, DialogFooter, DialogTitle } from 'react-native-popup-dialog';
 
 import { HeaderText, TextButton } from '../components/StyledText';
 
 export default function HomeScreen({ navigation }) {
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
+
   function signOut() {
     firebase.auth().signOut().then(() => {
       console.log('Sign out successful!');
@@ -35,7 +36,31 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
 
-      <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => { signOut() }} />
+      <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => setShowLogoutMessage(true)} />
+      <Dialog
+        visible={showLogoutMessage}
+        onTouchOutside={() => setShowLogoutMessage(false)}
+        dialogTitle={<DialogTitle title="Logout" />}
+        footer={
+          <DialogFooter>
+            <DialogButton
+              text="CANCEL"
+              onPress={() => setShowLogoutMessage(false)}
+            />
+            <DialogButton
+              text="OK"
+              onPress={() => {
+                setShowLogoutMessage(false);
+                signOut();
+              }}
+            />
+          </DialogFooter>
+        }
+      >
+        <DialogContent>
+          <Text style={styles.logoutMessage}>Are you sure you want to logout?</Text>
+        </DialogContent>
+      </Dialog>
 
     </View>
   );
@@ -71,5 +96,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 30,
     right: 10
+  },
+  logoutMessage: {
+    marginVertical: 20,
+    position: 'relative',
+    top: 10
   }
 });
