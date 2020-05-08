@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, componentDidMount } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import firebase from 'firebase';
 
@@ -7,14 +7,14 @@ export default function InitialLoaderScreen({ navigation }) {
   useEffect(() => {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged((user) => {
-        if (user != null) {
+        if (user) {
           navigation.navigate('Home');
         } else {
           navigation.navigate('LoginOptions');
         }
       });
     }, 1000)
-  })
+  }, [])
 
   return (
     <View style={styles.container}>

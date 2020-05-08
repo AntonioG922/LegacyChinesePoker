@@ -8,6 +8,8 @@ import { SplashScreen } from 'expo';
 import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 import useLinking from './navigation/useLinking';
 import HomeScreen from './screens/HomeScreen';
@@ -81,23 +83,25 @@ export default function App(props) {
     return null;
   } else {
     return (
-      <PaperProvider theme={theme}>
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
-            <Stack.Navigator initialRouteName={'InitialLoadScreen'} screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="InitialLoadScreen" component={InitialLoadScreen} />
-              <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
-              <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
-              <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
-              <Stack.Screen name="Game" component={GameScreen} />
-              <Stack.Screen name="LoginOptions" component={LoginOptions} />
-              <Stack.Screen name="EmailLogin" component={EmailLogin} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </View>
-      </PaperProvider>
+      <Provider store={store}>
+        <PaperProvider theme={theme}>
+          <View style={styles.container}>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+            <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
+              <Stack.Navigator initialRouteName={'InitialLoadScreen'} screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="InitialLoadScreen" component={InitialLoadScreen} />
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+                <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
+                <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
+                <Stack.Screen name="Game" component={GameScreen} />
+                <Stack.Screen name="LoginOptions" component={LoginOptions} />
+                <Stack.Screen name="EmailLogin" component={EmailLogin} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </View>
+        </PaperProvider>
+      </Provider>
     );
   }
 }
