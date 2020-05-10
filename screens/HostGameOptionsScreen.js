@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 
-import { dealCards } from '../functions/HelperFunctions';
+import {dealCards, findStartingPlayer} from '../functions/HelperFunctions';
 
 import {
   HeaderText, FlatTextInput,
@@ -33,17 +33,19 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
+    const hands = dealCards(numberOfPlayers, useJoker);
+    const startingPlayerIndex = findStartingPlayer(hands);
     const gameData = {
       gameName: gameName,
       password: password,
       numberOfPlayers: numberOfPlayers,
       useJoker: useJoker,
       players: {[userId]: 0},
-      currentPlayerTurn: 0,
       playersLeftToJoin: numberOfPlayers - 1,
       hands: dealCards(numberOfPlayers, useJoker),
       lastPlayerToPlay: '',
       playedCards: [],
+      currentPlayerTurnIndex: startingPlayerIndex,
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {
