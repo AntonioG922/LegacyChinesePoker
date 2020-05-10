@@ -1,25 +1,23 @@
 import { configureStore, getDefaultMiddleware, createSlice } from "@reduxjs/toolkit";
 
-const userInfoSlice = createSlice({
-  name: 'userInfo',
-  initialState: {
-    user: {}
-  },
+const userDataSlice = createSlice({
+  name: 'userData',
+  initialState: {},
   reducers: {
-    setUserInfo: (state, action) => {
+    setUserData(state, action) {
       state.user = action.payload;
     },
-    clearUserInfo: (state) => {
+    clearUserData(state) {
       state.user = {}
     }
   }
 })
 
-export const { setUserInfo, clearUserInfo } = userInfoSlice.actions;
+export const { setUserData, clearUserData } = userDataSlice.actions;
 
-export const store = configureStore({
+export default store = configureStore({
   reducer: {
-    userInfo: userInfoSlice.reducer
+    userInfo: userDataSlice.reducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: false,
