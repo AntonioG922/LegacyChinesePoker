@@ -1,16 +1,14 @@
 import { configureStore, getDefaultMiddleware, createSlice } from "@reduxjs/toolkit";
-import {dealCards} from '../functions/HelperFunctions';
+import { dealCards } from '../functions/HelperFunctions';
 
-const userInfoSlice = createSlice({
-  name: 'userInfo',
-  initialState: {
-    user: {}
-  },
+const userDataSlice = createSlice({
+  name: 'userData',
+  initialState: {},
   reducers: {
-    setUserInfo: (state, action) => {
+    setUserData(state, action) {
       state.user = action.payload;
     },
-    clearUserInfo: (state) => {
+    clearUserData(state) {
       state.user = {}
     }
   }
@@ -47,13 +45,11 @@ const gameStateSlice = createSlice({
   }
 });
 
-export const { setUserInfo, clearUserInfo } = userInfoSlice.actions;
-export const { setGameState, clearGameState } = gameStateSlice.actions;
+export const { setUserData, clearUserData } = userDataSlice.actions;
 
-export const store = configureStore({
+export default store = configureStore({
   reducer: {
-    userInfo: userInfoSlice.reducer,
-    gameState: gameStateSlice.reducer,
+    userData: userDataSlice.reducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: false,

@@ -1,15 +1,24 @@
-import React, { useEffect, componentDidMount } from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import firebase from 'firebase';
+import store from '../redux/store';
+import { setUserData, clearUserData } from '../redux/store';
 
 export default function InitialLoaderScreen({ navigation }) {
-
   useEffect(() => {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
+          const { displayName, email, photoURL, uid } = user;
+          store.dispatch(setUserData({
+            displayName: displayName,
+            email: email,
+            photoURL: photoURL,
+            uid: uid
+          }));
           navigation.navigate('Home');
         } else {
+          store.dispatch(clearUserData());
           navigation.navigate('LoginOptions');
         }
       });

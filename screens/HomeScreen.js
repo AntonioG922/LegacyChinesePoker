@@ -3,7 +3,6 @@ import { ImageBackground, StyleSheet, View, Text } from 'react-native';
 import firebase from 'firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Dialog, { DialogContent, DialogButton, DialogFooter, DialogTitle } from 'react-native-popup-dialog';
-import { store, setUserInfo } from '../redux/store';
 
 import { HeaderText, TextButton } from '../components/StyledText';
 
@@ -34,7 +33,7 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Host Game</TextButton>
         <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton>Stats</TextButton>
-        <TextButton onPress={() => console.log(store.getState().userInfo)}>How To Play</TextButton>
+        <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
 
       <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => setShowLogoutMessage(true)} />
