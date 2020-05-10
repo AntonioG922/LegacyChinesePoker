@@ -5,14 +5,14 @@ import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
 import {HeaderText} from './StyledText';
 
-export function UserCardContainer({cards, playerIndex, currentPlayerTurnIndex, style, playCards}) {
+export function UserCardContainer({cards, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
       <View key={cards} style={[styles.horizontalContainer, style ]}>
         <View style={styles.actionsContainer}>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
-          <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex}>Pass</ContainedButton>
+          <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
         </View>
         <View style={styles.cardContainer}>
           {sortCards(cards).map((rank, index) => (

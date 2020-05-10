@@ -56,7 +56,8 @@ export default function GameScreen({ route, navigation }) {
     });
   }, [navigation, user]);
 
-  function playCards(selectedCards, player) {
+  function playCards(selectedCards) {
+    const player = gameData.currentPlayerTurnIndex;
     let hands = gameData.hands;
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
 
@@ -65,11 +66,22 @@ export default function GameScreen({ route, navigation }) {
       lastPlayed: selectedCards,
       lastPlayerToPlay: user.displayName,
       hands: hands,
+      // REMOVE FOR PROD. Allows tester to play every hand in a game.
       players: {
         [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
       },
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
+    });
+  }
+
+  function pass() {
+    db.collection('CustomGames').doc(gameData.gameName).update({
+      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
+      // REMOVE FOR PROD. Allows tester to play every hand in a game.
+      players: {
+        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      },
     });
   }
 
@@ -86,6 +98,7 @@ export default function GameScreen({ route, navigation }) {
                            playerIndex={gameData.players[user.uid]}
                            currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
                            playCards={playCards}
+                           pass={pass}
                            style={styles.player1Hand} />
         <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % gameData.numberOfPlayers].cards.length}
                                 style={styles.player2Hand}
