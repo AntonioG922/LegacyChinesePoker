@@ -19,7 +19,7 @@ export default function InitialLoaderScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/dragon.png')}
+        source={require('../assets/images/dragon_1350x2400.png')}
         style={styles.loaderImage}
       />
     </View>
