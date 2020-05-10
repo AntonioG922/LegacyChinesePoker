@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
@@ -10,7 +10,7 @@ export function UserCardContainer({cards, errorMessage, playerIndex, currentPlay
 
   return (
       <View key={cards} style={[styles.horizontalContainer, style ]}>
-        <Text>{errorMessage}</Text>
+        <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
         <View style={styles.actionsContainer}>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
@@ -106,6 +106,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     flexDirection: 'column',
+  },
+  errorMessage: {
+    fontSize: 24,
+    textAlign: 'center',
   },
   cardContainer: {
     top: 75,

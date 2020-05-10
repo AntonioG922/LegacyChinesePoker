@@ -61,7 +61,7 @@ export default function GameScreen({ route, navigation }) {
       setErrorMessage('Must play ' + gameData.currentHandType);
       return false;
     } else if (user.displayName !== gameData.lastPlayerToPlay && !isBetterHand(selectedCards, gameData.lastPlayed)) {
-      setErrorMessage('Your hand is not stronger than the current hand');
+      setErrorMessage('Get that weak shit out');
       return false;
     }
 
@@ -96,6 +96,9 @@ export default function GameScreen({ route, navigation }) {
       // },
 
     });
+
+    setErrorMessage('');
+    return true;
   }
 
   return (

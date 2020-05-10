@@ -80,7 +80,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   return (
-    <ScrollView>
+    <ScrollView style={{minHeight: '100%'}}>
       <Loader loading={loading} message={'Entering Game'} />
       <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>

@@ -136,6 +136,10 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
   }
 }
 
+export function getNextPlayer(hands, currentPlayerIndex) {
+
+}
+
 function getHighestCard(cards) {
   return Math.max(...[].concat(...cards));
 }
