@@ -25,7 +25,7 @@ export function UserCardContainer({cards, errorMessage, playerIndex, currentPlay
   );
 
   function playSelectedCards() {
-    if (selectedCards.length > 0) {
+    if (selectedCards.length > 0 || playerIndex !== currentPlayerTurnIndex) {
       if (playCards(selectedCards))
         setSelectedCards([]);
     }

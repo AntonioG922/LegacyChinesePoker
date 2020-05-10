@@ -96,6 +96,7 @@ export default function GameScreen({ route, navigation }) {
       // players: {
       //   [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
       // },
+
     });
   }
 
