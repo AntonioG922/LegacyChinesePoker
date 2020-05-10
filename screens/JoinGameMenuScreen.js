@@ -1,11 +1,11 @@
-import React, {useEffect, useReducer, useState} from "react";
-import {StyleSheet, Text, View} from "react-native";
-import {MaterialCommunityIcons} from '@expo/vector-icons';
+import React, { useEffect, useReducer, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import firebase from 'firebase'
 
-import {HeaderText, TextButton} from "../components/StyledText";
-import {TitledPage} from "../components/Template";
-import {ScrollView} from "react-native-gesture-handler";
+import { HeaderText, TextButton } from "../components/StyledText";
+import { TitledPage } from "../components/Template";
+import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader';
 
 export default function JoinGameMenuScreen({ navigation }) {
@@ -63,24 +63,24 @@ export default function JoinGameMenuScreen({ navigation }) {
     });
 
     return db.collection('CustomGames')
-        .where('playersLeftToJoin', '>', 0)
-        .onSnapshot((snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-              dispatch({type: "add", value: change.doc.data()});
-            }
-            if (change.type === "modified") {
-              dispatch({type: "modified", value: change.doc.data()});
-            }
-            if (change.type === "removed") {
-              dispatch({type: "remove", value: change.doc.data()});
-            }
-          });
+      .where('playersLeftToJoin', '>', 0)
+      .onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            dispatch({ type: "add", value: change.doc.data() });
+          }
+          if (change.type === "modified") {
+            dispatch({ type: "modified", value: change.doc.data() });
+          }
+          if (change.type === "removed") {
+            dispatch({ type: "remove", value: change.doc.data() });
+          }
         });
+      });
   }, []);
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <Loader loading={loading} message={'Entering Game'} />
       <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
@@ -112,6 +112,7 @@ export default function JoinGameMenuScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    minHeight: '100vh',
     alignItems: "center",
     justifyContent: "center",
   },
