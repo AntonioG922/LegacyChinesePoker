@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import firebase from 'firebase';
+import store from '../redux/store';
 
 import Loader from '../components/Loader';
 import {
@@ -15,21 +16,13 @@ import {
 } from '../functions/HelperFunctions';
 
 export default function GameScreen({ route, navigation }) {
-  const [user, setUser] = useState({});
+  const user = store.getState().userData.user;
   const [errorMessage, setErrorMessage] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const db = firebase.firestore();
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(function(currentUser) {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        // No user is signed in.
-      }
-    });
-
     return db.collection('CustomGames').doc(gameData.gameName)
         .onSnapshot((doc) => {
           setGameData(doc.data());
@@ -85,9 +78,9 @@ export default function GameScreen({ route, navigation }) {
       lastPlayerToPlay: user.displayName,
       hands: hands,
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      players: {
-        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
-      },
+      // players: {
+      //   [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      // },
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
     });
@@ -100,9 +93,9 @@ export default function GameScreen({ route, navigation }) {
     db.collection('CustomGames').doc(gameData.gameName).update({
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      players: {
-        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
-      },
+      // players: {
+      //   [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      // },
     });
   }
 

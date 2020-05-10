@@ -23,7 +23,7 @@ export default function InitialLoaderScreen({ navigation }) {
         }
       });
     }, 1000)
-  }, [])
+  }, []);
 
   return (
     <View style={styles.container}>
