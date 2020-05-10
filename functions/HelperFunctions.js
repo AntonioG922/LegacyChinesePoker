@@ -144,8 +144,12 @@ function getHighestCard(cards) {
   return Math.max(...[].concat(...cards));
 }
 
+export function getLowestCard(cards) {
+  return Math.min(...[].concat(...cards));
+}
+
 export function findStartingPlayer(hands) {
-  const lowestCard = Math.min(...[].concat(...hands.map((hand) => hand.cards)));
+  const lowestCard = getLowestCard(hands.map((hand) => hand.cards));
 
   return hands.findIndex((hand) => hand.cards.includes(lowestCard));
 }

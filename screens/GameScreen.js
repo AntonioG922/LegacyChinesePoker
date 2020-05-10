@@ -10,14 +10,16 @@ import {
   UserCardContainer
 } from '../components/CardContainer';
 import {
-  getHandType,
+  getHandType, getLowestCard,
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
+import {SuitAndRank} from '../components/Card';
 
 export default function GameScreen({ route, navigation }) {
   const user = store.getState().userData.user;
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const db = firebase.firestore();
@@ -54,14 +56,25 @@ export default function GameScreen({ route, navigation }) {
   }, [navigation]);
 
   function playCards(selectedCards) {
+    setErrorMessage('');
+    setErrorCards([]);
+    
     const playedHandType = getHandType(selectedCards);
+    const everyonePassed = user.displayName === gameData.lastPlayerToPlay;
+    const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
+    const currentHand = gameData.hands[gameData.players[user.uid]].cards;
+
     if (playedHandType === HAND_TYPES.INVALID) {
       setErrorMessage('Invalid hand type');
       return false;
-    } else if (user.displayName !== gameData.lastPlayerToPlay && gameData.currentHandType !== HAND_TYPES.START_OF_GAME && playedHandType !== gameData.currentHandType) {
+    } else if (isFirstPlayOfGame && !selectedCards.includes(getLowestCard(currentHand))) {
+      setErrorMessage('Hand must include ');
+      setErrorCards([getLowestCard(currentHand)]);
+      return false;
+    } else if (!everyonePassed && !isFirstPlayOfGame && playedHandType !== gameData.currentHandType) {
       setErrorMessage('Must play ' + gameData.currentHandType);
       return false;
-    } else if (user.displayName !== gameData.lastPlayerToPlay && !isBetterHand(selectedCards, gameData.lastPlayed)) {
+    } else if (!everyonePassed && !isBetterHand(selectedCards, gameData.lastPlayed)) {
       setErrorMessage('Get that weak shit out');
       return false;
     }
@@ -84,7 +97,6 @@ export default function GameScreen({ route, navigation }) {
       currentHandType: getHandType(selectedCards),
     });
 
-    setErrorMessage('');
     return true;
   }
 
@@ -99,6 +111,7 @@ export default function GameScreen({ route, navigation }) {
     });
 
     setErrorMessage('');
+    setErrorCards([]);
     return true;
   }
 
@@ -113,6 +126,7 @@ export default function GameScreen({ route, navigation }) {
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
           errorMessage={errorMessage}
+          errorCards={errorCards}
           playerIndex={gameData.players[user.uid]}
           currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
           playCards={playCards}

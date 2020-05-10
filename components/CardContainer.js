@@ -5,12 +5,15 @@ import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
 import {HeaderText} from './StyledText';
 
-export function UserCardContainer({cards, errorMessage, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
+export function UserCardContainer({cards, errorMessage, errorCards, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
       <View key={cards} style={[styles.horizontalContainer, style ]}>
-        <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
+        <View style={styles.errorMessage}>
+          <HeaderText style={{fontSize: 18}}>{errorMessage}</HeaderText>
+          {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
+        </View>
         <View style={styles.actionsContainer}>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
@@ -108,8 +111,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   errorMessage: {
-    fontSize: 24,
-    textAlign: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   cardContainer: {
     top: 75,
