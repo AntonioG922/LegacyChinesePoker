@@ -46,7 +46,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       useJoker: useJoker,
       players: {[userId]: 0},
       playersLeftToJoin: numberOfPlayers - 1,
-      hands: dealCards(numberOfPlayers, useJoker),
+      hands: hands,
       lastPlayed: [],
       lastPlayerToPlay: '',
       playedCards: [],
