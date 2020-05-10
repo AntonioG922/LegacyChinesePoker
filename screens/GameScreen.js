@@ -64,18 +64,32 @@ export default function GameScreen({ route, navigation }) {
       lastPlayed: selectedCards,
       lastPlayerToPlay: user.displayName,
       hands: hands,
+      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
     });
   }
 
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
-      <PlayedCardsContainer cards={gameData.playedCards} lastPlayedCards={gameData.lastPlayed} lastPlayerToPlay={gameData.lastPlayerToPlay} style={styles.playedCards} />
+      <PlayedCardsContainer cards={gameData.playedCards}
+                            lastPlayedCards={gameData.lastPlayed}
+                            lastPlayerToPlay={gameData.lastPlayerToPlay}
+                            style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
-        <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards} player={gameData.players[user.uid]} playCards={playCards} style={styles.player1Hand} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % 4].cards.length} style={styles.player2Hand} isPlayer2={true} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % 4].cards.length} style={styles.player3Hand} isPlayer3={true} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % 4].cards.length} style={styles.player4Hand} isPlayer4={true} />
+        <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
+                           playerIndex={gameData.players[user.uid]}
+                           currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
+                           playCards={playCards}
+                           style={styles.player1Hand} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % gameData.numberOfPlayers].cards.length}
+                                style={styles.player2Hand}
+                                isPlayer2={true} />
+        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % gameData.numberOfPlayers].cards.length}
+                                style={styles.player3Hand}
+                                isPlayer3={true} />
+        {gameData.numberOfPlayers > 3 && <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % gameData.numberOfPlayers].cards.length}
+                                                                 style={styles.player4Hand}
+                                                                 isPlayer4={true} />}
       </View>}
     </ImageBackground>
   );

@@ -17,6 +17,12 @@ export function getCardInfo(rank) {
   return cardInfo;
 }
 
+export function findStartingPlayer(hands) {
+  const lowestCard = Math.min(...[].concat(...hands.map((hand) => hand.cards)));
+
+  return hands.findIndex((hand) => hand.cards.includes(lowestCard));
+}
+
 export function dealCards(numberOfPlayers = 4, useJoker) {
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 

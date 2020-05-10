@@ -25,6 +25,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.doubleg.chinesepoker"
+    },
+    "web": {
+      "build": {
+        "babel": {
+          "include": ["static-container"]
+        }
+      }
     }
   }
 }
