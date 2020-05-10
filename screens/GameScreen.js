@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
 
@@ -24,9 +24,9 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
-        .onSnapshot((doc) => {
-          setGameData(doc.data());
-        });
+      .onSnapshot((doc) => {
+        setGameData(doc.data());
+      });
   }, []);
 
   useEffect(() => {
@@ -43,14 +43,15 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     return navigation.addListener('blur', () => {
+      if (!gameStarted) {
+        let updates = {};
+        updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+        updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
+        db.collection('CustomGames').doc(gameData.gameName).update(updates)
+      }
       setGameStarted(true);
-
-      let updates = {};
-      updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
-      updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
-      db.collection('CustomGames').doc(gameData.gameName).update(updates)
     });
-  }, [navigation, user]);
+  }, [navigation]);
 
   function playCards(selectedCards) {
     const playedHandType = getHandType(selectedCards);
@@ -102,27 +103,27 @@ export default function GameScreen({ route, navigation }) {
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
       <PlayedCardsContainer cards={gameData.playedCards}
-                            lastPlayedCards={gameData.lastPlayed}
-                            lastPlayerToPlay={gameData.lastPlayerToPlay}
-                            currentHandType={gameData.currentHandType}
-                            style={styles.playedCards} />
+        lastPlayedCards={gameData.lastPlayed}
+        lastPlayerToPlay={gameData.lastPlayerToPlay}
+        currentHandType={gameData.currentHandType}
+        style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
-                           errorMessage={errorMessage}
-                           playerIndex={gameData.players[user.uid]}
-                           currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
-                           playCards={playCards}
-                           pass={pass}
-                           style={styles.player1Hand} />
+          errorMessage={errorMessage}
+          playerIndex={gameData.players[user.uid]}
+          currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
+          playCards={playCards}
+          pass={pass}
+          style={styles.player1Hand} />
         <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % gameData.numberOfPlayers].cards.length}
-                                style={styles.player2Hand}
-                                isPlayer2={true} />
+          style={styles.player2Hand}
+          isPlayer2={true} />
         <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % gameData.numberOfPlayers].cards.length}
-                                style={styles.player3Hand}
-                                isPlayer3={true} />
+          style={styles.player3Hand}
+          isPlayer3={true} />
         {gameData.numberOfPlayers > 3 && <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % gameData.numberOfPlayers].cards.length}
-                                                                 style={styles.player4Hand}
-                                                                 isPlayer4={true} />}
+          style={styles.player4Hand}
+          isPlayer4={true} />}
       </View>}
     </ImageBackground>
   );
