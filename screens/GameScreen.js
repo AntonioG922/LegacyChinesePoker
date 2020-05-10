@@ -8,6 +8,7 @@ import {
   PlayedCardsContainer,
   UserCardContainer
 } from '../components/CardContainer';
+import {getHandType} from '../functions/HelperFunctions';
 
 export default function GameScreen({ route, navigation }) {
   const [user, setUser] = useState({});
@@ -64,7 +65,11 @@ export default function GameScreen({ route, navigation }) {
       lastPlayed: selectedCards,
       lastPlayerToPlay: user.displayName,
       hands: hands,
-      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      players: {
+        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      },
+      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
+      currentHandType: getHandType(selectedCards),
     });
   }
 
@@ -74,6 +79,7 @@ export default function GameScreen({ route, navigation }) {
       <PlayedCardsContainer cards={gameData.playedCards}
                             lastPlayedCards={gameData.lastPlayed}
                             lastPlayerToPlay={gameData.lastPlayerToPlay}
+                            currentHandType={gameData.currentHandType}
                             style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}

@@ -51,7 +51,7 @@ export function FaceDownCardsContainer({numberOfCards, style, isPlayer2, isPlaye
   )
 }
 
-export function PlayedCardsContainer({cards, lastPlayedCards, lastPlayerToPlay, style}) {
+export function PlayedCardsContainer({cards, lastPlayedCards, lastPlayerToPlay, currentHandType, style}) {
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
 
@@ -59,6 +59,7 @@ export function PlayedCardsContainer({cards, lastPlayedCards, lastPlayerToPlay, 
       <View key={cards} style={style}>
         <View style={styles.lastPlayed}>
           <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
+          <HeaderText style={styles.lastPlayedText}>{currentHandType}</HeaderText>
           <View style={styles.lastPlayedCards}>
             {lastPlayedCards.map((card) =>
                 <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />

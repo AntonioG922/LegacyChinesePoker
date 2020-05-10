@@ -1,13 +1,18 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
-import { getCardInfo } from '../functions/HelperFunctions';
+import { getCardInfo, SUITS } from '../functions/HelperFunctions';
+
+const SUIT_TO_ICON_NAME_MAP = {
+  [SUITS.CLUB]: 'cards-club',
+  [SUITS.DIAMOND]: 'cards-diamond',
+  [SUITS.HEART]: 'cards-heart',
+  [SUITS.SPADE]: 'cards-spade',
+};
 
 export function Card({ rank, style, toggleSelected, }) {
   // cards are positioned based off their center
-  const [cardInfo, setSuitAndNum] = useState(getCardInfo(rank));
   const [selected, setSelected] = useState(false);
-  const [played, setPlayed] = useState(false);
 
   return (
     <TouchableHighlight underlayColor='#ddd' style={[styles.card, selected && styles.selected, style]} onPress={selectCard}>
@@ -30,7 +35,7 @@ export function SuitAndRank({ cardNumber, containerStyle, numberStyle }) {
   return (
     <View style={containerStyle}>
       <Text style={[{ color: cardInfo.color }, numberStyle]}>{cardInfo.number}</Text>
-      <MaterialCommunityIcons name={`cards-${cardInfo.suit}`} style={{ color: cardInfo.color }} size={20} />
+      <MaterialCommunityIcons name={SUIT_TO_ICON_NAME_MAP[cardInfo.suit]} style={{ color: cardInfo.color }} size={20} />
     </View>
   );
 }
