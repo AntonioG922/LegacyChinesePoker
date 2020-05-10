@@ -1,5 +1,4 @@
 import { configureStore, getDefaultMiddleware, createSlice } from "@reduxjs/toolkit";
-import { dealCards } from '../functions/HelperFunctions';
 
 const userDataSlice = createSlice({
   name: 'userData',
@@ -47,6 +46,7 @@ const gameStateSlice = createSlice({
 
 export const { setUserData, clearUserData } = userDataSlice.actions;
 
+let store;
 export default store = configureStore({
   reducer: {
     userData: userDataSlice.reducer

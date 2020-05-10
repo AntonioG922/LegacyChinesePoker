@@ -24,12 +24,13 @@ export const RANKS = {
 };
 export const HAND_TYPES = {
   INVALID: 'INVALID', // Should never be allowed to be played
+  START_OF_GAME: 'START OF GAME',
   SINGLE: 'SINGLE',
   PAIR: 'PAIR',
-  THREE_OF_A_KIND: 'THREE_OF_A_KIND',
-  FULL_HOUSE: 'FULL_HOUSE',
+  THREE_OF_A_KIND: 'THREE OF A KIND',
+  FULL_HOUSE: 'FULL HOUSE',
   STRAIGHT: 'STRAIGHT',
-  STRAIGHT_FLUSH: 'STRAIGHT_FLUSH',
+  STRAIGHT_FLUSH: 'STRAIGHT FLUSH',
   UNION: 'UNION',
   DRAGON: 'DRAGON',
 };
@@ -53,6 +54,8 @@ export function getHandType(cardRanks) {
   const cards = cardRanks.sort((a, b) => a-b).map((rank) => getCardInfo(rank));
 
   switch (cards.length) {
+    case 0:
+      return HAND_TYPES.START_OF_GAME;
     case 1:
       return HAND_TYPES.SINGLE;
     case 2:
@@ -105,6 +108,36 @@ export function getHandType(cardRanks) {
         return HAND_TYPES.UNION;
       else return HAND_TYPES.INVALID;
   }
+}
+
+/**
+ * Determines an one hand is better than another.
+ * Assumes that both hands are valid and of matching hand type.
+ * @param attemptedPlay
+ * @param lastPlayedHand
+ * @return {boolean}
+ */
+export function isBetterHand(attemptedPlay, lastPlayedHand) {
+  switch (getHandType(lastPlayedHand)) {
+    case HAND_TYPES.SINGLE:
+    case HAND_TYPES.PAIR:
+    case HAND_TYPES.THREE_OF_A_KIND:
+    case HAND_TYPES.UNION:
+    case HAND_TYPES.STRAIGHT:
+    case HAND_TYPES.STRAIGHT_FLUSH:
+      return getHighestCard(attemptedPlay) > getHighestCard(lastPlayedHand);
+    case HAND_TYPES.FULL_HOUSE:
+      return lastPlayedHand.length === 0 ? true : attemptedPlay.sort((a, b) => a-b)[2] > lastPlayedHand.sort((a, b) => a-b)[2];
+    case HAND_TYPES.START_OF_GAME:
+    case HAND_TYPES.DRAGON:
+      return true;
+    default:
+      return false;
+  }
+}
+
+function getHighestCard(cards) {
+  return Math.max(...[].concat(...cards));
 }
 
 export function findStartingPlayer(hands) {

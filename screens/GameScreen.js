@@ -8,10 +8,15 @@ import {
   PlayedCardsContainer,
   UserCardContainer
 } from '../components/CardContainer';
-import {getHandType} from '../functions/HelperFunctions';
+import {
+  getHandType,
+  HAND_TYPES,
+  isBetterHand
+} from '../functions/HelperFunctions';
 
 export default function GameScreen({ route, navigation }) {
   const [user, setUser] = useState({});
+  const [errorMessage, setErrorMessage] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const db = firebase.firestore();
@@ -57,6 +62,19 @@ export default function GameScreen({ route, navigation }) {
   }, [navigation, user]);
 
   function playCards(selectedCards) {
+    const playedHandType = getHandType(selectedCards);
+    if (playedHandType === HAND_TYPES.INVALID) {
+      setErrorMessage('Invalid hand type');
+      return false;
+    } else if (user.displayName !== gameData.lastPlayerToPlay && gameData.currentHandType !== HAND_TYPES.START_OF_GAME && playedHandType !== gameData.currentHandType) {
+      setErrorMessage('Must play ' + gameData.currentHandType);
+      return false;
+    } else if (user.displayName !== gameData.lastPlayerToPlay && !isBetterHand(selectedCards, gameData.lastPlayed)) {
+      setErrorMessage('Your hand is not stronger than the current hand');
+      return false;
+    }
+
+
     const player = gameData.currentPlayerTurnIndex;
     let hands = gameData.hands;
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
@@ -73,6 +91,9 @@ export default function GameScreen({ route, navigation }) {
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
     });
+
+    setErrorMessage('');
+    return true;
   }
 
   function pass() {
@@ -95,6 +116,7 @@ export default function GameScreen({ route, navigation }) {
                             style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
+                           errorMessage={errorMessage}
                            playerIndex={gameData.players[user.uid]}
                            currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
                            playCards={playCards}

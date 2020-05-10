@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 
 import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
 import {HeaderText} from './StyledText';
 
-export function UserCardContainer({cards, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
+export function UserCardContainer({cards, errorMessage, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
       <View key={cards} style={[styles.horizontalContainer, style ]}>
+        <Text>{errorMessage}</Text>
         <View style={styles.actionsContainer}>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
@@ -25,8 +26,8 @@ export function UserCardContainer({cards, playerIndex, currentPlayerTurnIndex, s
 
   function playSelectedCards() {
     if (selectedCards.length > 0) {
-      playCards(selectedCards, playerIndex);
-      setSelectedCards([]);
+      if (playCards(selectedCards))
+        setSelectedCards([]);
     }
   }
 

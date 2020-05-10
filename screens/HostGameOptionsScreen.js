@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 
-import {dealCards, findStartingPlayer} from '../functions/HelperFunctions';
+import {
+  dealCards,
+  findStartingPlayer,
+  HAND_TYPES
+} from '../functions/HelperFunctions';
 
 import {
   HeaderText, FlatTextInput,
@@ -43,10 +47,11 @@ export default function HostGameOptionsScreen({ navigation }) {
       players: {[userId]: 0},
       playersLeftToJoin: numberOfPlayers - 1,
       hands: dealCards(numberOfPlayers, useJoker),
+      lastPlayed: [],
       lastPlayerToPlay: '',
       playedCards: [],
       currentPlayerTurnIndex: startingPlayerIndex,
-      currentHandType: ''
+      currentHandType: HAND_TYPES.START_OF_GAME,
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {
