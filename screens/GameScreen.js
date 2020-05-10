@@ -32,8 +32,6 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     if (gameStarted) {
       //****** Add in game logic here (playing cards, opponents hands shrinking, etc.) *******/
-
-      db.collection('CustomGames').doc(gameData.gameName).set(gameData)
     } else {
       if (!gameData.playersLeftToJoin) {
         setGameStarted(true);
