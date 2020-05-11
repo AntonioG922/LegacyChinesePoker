@@ -58,7 +58,7 @@ export default function GameScreen({ route, navigation }) {
   function playCards(selectedCards) {
     setErrorMessage('');
     setErrorCards([]);
-    
+
     const playedHandType = getHandType(selectedCards);
     const everyonePassed = user.displayName === gameData.lastPlayerToPlay;
     const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
@@ -133,14 +133,11 @@ export default function GameScreen({ route, navigation }) {
           pass={pass}
           style={styles.player1Hand} />
         <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % gameData.numberOfPlayers].cards.length}
-          style={styles.player2Hand}
-          isPlayer2={true} />
+          style={styles.player2Hand} />
         <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % gameData.numberOfPlayers].cards.length}
-          style={styles.player3Hand}
-          isPlayer3={true} />
+          style={styles.player3Hand} />
         {gameData.numberOfPlayers > 3 && <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % gameData.numberOfPlayers].cards.length}
-          style={styles.player4Hand}
-          isPlayer4={true} />}
+          style={styles.player4Hand} />}
       </View>}
     </ImageBackground>
   );
@@ -175,22 +172,33 @@ const styles = StyleSheet.create({
   },
   player2Hand: {
     position: 'absolute',
-    left: -45,
-    top: '20%',
-    height: '40%',
+    left: -110,
+    top: '50%',
+    width: '80%',
+    transform: [
+        {rotateZ: '90deg'},
+        {translateX: '-50%'}
+    ],
   },
   player3Hand: {
     position: 'absolute',
-    top: -45,
+    top: 55,
     right: '5%',
     width: '80%',
     flexDirection: 'row',
+    transform: [
+      {rotateZ: '180deg'},
+    ],
   },
   player4Hand: {
     position: 'absolute',
-    right: 30,
-    top: '20%',
-    height: '40%'
+    right: -110,
+    top: '50%',
+    width: '80%',
+    transform: [
+      {rotateZ: '-90deg'},
+      {translateX: '0%'}
+    ],
   }
 
 });

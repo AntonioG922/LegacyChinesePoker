@@ -43,14 +43,11 @@ export function UserCardContainer({cards, errorMessage, errorCards, playerIndex,
   }
 }
 
-export function FaceDownCardsContainer({numberOfCards, style, isPlayer2, isPlayer3, isPlayer4}) {
+export function FaceDownCardsContainer({numberOfCards, style}) {
   return (
       <View style={style}>
         {Array.from({length: numberOfCards}, (v, i) => i).map(index =>
-            <CardBack key={index} style={[{position: 'absolute'},
-              isPlayer2 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '90deg'}]},
-              isPlayer3 && {right: `${(index / numberOfCards * 100)}%`},
-              isPlayer4 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '-90deg'}]}]} />)}
+            <CardBack key={index} style={[{position: 'absolute', left: `${(index / numberOfCards * 100)}%`}]} />)}
       </View>
   )
 }
