@@ -16,39 +16,60 @@ export default function Login({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function logIn(email, password) {
-    setLoading(true);
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(() => {
-        setLoading(false),
-          navigation.navigate('Home')
-      })
-      .catch((error) => {
-        setLoading(false);
-        setErrorMessage(error.message);
-      })
+  function allFieldsFilled() {
+    if (signingUp && !username) {
+      setErrorMessage('Please enter a username');
+      return false;
+    } else if (!email) {
+      setErrorMessage('Please enter an email');
+      return false;
+    } else if (!password) {
+      setErrorMessage('Please enter a password');
+      return false;
+    } else if (signingUp && !passwordConfirm) {
+      setErrorMessage('Please confirm your password');
+      return false;
+    }
+    return true;
   }
 
-  function signUp(username, email, password, passwordConfirm) {
-    if (password === passwordConfirm) {
+  function logIn(email, password) {
+    if (allFieldsFilled()) {
       setLoading(true);
-      firebase.auth().createUserWithEmailAndPassword(email, password)
+      firebase.auth().signInWithEmailAndPassword(email, password)
         .then(() => {
-          firebase.auth().currentUser.updateProfile({
-            displayName: username
-          }).then(() => {
-            setLoading(false);
-            navigation.navigate('Home');
-          }).catch((error) => {
-            setErrorMessage(error);
-          })
+          setLoading(false),
+            navigation.navigate('Home')
         })
         .catch((error) => {
           setLoading(false);
           setErrorMessage(error.message);
         })
-    } else {
-      setErrorMessage('Passwords do not match');
+    }
+  }
+
+  function signUp(username, email, password, passwordConfirm) {
+    if (allFieldsFilled()) {
+      if (password === passwordConfirm) {
+        setLoading(true);
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            firebase.auth().currentUser.updateProfile({
+              displayName: username
+            }).then(() => {
+              setLoading(false);
+              navigation.navigate('Home');
+            }).catch((error) => {
+              setErrorMessage(error);
+            })
+          })
+          .catch((error) => {
+            setLoading(false);
+            setErrorMessage(error.message);
+          })
+      } else {
+        setErrorMessage('Passwords do not match');
+      }
     }
   }
 
