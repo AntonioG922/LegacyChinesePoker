@@ -58,7 +58,7 @@ export function PlayedCardsContainer({ cards, lastPlayedCards, lastPlayerToPlay,
   cards = Array.isArray(cards) ? cards : [];
 
   return (
-    <View key={cards} style={style}>
+    <View style={style}>
       <View style={styles.lastPlayed}>
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
         <View style={styles.lastPlayedCards}>
@@ -68,12 +68,7 @@ export function PlayedCardsContainer({ cards, lastPlayedCards, lastPlayerToPlay,
         </View>
       </View>
       {cards.map((rank) => {
-        const maxOffset = 50;
-        const verticalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
-        const horizontalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
-        const rotation = Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg';
-
-        return <Card key={rank} rank={rank} style={{ top: verticalOffset, left: horizontalOffset, transform: [{ rotateZ: rotation }] }} />
+        return <Card key={rank.toString()} rank={rank} played={true} />
       })}
     </View>
   );

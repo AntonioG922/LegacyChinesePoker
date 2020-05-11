@@ -146,7 +146,7 @@ export default function GameScreen({ route, navigation }) {
         {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
           const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
 
-          return <FaceDownCardsContainer numberOfCards={gameData.hands[playerIndex].cards.length}
+          return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
             style={getStyle(index + 1)}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
