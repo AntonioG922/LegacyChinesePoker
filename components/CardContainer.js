@@ -43,11 +43,12 @@ export function UserCardContainer({cards, errorMessage, errorCards, playerIndex,
   }
 }
 
-export function FaceDownCardsContainer({numberOfCards, style}) {
+export function FaceDownCardsContainer({numberOfCards, style, isCurrentPlayer}) {
   return (
       <View style={style}>
+        {isCurrentPlayer && <View style={styles.currentPlayerChip}></View>}
         {Array.from({length: numberOfCards}, (v, i) => i).map(index =>
-            <CardBack key={index} style={[{position: 'absolute', left: `${(index / numberOfCards * 100)}%`}]} />)}
+            <CardBack key={index} style={[{borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%`}]} />)}
       </View>
   )
 }
@@ -111,6 +112,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  currentPlayerChip: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 0,
+    borderColor: '#333',
+    backgroundColor: '#444',
+    shadowColor: '#333',
+    shadowOffset: {
+      width: 0,
+      height: 0
+    },
+    shadowRadius: 3,
+    shadowOpacity: 1.0,
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
   },
   cardContainer: {
     top: 75,

@@ -17,11 +17,11 @@ import {
 import { SuitAndRank } from '../components/Card';
 
 export default function GameScreen({ route, navigation }) {
-  const user = store.getState().userData;
   const [errorMessage, setErrorMessage] = useState('');
   const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
+  const user = store.getState().userData;
   const db = firebase.firestore();
 
   useEffect(() => {
@@ -132,12 +132,13 @@ export default function GameScreen({ route, navigation }) {
           playCards={playCards}
           pass={pass}
           style={styles.player1Hand} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 1) % gameData.numberOfPlayers].cards.length}
-          style={styles.player2Hand} />
-        <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 2) % gameData.numberOfPlayers].cards.length}
-          style={styles.player3Hand} />
-        {gameData.numberOfPlayers > 3 && <FaceDownCardsContainer numberOfCards={gameData.hands[(gameData.players[user.uid] + 3) % gameData.numberOfPlayers].cards.length}
-          style={styles.player4Hand} />}
+        {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
+          const playerIndex = (gameData.players[user.uid] + index) % gameData.numberOfPlayers;
+
+          return <FaceDownCardsContainer numberOfCards={gameData.hands[playerIndex].cards.length}
+            style={styles.playerHands[index + 1]}
+            isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+        })}
       </View>}
     </ImageBackground>
   );
@@ -166,40 +167,41 @@ const styles = StyleSheet.create({
     ],
     alignItems: 'center',
   },
+  playerHands: [
+    {
+      position: 'absolute',
+      left: -110,
+      top: '50%',
+      width: '80%',
+      transform: [
+        { rotateZ: '90deg' },
+        { translateX: '-50%' }
+      ],
+    },
+    {
+      position: 'absolute',
+      top: 55,
+      right: '5%',
+      width: '80%',
+      flexDirection: 'row',
+      transform: [
+        { rotateZ: '180deg' },
+      ],
+    },
+    {
+      position: 'absolute',
+      right: -110,
+      top: '50%',
+      width: '80%',
+      transform: [
+        { rotateZ: '-90deg' },
+      ],
+    }
+  ],
   player1Hand: {
     bottom: 40,
     width: '80%'
   },
-  player2Hand: {
-    position: 'absolute',
-    left: -110,
-    top: '50%',
-    width: '80%',
-    transform: [
-      { rotateZ: '90deg' },
-      { translateX: '-50%' }
-    ],
-  },
-  player3Hand: {
-    position: 'absolute',
-    top: 55,
-    right: '5%',
-    width: '80%',
-    flexDirection: 'row',
-    transform: [
-      { rotateZ: '180deg' },
-    ],
-  },
-  player4Hand: {
-    position: 'absolute',
-    right: -110,
-    top: '50%',
-    width: '80%',
-    transform: [
-      { rotateZ: '-90deg' },
-      { translateX: '0%' }
-    ],
-  }
 
 });
 
