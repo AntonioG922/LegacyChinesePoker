@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { ContainedButton } from './StyledText'
 import {Card, CardBack, SuitAndRank} from './Card'
 import {HeaderText} from './StyledText';
 
-export function UserCardContainer({cards, errorMessage, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
+export function UserCardContainer({cards, errorMessage, errorCards, playerIndex, currentPlayerTurnIndex, style, playCards, pass}) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
       <View key={cards} style={[styles.horizontalContainer, style ]}>
-        <Text>{errorMessage}</Text>
+        <View style={styles.errorMessage}>
+          <HeaderText style={{fontSize: 18}}>{errorMessage}</HeaderText>
+          {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
+        </View>
         <View style={styles.actionsContainer}>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
           <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
@@ -40,14 +43,11 @@ export function UserCardContainer({cards, errorMessage, playerIndex, currentPlay
   }
 }
 
-export function FaceDownCardsContainer({numberOfCards, style, isPlayer2, isPlayer3, isPlayer4}) {
+export function FaceDownCardsContainer({numberOfCards, style}) {
   return (
       <View style={style}>
         {Array.from({length: numberOfCards}, (v, i) => i).map(index =>
-            <CardBack key={index} style={[{position: 'absolute'},
-              isPlayer2 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '90deg'}]},
-              isPlayer3 && {right: `${(index / numberOfCards * 100)}%`},
-              isPlayer4 && {top: `${(index / numberOfCards * 100)}%`, transform: [{rotateZ: '-90deg'}]}]} />)}
+            <CardBack key={index} style={[{position: 'absolute', left: `${(index / numberOfCards * 100)}%`}]} />)}
       </View>
   )
 }
@@ -106,6 +106,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     flexDirection: 'column',
+  },
+  errorMessage: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   cardContainer: {
     top: 75,
