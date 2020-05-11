@@ -80,7 +80,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Loader loading={loading} message={'Entering Game'} />
       <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
         <View style={styles.iconInfo}>
@@ -110,6 +110,10 @@ export default function JoinGameMenuScreen({ navigation }) {
 
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'space-between'
+  },
   container: {
     flex: 1,
     minHeight: '100vh',
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
   },
   menuOption: {
     marginBottom: 15,
-    marginTop: 15,
+    marginTop: 15
   },
   menuOptionIcons: {
     flexDirection: 'row',

@@ -42,7 +42,7 @@ export default function LoginOptions({ navigation }) {
       <Text
         style={styles.signUpButton}
         onPress={() => navigation.navigate('EmailLogin', { signingUp: true })}
-      >Don't have any of these accounts?{'\n'} Sign Up</Text>
+      >Don't have any of these accounts?{'\n'} Tap here to Sign Up</Text>
     </TitledPage>
   )
 }
