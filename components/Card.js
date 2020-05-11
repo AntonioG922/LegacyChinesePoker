@@ -40,7 +40,7 @@ export function SuitAndRank({ cardNumber, containerStyle, numberStyle }) {
   );
 }
 
-export function CardBack({style}) {
+export function CardBack({ style }) {
   return (
     <Image source={require('../assets/images/cardBacks/redDragon.png')} style={[styles.cardBack, style]} />
   )

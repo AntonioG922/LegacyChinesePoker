@@ -90,9 +90,9 @@ export default function GameScreen({ route, navigation }) {
       lastPlayerToPlay: user.displayName,
       hands: hands,
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      // players: {
-      //   [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
-      // },
+      players: {
+        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      },
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
     });
@@ -104,9 +104,9 @@ export default function GameScreen({ route, navigation }) {
     db.collection('CustomGames').doc(gameData.gameName).update({
       currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      // players: {
-      //   [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
-      // },
+      players: {
+        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+      },
 
     });
 
@@ -121,7 +121,6 @@ export default function GameScreen({ route, navigation }) {
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay}
-        currentHandType={gameData.currentHandType}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
