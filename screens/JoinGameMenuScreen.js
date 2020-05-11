@@ -10,8 +10,8 @@ import Loader from '../components/Loader';
 
 export default function JoinGameMenuScreen({ navigation }) {
   const db = firebase.firestore();
+  const user = store.getState().userData;
 
-  const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
@@ -34,7 +34,7 @@ export default function JoinGameMenuScreen({ navigation }) {
     const playerNumber = game.numberOfPlayers - game.playersLeftToJoin;
 
     let updates = {};
-    updates[`players.${userId}`] = playerNumber;
+    updates[`players.${user.uid}`] = playerNumber;
     updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
     db.collection('CustomGames').doc(gameName).update(updates)
       .then(() => {
@@ -54,14 +54,6 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(function (currentUser) {
-      if (currentUser) {
-        setUserId(currentUser.uid);
-      } else {
-        // No user is signed in.
-      }
-    });
-
     return db.collection('CustomGames')
       .where('playersLeftToJoin', '>', 0)
       .onSnapshot((snapshot) => {

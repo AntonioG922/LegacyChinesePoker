@@ -14,14 +14,14 @@ import {
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
-import {SuitAndRank} from '../components/Card';
+import { SuitAndRank } from '../components/Card';
 
 export default function GameScreen({ route, navigation }) {
-  const user = store.getState().userData.user;
   const [errorMessage, setErrorMessage] = useState('');
   const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
+  const user = store.getState().userData;
   const db = firebase.firestore();
 
   useEffect(() => {
@@ -144,7 +144,7 @@ export default function GameScreen({ route, navigation }) {
           playCards={playCards}
           pass={pass}
           style={styles.player1Hand} />
-        {Array.from({length: gameData.numberOfPlayers - 1}).map((value, index) => {
+        {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
           const playerIndex = (gameData.players[user.uid] + index) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer numberOfCards={gameData.hands[playerIndex].cards.length}

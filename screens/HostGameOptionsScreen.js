@@ -3,6 +3,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
+import store from '../redux/store';
 
 import {
   dealCards,
@@ -18,22 +19,12 @@ import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
-  const [userId, setUserId] = useState('');
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [useJoker, setUseJoker] = useState(true);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        // No user is signed in.
-      }
-    });
-  }, []);
+  const user = store.getState().userData;
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
@@ -43,7 +34,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       password: password,
       numberOfPlayers: numberOfPlayers,
       useJoker: useJoker,
-      players: {[userId]: 0},
+      players: { [user.uid]: 0 },
       playersLeftToJoin: numberOfPlayers - 1,
       hands: hands,
       lastPlayed: [],

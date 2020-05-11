@@ -5,10 +5,10 @@ const userDataSlice = createSlice({
   initialState: {},
   reducers: {
     setUserData(state, action) {
-      state.user = action.payload;
+      state = action.payload;
     },
     clearUserData(state) {
-      state.user = {}
+      state = {}
     }
   }
 });
@@ -27,10 +27,10 @@ const gameStateSlice = createSlice({
   },
   reducers: {
     setGameState: (state, action) => {
-      state.game = action.payload;
+      state = action.payload;
     },
     clearGameState: (state) => {
-      state.user = {
+      state = {
         gameName: '',
         numberOfPlayers: 0,
         players: {},
@@ -45,11 +45,13 @@ const gameStateSlice = createSlice({
 });
 
 export const { setUserData, clearUserData } = userDataSlice.actions;
+export const { setGameState, clearGameState } = gameStateSlice.actions;
 
 let store;
 export default store = configureStore({
   reducer: {
-    userData: userDataSlice.reducer
+    userData: userDataSlice.reducer,
+    gameState: gameStateSlice.reducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: false,
