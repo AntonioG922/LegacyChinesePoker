@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   lastPlayed: {
     position: 'absolute',
     width: 250,
-    top: -120,
+    top: -140,
   },
   lastPlayedCards: {
     paddingVertical: 10,
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   lastPlayedText: {
     fontSize: 24,
