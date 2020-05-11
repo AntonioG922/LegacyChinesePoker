@@ -2,13 +2,15 @@ import { configureStore, getDefaultMiddleware, createSlice } from "@reduxjs/tool
 
 const userDataSlice = createSlice({
   name: 'userData',
-  initialState: {},
+  initialState: {
+    user: {}
+  },
   reducers: {
     setUserData(state, action) {
-      state = action.payload;
+      state.user = action.payload;
     },
     clearUserData(state) {
-      state = {}
+      state.user = {}
     }
   }
 });

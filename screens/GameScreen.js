@@ -21,7 +21,7 @@ export default function GameScreen({ route, navigation }) {
   const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
-  const user = store.getState().userData;
+  const user = store.getState().userData.user;
   const db = firebase.firestore();
 
   useEffect(() => {
@@ -147,8 +147,8 @@ export default function GameScreen({ route, navigation }) {
           const playerIndex = (gameData.players[user.uid] + index) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer numberOfCards={gameData.hands[playerIndex].cards.length}
-                                         style={getStyle(index + 1)}
-                                         isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+            style={getStyle(index + 1)}
+            isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}
     </ImageBackground>
@@ -188,8 +188,8 @@ const styles = StyleSheet.create({
     top: '50%',
     width: '80%',
     transform: [
-        {rotateZ: '90deg'},
-        {translateX: '-50%'}
+      { rotateZ: '90deg' },
+      { translateX: '-50%' }
     ],
   },
   player3Hand: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     width: '80%',
     flexDirection: 'row',
     transform: [
-      {rotateZ: '180deg'},
+      { rotateZ: '180deg' },
     ],
   },
   player4Hand: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     top: '50%',
     width: '80%',
     transform: [
-      {rotateZ: '-90deg'},
+      { rotateZ: '-90deg' },
     ],
   }
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import firebase from 'firebase'
+import firebase from 'firebase';
+import store from '../redux/store';
 
 import { HeaderText, TextButton } from "../components/StyledText";
 import { TitledPage } from "../components/Template";
@@ -10,7 +11,7 @@ import Loader from '../components/Loader';
 
 export default function JoinGameMenuScreen({ navigation }) {
   const db = firebase.firestore();
-  const user = store.getState().userData;
+  const user = store.getState().userData.user;
 
   const [loading, setLoading] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {

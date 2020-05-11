@@ -24,7 +24,7 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [useJoker, setUseJoker] = useState(true);
   const [loading, setLoading] = useState(false);
-  const user = store.getState().userData;
+  const user = store.getState().userData.user;
 
   function createGame(gameName, password, numberOfPlayers, useJoker) {
     setLoading(true);
