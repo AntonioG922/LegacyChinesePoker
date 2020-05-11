@@ -14,10 +14,10 @@ import {
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
-import {SuitAndRank} from '../components/Card';
+import { SuitAndRank } from '../components/Card';
 
 export default function GameScreen({ route, navigation }) {
-  const user = store.getState().userData.user;
+  const user = store.getState().userData;
   const [errorMessage, setErrorMessage] = useState('');
   const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
@@ -176,8 +176,8 @@ const styles = StyleSheet.create({
     top: '50%',
     width: '80%',
     transform: [
-        {rotateZ: '90deg'},
-        {translateX: '-50%'}
+      { rotateZ: '90deg' },
+      { translateX: '-50%' }
     ],
   },
   player3Hand: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     width: '80%',
     flexDirection: 'row',
     transform: [
-      {rotateZ: '180deg'},
+      { rotateZ: '180deg' },
     ],
   },
   player4Hand: {
@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
     top: '50%',
     width: '80%',
     transform: [
-      {rotateZ: '-90deg'},
-      {translateX: '0%'}
+      { rotateZ: '-90deg' },
+      { translateX: '0%' }
     ],
   }
 
