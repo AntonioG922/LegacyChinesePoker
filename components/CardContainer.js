@@ -15,8 +15,8 @@ export function UserCardContainer({ cards, errorMessage, errorCards, playerIndex
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
       </View>
       <View style={styles.actionsContainer}>
-        <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
         <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
+        <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
       </View>
       <View style={styles.cardContainer}>
         {sortCards(cards).map((rank, index) => (
