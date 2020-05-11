@@ -115,6 +115,18 @@ export default function GameScreen({ route, navigation }) {
     return true;
   }
 
+  function getStyle(index) {
+    switch (index) {
+      case 2:
+        return styles.player2Hand;
+      case 3:
+        return styles.player3Hand;
+      case 4:
+      default:
+        return styles.player4Hand;
+    }
+  }
+
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
@@ -136,7 +148,7 @@ export default function GameScreen({ route, navigation }) {
           const playerIndex = (gameData.players[user.uid] + index) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer numberOfCards={gameData.hands[playerIndex].cards.length}
-                                         style={styles.playerHands[index + 1]}
+                                         style={getStyle(index + 1)}
                                          isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}
@@ -167,41 +179,39 @@ const styles = StyleSheet.create({
     ],
     alignItems: 'center',
   },
-  playerHands: [
-    {
-      position: 'absolute',
-      left: -110,
-      top: '50%',
-      width: '80%',
-      transform: [
-        {rotateZ: '90deg'},
-        {translateX: '-50%'}
-      ],
-    },
-    {
-      position: 'absolute',
-      top: 55,
-      right: '5%',
-      width: '80%',
-      flexDirection: 'row',
-      transform: [
-        {rotateZ: '180deg'},
-      ],
-    },
-    {
-      position: 'absolute',
-      right: -110,
-      top: '50%',
-      width: '80%',
-      transform: [
-        {rotateZ: '-90deg'},
-      ],
-    }
-  ],
   player1Hand: {
     bottom: 40,
     width: '80%'
   },
+  player2Hand: {
+    position: 'absolute',
+    left: -110,
+    top: '50%',
+    width: '80%',
+    transform: [
+        {rotateZ: '90deg'},
+        {translateX: '-50%'}
+    ],
+  },
+  player3Hand: {
+    position: 'absolute',
+    top: 55,
+    right: '5%',
+    width: '80%',
+    flexDirection: 'row',
+    transform: [
+      {rotateZ: '180deg'},
+    ],
+  },
+  player4Hand: {
+    position: 'absolute',
+    right: -110,
+    top: '50%',
+    width: '80%',
+    transform: [
+      {rotateZ: '-90deg'},
+    ],
+  }
 
 });
 
