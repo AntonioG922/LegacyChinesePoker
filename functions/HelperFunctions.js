@@ -1,6 +1,6 @@
 const NUMBER_OF_CARDS = 52;
-const STANDARD_DECK = Array.from({length: NUMBER_OF_CARDS}, (v, i) => i + 1);
-const JOKER_DECK = Array.from({length: NUMBER_OF_CARDS + 1}, (v, i) => i + 1);
+const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
+const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
 export const SUITS = {
   CLUB: 'CLUB',
   DIAMOND: 'DIAMOND',
@@ -51,7 +51,7 @@ export function getCardInfo(rank) {
 }
 
 export function getHandType(cardRanks) {
-  const cards = cardRanks.sort((a, b) => a-b).map((rank) => getCardInfo(rank));
+  const cards = cardRanks.sort((a, b) => a - b).map((rank) => getCardInfo(rank));
 
   switch (cards.length) {
     case 0:
@@ -81,9 +81,9 @@ export function getHandType(cardRanks) {
       // Straight
       const startingIndex = ORDERED_RANKS.indexOf(cards[0].number);
       if (ORDERED_RANKS.indexOf(cards[1].number) === startingIndex + 1 &&
-          ORDERED_RANKS.indexOf(cards[2].number) === startingIndex + 2 &&
-          ORDERED_RANKS.indexOf(cards[3].number) === startingIndex + 3 &&
-          ORDERED_RANKS.indexOf(cards[4].number) === startingIndex + 4) {
+        ORDERED_RANKS.indexOf(cards[2].number) === startingIndex + 2 &&
+        ORDERED_RANKS.indexOf(cards[3].number) === startingIndex + 3 &&
+        ORDERED_RANKS.indexOf(cards[4].number) === startingIndex + 4) {
         if (cards[0].suit === cards[1].suit && cards[0].suit === cards[2].suit && cards[0].suit === cards[3].suit && cards[0].suit === cards[4].suit)
           return HAND_TYPES.STRAIGHT_FLUSH;
         return HAND_TYPES.STRAIGHT;
@@ -92,19 +92,19 @@ export function getHandType(cardRanks) {
       return HAND_TYPES.INVALID;
     case 13:
       if (cards.findIndex((card) => card.number === RANKS.TWO) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.THREE) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.FOUR) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.FIVE) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.SIX) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.SEVEN) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.EIGHT) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.NINE) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.TEN) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.JACK) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.QUEEN) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.KING) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.ACE) !== -1 &&
-          cards.findIndex((card) => card.number === RANKS.TWO))
+        cards.findIndex((card) => card.number === RANKS.THREE) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.FOUR) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.FIVE) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.SIX) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.SEVEN) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.EIGHT) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.NINE) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.TEN) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.JACK) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.QUEEN) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.KING) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.ACE) !== -1 &&
+        cards.findIndex((card) => card.number === RANKS.TWO))
         return HAND_TYPES.UNION;
       else return HAND_TYPES.INVALID;
   }
@@ -127,7 +127,7 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
     case HAND_TYPES.STRAIGHT_FLUSH:
       return getHighestCard(attemptedPlay) > getHighestCard(lastPlayedHand);
     case HAND_TYPES.FULL_HOUSE:
-      return lastPlayedHand.length === 0 ? true : attemptedPlay.sort((a, b) => a-b)[2] > lastPlayedHand.sort((a, b) => a-b)[2];
+      return lastPlayedHand.length === 0 ? true : attemptedPlay.sort((a, b) => a - b)[2] > lastPlayedHand.sort((a, b) => a - b)[2];
     case HAND_TYPES.START_OF_GAME:
     case HAND_TYPES.DRAGON:
       return true;
@@ -136,8 +136,17 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
   }
 }
 
-export function getNextPlayer(hands, currentPlayerIndex) {
+export function getNextEmptyHandIndex(hands, players, currentPlayerTurnIndex, numberOfPlayers, uid) {
+  let currentIndex = (currentPlayerTurnIndex + 1) % numberOfPlayers;
+  let playersCycled = 1;
+  while (hands[currentIndex].cards.length === 0
+    && currentIndex != players[uid]
+    && playersCycled != numberOfPlayers) {
 
+    currentIndex++;
+    playersCycled++;
+  }
+  return currentIndex;
 }
 
 function getHighestCard(cards) {
@@ -157,11 +166,12 @@ export function findStartingPlayer(hands) {
 export function dealCards(numberOfPlayers = 4, useJoker) {
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
-  return Array.from({length: numberOfPlayers},(x, i) => {
-        return {
-          player: i,
-          cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers)
-        }});
+  return Array.from({ length: numberOfPlayers }, (x, i) => {
+    return {
+      player: i,
+      cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers)
+    }
+  });
 }
 
 function shuffle(arr) {
