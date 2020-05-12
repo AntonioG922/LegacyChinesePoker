@@ -16,7 +16,7 @@ export function TextButton(props) {
 }
 
 export function ContainedButton(props) {
-  return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.containedButtonText, { fontSize: 32 }, props.labelStyle]} />;
+  return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.noShadow, styles.containedButtonText, { fontSize: 32 }, props.labelStyle]} />;
 }
 
 export function FlatTextInput(props) {
@@ -57,9 +57,6 @@ const styles = StyleSheet.create({
   styledText: {
     fontFamily: 'gang-of-three',
     color: 'rgb(217, 56, 27)',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 2,
   },
   containedButtonText: {
     color: '#ddd'

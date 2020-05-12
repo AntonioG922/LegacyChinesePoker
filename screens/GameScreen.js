@@ -149,6 +149,7 @@ export default function GameScreen({ route, navigation }) {
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay}
+        currentPlayer={gameData.currentPlayerTurnIndex}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
