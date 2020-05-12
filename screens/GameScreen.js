@@ -14,7 +14,21 @@ import {
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
-import { SuitAndRank } from '../components/Card';
+
+const AVATARS = [
+    require('../assets/images/avatars/dog.png'),
+    require('../assets/images/avatars/dragon.png'),
+    require('../assets/images/avatars/goat.png'),
+    require('../assets/images/avatars/horse.png'),
+    require('../assets/images/avatars/monkey.png'),
+    require('../assets/images/avatars/ox.png'),
+    require('../assets/images/avatars/pig.png'),
+    require('../assets/images/avatars/rabbit.png'),
+    require('../assets/images/avatars/rat.png'),
+    require('../assets/images/avatars/rooster.png'),
+    require('../assets/images/avatars/snake.png'),
+    require('../assets/images/avatars/tiger.png'),
+];
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -23,6 +37,7 @@ export default function GameScreen({ route, navigation }) {
   const [gameData, setGameData] = useState(route.params);
   const user = store.getState().userData.user;
   const db = firebase.firestore();
+  let activeAvatars = [-1];
 
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
@@ -127,6 +142,19 @@ export default function GameScreen({ route, navigation }) {
     }
   }
 
+  function getAvatar() {
+    let index = -1;
+    while (activeAvatars.includes(index)) {
+      index = Math.floor(Math.random() * (AVATARS.length));
+    }
+    activeAvatars.push(index);
+    return AVATARS[index];
+  }
+
+  function getAvatarRotation(index) {
+    return (270 - 90 * index) + 'deg';
+  }
+
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
@@ -139,6 +167,7 @@ export default function GameScreen({ route, navigation }) {
           errorMessage={errorMessage}
           errorCards={errorCards}
           isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
+          avatarImage={getAvatar()}
           playCards={playCards}
           pass={pass}
           style={styles.player1Hand} />
@@ -146,7 +175,9 @@ export default function GameScreen({ route, navigation }) {
           const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
-            style={getStyle(index + 2)}
+            style={[styles.opposingPlayerHand, getStyle(index + 2)]}
+            avatarImage={getAvatar(index)}
+            avatarStyling={{transform: [{rotateZ: getAvatarRotation(index)}]}}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}
@@ -181,31 +212,30 @@ const styles = StyleSheet.create({
     bottom: 40,
     width: '80%'
   },
-  player2Hand: {
+  opposingPlayerHand: {
     position: 'absolute',
-    left: -110,
+    width: '40%',
+  },
+  player2Hand: {
+    left: -30,
     top: '50%',
-    width: '80%',
     transform: [
       { rotateZ: '90deg' },
       { translateX: '-50%' }
     ],
   },
   player3Hand: {
-    position: 'absolute',
     top: 55,
-    right: '5%',
-    width: '80%',
+    right: '50%',
     flexDirection: 'row',
     transform: [
       { rotateZ: '180deg' },
+      { translateX: '-100%' }
     ],
   },
   player4Hand: {
-    position: 'absolute',
-    right: -110,
+    right: -30,
     top: '50%',
-    width: '80%',
     transform: [
       { rotateZ: '-90deg' },
     ],

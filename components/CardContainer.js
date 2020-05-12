@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 
 import { ContainedButton } from './StyledText'
 import { Card, CardBack, SuitAndRank } from './Card'
 import { HeaderText } from './StyledText';
 
-export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, style, playCards, pass }) {
+export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
-      {isCurrentPlayer && <View style={[styles.currentPlayerChip, {bottom: 75, left: -10}]} />}
+      <Image source={avatarImage} style={[styles.avatar, {bottom: 70, right: -10}, isCurrentPlayer && styles.currentPlayerAvatar]} />
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
@@ -44,10 +44,10 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
   }
 }
 
-export function FaceDownCardsContainer({ numberOfCards, style, isCurrentPlayer }) {
+export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCards, style, isCurrentPlayer }) {
   return (
     <View style={style}>
-      {isCurrentPlayer && <View style={styles.currentPlayerChip} />}
+      {avatarImage && <Image source={avatarImage} style={[styles.avatar, isCurrentPlayer && styles.currentPlayerAvatar, avatarStyling]} />}
       {Array.from({ length: numberOfCards }, (v, i) => i).map(index =>
         <CardBack key={index} style={[{ borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%` }]} />)}
     </View>
@@ -108,6 +108,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  avatar: {
+    position: 'absolute',
+    right: -20,
+    bottom: 20,
+    width: 30,
+    height: 30,
+  },
+  currentPlayerAvatar: {
+    width: 40,
+    height: 40,
   },
   currentPlayerChip: {
     width: 20,
