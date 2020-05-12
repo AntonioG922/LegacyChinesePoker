@@ -108,11 +108,12 @@ export default function GameScreen({ route, navigation }) {
       setErrorCards([getLowestCard(currentHand)]);
       return true;
     }
-    if (gameData.lastPlayerToPlay === user.displayName) {
+    //REMOVE FOR PROD> ALLOWS TESTER TO PASS
+    /* if (gameData.lastPlayerToPlay === user.displayName) {
       setErrorMessage('Must start a new hand');
       setErrorCards([]);
       return true;
-    }
+    } */
     db.collection('CustomGames').doc(gameData.gameName).update({
       currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
