@@ -10,7 +10,7 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
-      <Image source={avatarImage} style={[styles.avatar, {bottom: 70, right: -10}, isCurrentPlayer && styles.currentPlayerAvatar]} />
+      <Image source={avatarImage} style={[styles.avatar, {bottom: 60, right: -20}, isCurrentPlayer && styles.currentPlayerAvatar]} />
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
   },
   avatar: {
     position: 'absolute',
-    right: -20,
-    bottom: 20,
+    right: -40,
+    bottom: 10,
     width: 30,
     height: 30,
   },
   currentPlayerAvatar: {
-    width: 40,
-    height: 40,
+    width: 45,
+    height: 45,
   },
   currentPlayerChip: {
     width: 20,

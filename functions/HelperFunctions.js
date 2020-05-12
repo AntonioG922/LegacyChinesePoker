@@ -34,8 +34,55 @@ export const HAND_TYPES = {
   UNION: 'UNION',
   DRAGON: 'DRAGON',
 };
+export const AVATARS = {
+  DOG: 'DOG',
+  DRAGON: 'DRAGON',
+  GOAT: 'GOAT',
+  HORSE: 'HORSE',
+  MONKEY: 'MONKEY',
+  OX: 'OX',
+  PIG: 'PIG',
+  RABBIT: 'RABBIT',
+  RAT: 'RAT',
+  ROOSTER: 'ROOSTER',
+  SNAKE: 'SNAKE',
+  TIGER: 'TIGER',
+};
+const AVATAR_IMAGES = {
+  DOG: require('../assets/images/avatars/dog.png'),
+  DRAGON: require('../assets/images/avatars/dragon.png'),
+  GOAT: require('../assets/images/avatars/goat.png'),
+  HORSE: require('../assets/images/avatars/horse.png'),
+  MONKEY: require('../assets/images/avatars/monkey.png'),
+  OX: require('../assets/images/avatars/ox.png'),
+  PIG: require('../assets/images/avatars/pig.png'),
+  RABBIT: require('../assets/images/avatars/rabbit.png'),
+  RAT: require('../assets/images/avatars/rat.png'),
+  ROOSTER: require('../assets/images/avatars/rooster.png'),
+  SNAKE: require('../assets/images/avatars/snake.png'),
+  TIGER: require('../assets/images/avatars/tiger.png'),
+};
 const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
 const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
+const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, AVATARS.MONKEY, AVATARS.OX, AVATARS.PIG, AVATARS.RABBIT, AVATARS.RAT, AVATARS.ROOSTER, AVATARS.SNAKE, AVATARS.TIGER];
+
+export function getRandomAvatars(numAvatars) {
+  let avatars = [];
+
+  Array.from({length: numAvatars}).map(() => {
+    let index = Math.floor(Math.random() * (AVATAR_LIST.length));
+    while (avatars.includes(index)) {
+      index = Math.floor(Math.random() * (AVATAR_LIST.length));
+    }
+    avatars.push(index);
+  });
+
+  return avatars.map((avatar) => AVATAR_LIST[avatar]);
+}
+
+export function getAvatarImage(avatar) {
+  return AVATAR_IMAGES[avatar];
+}
 
 export function getCardInfo(rank) {
   let cardInfo = { suit: '', number: '', color: 'black' };
@@ -164,12 +211,14 @@ export function findStartingPlayer(hands) {
 }
 
 export function dealCards(numberOfPlayers = 4, useJoker) {
+  const avatars = getRandomAvatars(numberOfPlayers);
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
   return Array.from({ length: numberOfPlayers }, (x, i) => {
     return {
       player: i,
-      cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers)
+      cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers),
+      avatar: avatars[i]
     }
   });
 }

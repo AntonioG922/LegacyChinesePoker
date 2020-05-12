@@ -7,7 +7,7 @@ import store from '../redux/store';
 
 import {
   dealCards,
-  findStartingPlayer,
+  findStartingPlayer, getRandomAvatars,
   HAND_TYPES
 } from '../functions/HelperFunctions';
 

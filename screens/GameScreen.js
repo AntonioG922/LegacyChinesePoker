@@ -10,26 +10,12 @@ import {
   UserCardContainer
 } from '../components/CardContainer';
 import {
+  getAvatarImage,
   getHandType, getLowestCard,
   getNextEmptyHandIndex,
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
-
-const AVATARS = [
-    require('../assets/images/avatars/dog.png'),
-    require('../assets/images/avatars/dragon.png'),
-    require('../assets/images/avatars/goat.png'),
-    require('../assets/images/avatars/horse.png'),
-    require('../assets/images/avatars/monkey.png'),
-    require('../assets/images/avatars/ox.png'),
-    require('../assets/images/avatars/pig.png'),
-    require('../assets/images/avatars/rabbit.png'),
-    require('../assets/images/avatars/rat.png'),
-    require('../assets/images/avatars/rooster.png'),
-    require('../assets/images/avatars/snake.png'),
-    require('../assets/images/avatars/tiger.png'),
-];
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,7 +24,6 @@ export default function GameScreen({ route, navigation }) {
   const [gameData, setGameData] = useState(route.params);
   const user = store.getState().userData.user;
   const db = firebase.firestore();
-  let activeAvatars = [-1];
 
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
@@ -93,7 +78,6 @@ export default function GameScreen({ route, navigation }) {
       return false;
     }
 
-
     const player = gameData.currentPlayerTurnIndex;
     let hands = gameData.hands;
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
@@ -104,9 +88,9 @@ export default function GameScreen({ route, navigation }) {
       lastPlayerToPlay: user.displayName,
       hands: hands,
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      players: {
-        [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
-      },
+      // players: {
+      //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
+      // },
       currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
     });
@@ -132,9 +116,9 @@ export default function GameScreen({ route, navigation }) {
     db.collection('CustomGames').doc(gameData.gameName).update({
       currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      players: {
-        [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
-      },
+      // players: {
+      //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
+      // },
 
     });
 
@@ -155,15 +139,6 @@ export default function GameScreen({ route, navigation }) {
     }
   }
 
-  function getAvatar() {
-    let index = -1;
-    while (activeAvatars.includes(index)) {
-      index = Math.floor(Math.random() * (AVATARS.length));
-    }
-    activeAvatars.push(index);
-    return AVATARS[index];
-  }
-
   function getAvatarRotation(index) {
     return (270 - 90 * index) + 'deg';
   }
@@ -180,7 +155,7 @@ export default function GameScreen({ route, navigation }) {
           errorMessage={errorMessage}
           errorCards={errorCards}
           isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
-          avatarImage={getAvatar()}
+          avatarImage={getAvatarImage(gameData.hands[gameData.players[user.uid]].avatar)}
           playCards={playCards}
           pass={pass}
           style={styles.player1Hand} />
@@ -189,7 +164,7 @@ export default function GameScreen({ route, navigation }) {
 
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
             style={[styles.opposingPlayerHand, getStyle(index + 2)]}
-            avatarImage={getAvatar(index)}
+            avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
             avatarStyling={{transform: [{rotateZ: getAvatarRotation(index)}]}}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
