@@ -146,7 +146,7 @@ export default function GameScreen({ route, navigation }) {
           const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
-            style={getStyle(index + 1)}
+            style={getStyle(index + 2)}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}
