@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, View } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
 
@@ -11,6 +11,7 @@ import {
 } from '../components/CardContainer';
 import {
   getHandType, getLowestCard,
+  getNextEmptyHandIndex,
   HAND_TYPES,
   isBetterHand
 } from '../functions/HelperFunctions';
@@ -32,14 +33,8 @@ export default function GameScreen({ route, navigation }) {
   }, []);
 
   useEffect(() => {
-    if (gameStarted) {
-      //****** Add in game logic here (playing cards, opponents hands shrinking, etc.) *******/
-    } else {
-      if (!gameData.playersLeftToJoin) {
-        setGameStarted(true);
-        //***** Add game start logic here (deal/render cards, show other players, etc.) ******/
-
-      }
+    if (!gameStarted && gameData.playersLeftToJoin === 0) {
+      setGameStarted(true);
     }
   }, [gameData]);
 
@@ -54,6 +49,10 @@ export default function GameScreen({ route, navigation }) {
       setGameStarted(true);
     });
   }, [navigation]);
+
+  function getNextEmptyHandIndexLocal() {
+    return getNextEmptyHandIndex(gameData.hands, gameData.players, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers, user.uid);
+  }
 
   function playCards(selectedCards) {
     setErrorMessage('');
@@ -91,9 +90,9 @@ export default function GameScreen({ route, navigation }) {
       hands: hands,
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
       players: {
-        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+        [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       },
-      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
+      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       currentHandType: getHandType(selectedCards),
     });
 
@@ -102,10 +101,10 @@ export default function GameScreen({ route, navigation }) {
 
   function pass() {
     db.collection('CustomGames').doc(gameData.gameName).update({
-      currentPlayerTurnIndex: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers),
+      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
       players: {
-        [user.uid]: (gameData.currentPlayerTurnIndex + 1) % (gameData.numberOfPlayers)
+        [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       },
 
     });
