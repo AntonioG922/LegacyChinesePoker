@@ -5,18 +5,19 @@ import { ContainedButton } from './StyledText'
 import { Card, CardBack, SuitAndRank } from './Card'
 import { HeaderText } from './StyledText';
 
-export function UserCardContainer({ cards, errorMessage, errorCards, playerIndex, currentPlayerTurnIndex, style, playCards, pass }) {
+export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
+      {isCurrentPlayer && <View style={[styles.currentPlayerChip, {bottom: 75, left: -10}]} />}
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
       </View>
       <View style={styles.actionsContainer}>
-        <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={pass}>Pass</ContainedButton>
-        <ContainedButton style={styles.actionButton} disabled={playerIndex !== currentPlayerTurnIndex} onPress={playSelectedCards}>Play</ContainedButton>
+        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>
+        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>
       </View>
       <View style={styles.cardContainer}>
         {sortCards(cards).map((rank, index) => (
@@ -28,7 +29,7 @@ export function UserCardContainer({ cards, errorMessage, errorCards, playerIndex
   );
 
   function playSelectedCards() {
-    if (selectedCards.length > 0 || playerIndex !== currentPlayerTurnIndex) {
+    if (selectedCards.length > 0) {
       if (playCards(selectedCards))
         setSelectedCards([]);
     }
@@ -46,7 +47,7 @@ export function UserCardContainer({ cards, errorMessage, errorCards, playerIndex
 export function FaceDownCardsContainer({ numberOfCards, style, isCurrentPlayer }) {
   return (
     <View style={style}>
-      {isCurrentPlayer && <View style={styles.currentPlayerChip}></View>}
+      {isCurrentPlayer && <View style={styles.currentPlayerChip} />}
       {Array.from({ length: numberOfCards }, (v, i) => i).map(index =>
         <CardBack key={index} style={[{ borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%` }]} />)}
     </View>

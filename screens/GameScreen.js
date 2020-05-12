@@ -138,8 +138,7 @@ export default function GameScreen({ route, navigation }) {
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
           errorMessage={errorMessage}
           errorCards={errorCards}
-          playerIndex={gameData.players[user.uid]}
-          currentPlayerTurnIndex={gameData.currentPlayerTurnIndex}
+          isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
           playCards={playCards}
           pass={pass}
           style={styles.player1Hand} />
@@ -147,7 +146,7 @@ export default function GameScreen({ route, navigation }) {
           const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
 
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
-            style={getStyle(index + 1)}
+            style={getStyle(index + 2)}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}
