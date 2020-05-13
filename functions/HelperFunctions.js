@@ -157,6 +157,21 @@ export function getHandType(cardRanks) {
   }
 }
 
+export function isLegalPlay(playedHandType, currentHandType) {
+  if (currentHandType === HAND_TYPES.START_OF_GAME)
+    return true;
+
+  switch (playedHandType) {
+    case HAND_TYPES.STRAIGHT_FLUSH:
+      return currentHandType === HAND_TYPES.STRAIGHT_FLUSH || currentHandType === HAND_TYPES.STRAIGHT;
+    case HAND_TYPES.UNION:
+    case HAND_TYPES.DRAGON:
+      return true;
+    default:
+      return currentHandType === playedHandType;
+  }
+}
+
 /**
  * Determines an one hand is better than another.
  * Assumes that both hands are valid and of matching hand type.
@@ -165,6 +180,9 @@ export function getHandType(cardRanks) {
  * @return {boolean}
  */
 export function isBetterHand(attemptedPlay, lastPlayedHand) {
+  if (getHandType(attemptedPlay) === HAND_TYPES.UNION && getHandType(lastPlayedHand) !== HAND_TYPES.UNION)
+    return true;
+
   switch (getHandType(lastPlayedHand)) {
     case HAND_TYPES.SINGLE:
     case HAND_TYPES.PAIR:

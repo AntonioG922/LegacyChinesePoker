@@ -14,7 +14,7 @@ import {
   getHandType, getLowestCard,
   getNextEmptyHandIndex,
   HAND_TYPES,
-  isBetterHand
+  isBetterHand, isLegalPlay
 } from '../functions/HelperFunctions';
 
 export default function GameScreen({ route, navigation }) {
@@ -70,7 +70,7 @@ export default function GameScreen({ route, navigation }) {
       setErrorMessage('Hand must include ');
       setErrorCards([getLowestCard(currentHand)]);
       return false;
-    } else if (!everyonePassed && !isFirstPlayOfGame && playedHandType !== gameData.currentHandType) {
+    } else if (!everyonePassed && !isLegalPlay(playedHandType, gameData.currentHandType)) {
       setErrorMessage('Must play ' + gameData.currentHandType);
       return false;
     } else if (!everyonePassed && !isBetterHand(selectedCards, gameData.lastPlayed)) {
@@ -92,7 +92,7 @@ export default function GameScreen({ route, navigation }) {
       //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       // },
       currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
-      currentHandType: getHandType(selectedCards),
+      currentHandType: playedHandType,
     });
 
     return true;
@@ -149,7 +149,7 @@ export default function GameScreen({ route, navigation }) {
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay}
-        currentPlayer={gameData.currentPlayerTurnIndex}
+        avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}

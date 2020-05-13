@@ -54,7 +54,7 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCar
   )
 }
 
-export function PlayedCardsContainer({ cards, currentPlayer, lastPlayedCards, lastPlayerToPlay, style }) {
+export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style }) {
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
 
@@ -64,7 +64,10 @@ export function PlayedCardsContainer({ cards, currentPlayer, lastPlayedCards, la
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
         <View style={styles.lastPlayedCards}>
           {lastPlayedCards.length === 0 ?
-            <HeaderText>Player {currentPlayer} starts</HeaderText> :
+              <View style={styles.suitAndRank}>
+                <Image source={avatarImage} style={{width: 20, height: 20, marginRight: 5}} />
+                <HeaderText> plays first</HeaderText>
+              </View> :
             lastPlayedCards.map((card) =>
             <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
           )}
@@ -175,6 +178,7 @@ const styles = StyleSheet.create({
   suitAndRank: {
     flexDirection: 'row',
     textAlign: 'center',
+    alignItems: 'center',
     paddingHorizontal: 8,
   },
   suitAndRankText: {
