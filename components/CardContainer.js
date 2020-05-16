@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import { Card, CardBack, SuitAndRank } from './Card'
+import {Card, CardBack, NumberedCard, SuitAndRank, SuitedCard} from './Card'
 import { HeaderText } from './StyledText';
+import {
+  getCardInfo,
+  getRank,
+  JOKER,
+  ORDERED_RANKS, ORDERED_SUITS, RANKS,
+  sortCards, SUITS
+} from '../functions/HelperFunctions';
 
 export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
+  const [selectingJoker, setSelectingJoker] = useState(false);
+  const [jokerValue, setJokerValue] = useState(0);
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
@@ -16,9 +25,10 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
       </View>
       <View style={styles.actionsContainer}>
-        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>
-        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>
+        {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
+        {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
       </View>
+      {selectingJoker && <JokerSelector setJoker={setJoker} />}
       <View style={styles.cardContainer}>
         {sortCards(cards).map((rank, index) => (
           <Card key={rank} rank={rank} toggleSelected={toggleSelected}
@@ -30,7 +40,9 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
 
   function playSelectedCards() {
     if (selectedCards.length > 0) {
-      if (playCards(selectedCards))
+      if (selectedCards.includes(JOKER)) {
+        setSelectingJoker(true);
+      } else if (playCards(selectedCards))
         setSelectedCards([]);
     }
   }
@@ -42,6 +54,40 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
       setSelectedCards(selectedCards.concat(rank));
     }
   }
+
+  function setJoker(rank) {
+    setSelectedCards(selectedCards.filter((rank) => rank !== JOKER).push(rank));
+    // Update joker in DB to be selected card
+    playSelectedCards();
+    setSelectingJoker(false);
+  }
+}
+
+function JokerSelector({setJoker}) {
+  const STATES = {
+    SUIT: 0,
+    RANK: 1
+  };
+  const [selectState, setSelectState] = useState(STATES.SUIT);
+  const [selectedSuit, setSelectedSuit] = useState(SUITS.SPADE);
+
+  function onSuitSelect(suit) {
+    setSelectedSuit(suit);
+    setSelectState(STATES.RANK);
+  }
+
+  function toggleSelected(rank) {
+    setJoker(rank);
+  }
+
+  return (
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        {selectState === STATES.SUIT && ORDERED_SUITS.map((suit, index) =>
+            <SuitedCard key={suit} suit={suit} onSelect={onSuitSelect} style={{ left: `${(100 / ORDERED_SUITS.length * (index + 1 / ORDERED_SUITS.length * index))}%` }} />)}
+        {selectState === STATES.RANK && ORDERED_RANKS.slice(0, -1).map((rank, index) =>
+            <Card key={rank} rank={getRank(rank, selectedSuit)} toggleSelected={toggleSelected} style={{ left: `${(100 / ORDERED_RANKS.length * (index + 1 / ORDERED_RANKS.length * index))}%` }} />)}
+      </View>
+  )
 }
 
 export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCards, style, isCurrentPlayer }) {
@@ -96,10 +142,6 @@ export function FanCardContainer(props) {
       ))}
     </View>
   )
-}
-
-function sortCards(cards) {
-  return cards.sort((a, b) => a - b);
 }
 
 const styles = StyleSheet.create({

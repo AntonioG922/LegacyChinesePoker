@@ -5,13 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { HeaderText } from "../components/StyledText";
 
-export default function Loader(props) {
-  const {
-    loading,
-    message,
-    ...attributes
-  } = props;
-
+export default function Loader({loading, message, navigation}) {
   return (
     <Modal
       transparent={true}
@@ -20,7 +14,7 @@ export default function Loader(props) {
       visible={loading}
       onRequestClose={() => loading = false}>
       <View style={styles.modalBackground}>
-        {props.navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} /></HeaderText>}
+        {navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => navigation.goBack()} /></HeaderText>}
         <HeaderText style={styles.loaderMessage}>{message}</HeaderText>
         <ActivityIndicator
           animating={loading}
