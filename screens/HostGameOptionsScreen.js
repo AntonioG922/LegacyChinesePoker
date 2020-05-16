@@ -42,6 +42,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       playedCards: [],
       currentPlayerTurnIndex: findStartingPlayer(hands),
       currentHandType: HAND_TYPES.START_OF_GAME,
+      places: [],
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {
