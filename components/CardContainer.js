@@ -26,7 +26,7 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
       {place >= 0
           ? <Place place={place} />
           : <View style={styles.actionsContainer}>
-            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass {place}</ContainedButton>}
+            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
             {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
           </View>}
       {selectingJoker && <JokerSelector setJoker={setJoker} />}

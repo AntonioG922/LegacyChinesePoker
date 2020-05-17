@@ -19,6 +19,7 @@ import { TitledPage } from '../components/Template';
 import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
+  const [errorMessage, setErrorMessage] = useState('');
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
@@ -26,7 +27,20 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
 
-  function createGame(gameName, password, numberOfPlayers, useJoker) {
+  async function gameExists(gameName) {
+    const gameRef = firebase.firestore().collection('CustomGames').doc(gameName);
+
+    return gameRef.get().then((docSnapshot) => docSnapshot.exists);
+  }
+
+  async function createGame(gameName, password, numberOfPlayers, useJoker) {
+    const exists = await gameExists(gameName);
+    if (exists) {
+      setErrorMessage(' Game ' + gameName + ' already exists');
+      return false;
+    }
+
+    setErrorMessage('');
     setLoading(true);
     const hands = dealCards(numberOfPlayers, useJoker);
     const gameData = {
@@ -58,6 +72,7 @@ export default function HostGameOptionsScreen({ navigation }) {
     <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
       <Loader loading={loading} message={'Creating Game'} />
       <View style={styles.form}>
+        <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
         <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
         <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
         <View style={styles.row}>
@@ -82,6 +97,9 @@ const styles = StyleSheet.create({
   },
   createButton: {
     marginTop: 50,
+  },
+  errorMessage: {
+    textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
