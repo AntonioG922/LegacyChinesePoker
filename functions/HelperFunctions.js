@@ -243,14 +243,14 @@ export function findStartingPlayer(hands) {
   return hands.findIndex((hand) => hand.cards.includes(lowestCard));
 }
 
-export function dealCards(numberOfPlayers = 4, useJoker) {
+export function dealCards(numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers, useJoker) {
   const avatars = getRandomAvatars(numberOfPlayers);
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
   return Array.from({ length: numberOfPlayers }, (x, i) => {
     return {
       player: i,
-      cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers),
+      cards: deck.splice(0, numberOfCards),
       avatar: avatars[i]
     }
   });

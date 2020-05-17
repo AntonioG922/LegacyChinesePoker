@@ -23,6 +23,7 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [gameName, setGameName] = useState('');
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
+  const [cardsPerPlayer, setCardsPerPlayer] = useState(13);
   const [useJoker, setUseJoker] = useState(true);
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
@@ -33,7 +34,7 @@ export default function HostGameOptionsScreen({ navigation }) {
     return gameRef.get().then((docSnapshot) => docSnapshot.exists);
   }
 
-  async function createGame(gameName, password, numberOfPlayers, useJoker) {
+  async function createGame() {
     const exists = await gameExists(gameName);
     if (exists) {
       setErrorMessage(' Game ' + gameName + ' already exists');
@@ -42,7 +43,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
     setErrorMessage('');
     setLoading(true);
-    const hands = dealCards(numberOfPlayers, useJoker);
+    const hands = dealCards(numberOfPlayers, cardsPerPlayer, useJoker);
     const gameData = {
       gameName: gameName,
       password: password,
@@ -82,11 +83,17 @@ export default function HostGameOptionsScreen({ navigation }) {
           <Button disabled={numberOfPlayers >= 5} onPress={() => setNumberOfPlayers(numberOfPlayers + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
         </View>
         <View style={styles.row}>
+          <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
+          <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+          <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
+          <Button disabled={cardsPerPlayer >= 20} onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
+        </View>
+        <View style={styles.row}>
           <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
           <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
         </View>
       </View>
-      <TextButton style={styles.createButton} onPress={() => createGame(gameName, password, numberOfPlayers, useJoker)} >Create Game</TextButton>
+      <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
     </TitledPage>
   );
 }
@@ -104,6 +111,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginVertical: 10,
   },
   rowText: {
