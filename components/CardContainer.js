@@ -2,11 +2,19 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import { Card, PlainCard, CardBack, SuitAndRank } from './Card'
+import { Card, CardBack, SuitAndRank, SuitedCard } from './Card'
 import { HeaderText } from './StyledText';
+import {
+  getRank,
+  JOKER,
+  ORDERED_RANKS, ORDERED_SUITS,
+  sortCards, SUITS
+} from '../functions/HelperFunctions';
 
-export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
+export function UserCardContainer({ cards, place, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
+  const [selectingJoker, setSelectingJoker] = useState(false);
+  const [jokerValue, setJokerValue] = useState(JOKER);
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
@@ -15,13 +23,16 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
       </View>
-      <View style={styles.actionsContainer}>
-        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>
-        <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>
-      </View>
+      {place >= 0
+        ? <Place place={place} />
+        : <View style={styles.actionsContainer}>
+          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
+          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
+        </View>}
+      {selectingJoker && <JokerSelector setJoker={setJoker} />}
       <View style={styles.cardContainer}>
         {sortCards(cards).map((rank, index) => (
-          <Card key={rank} rank={rank} toggleSelected={toggleSelected}
+          <Card key={rank} rank={rank === JOKER ? jokerValue : rank} toggleSelected={toggleSelected}
             style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
         ))}
       </View>
@@ -30,8 +41,11 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
 
   function playSelectedCards() {
     if (selectedCards.length > 0) {
-      if (playCards(selectedCards))
+      if (selectedCards.includes(JOKER) && jokerValue === JOKER) {
+        setSelectingJoker(true);
+      } else if (playCards(selectedCards))
         setSelectedCards([]);
+      setJokerValue(JOKER);
     }
   }
 
@@ -42,6 +56,52 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
       setSelectedCards(selectedCards.concat(rank));
     }
   }
+
+  function setJoker(rank) {
+    setJokerValue(rank);
+    setSelectedCards(selectedCards.filter((rank) => rank !== JOKER).push(rank));
+    // Update joker in DB to be selected card
+    playSelectedCards();
+    setSelectingJoker(false);
+  }
+}
+
+function JokerSelector({ setJoker }) {
+  const STATES = {
+    SUIT: 0,
+    RANK: 1
+  };
+  const [selectState, setSelectState] = useState(STATES.SUIT);
+  const [selectedSuit, setSelectedSuit] = useState(SUITS.SPADE);
+
+  function onSuitSelect(suit) {
+    setSelectedSuit(suit);
+    setSelectState(STATES.RANK);
+  }
+
+  function toggleSelected(rank) {
+    setJoker(rank);
+  }
+
+  return (
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      {selectState === STATES.SUIT && ORDERED_SUITS.map((suit, index) =>
+        <SuitedCard key={suit} suit={suit} onSelect={onSuitSelect} style={{ left: `${(100 / ORDERED_SUITS.length * (index + 1 / ORDERED_SUITS.length * index))}%` }} />)}
+      {selectState === STATES.RANK && ORDERED_RANKS.slice(0, -1).map((rank, index) =>
+        <Card key={rank} rank={getRank(rank, selectedSuit)} toggleSelected={toggleSelected} style={{ left: `${(100 / ORDERED_RANKS.length * (index + 1 / ORDERED_RANKS.length * index))}%` }} />)}
+    </View>
+  )
+}
+
+export function Place({ place }) {
+  const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
+
+  return (
+    <View style={styles.placeContainer}>
+      <HeaderText style={styles.place}>{place + 1}</HeaderText>
+      <HeaderText style={styles.placeSuffix}>{PLACE_SUFFIX[place]}</HeaderText>
+    </View>
+  )
 }
 
 export function PlainCardContainer({ cards, style }) {
@@ -106,10 +166,6 @@ export function FanCardContainer(props) {
       ))}
     </View>
   )
-}
-
-function sortCards(cards) {
-  return cards.sort((a, b) => a - b);
 }
 
 const styles = StyleSheet.create({
@@ -199,5 +255,24 @@ const styles = StyleSheet.create({
   },
   suitAndRankText: {
     fontSize: 18
-  }
+  },
+  placeContainer: {
+    position: 'absolute',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    width: '150%',
+    marginLeft: '-30%',
+    bottom: -50,
+    borderColor: 'black',
+    borderWidth: 2,
+  },
+  place: {
+    textAlign: 'center',
+    fontSize: 80
+  },
+  placeSuffix: {
+    textAlign: 'center',
+    fontSize: 48
+  },
 });

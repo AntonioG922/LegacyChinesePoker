@@ -4,8 +4,9 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icon
 
 import HowToPlaySection from '../components/HowToPlaySection';
 import { PlainCardContainer } from '../components/CardContainer';
-import { dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind, getUnion, getStraight, getStraightFlush, getFullHouse } from '../functions/HelperFunctions';
+import { dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind, getUnion, getStraight, getStraightFlush, getFullHouse, SUITS } from '../functions/HelperFunctions';
 import { HeaderText } from '../components/StyledText';
+import { Suit } from '../components/Card';
 
 export default function HowToPlayScreen({ navigation }) {
   const cardRankPair = getPair();
@@ -38,7 +39,7 @@ export default function HowToPlayScreen({ navigation }) {
           pageTitle={'Objective'}
           sectionText={'The goal of the game is to get rid of all your cards before your opponents do'}
         >
-          <PlainCardContainer cards={dealCards(4, false)[0].cards} section={1} style={{ width: '80%' }} />
+          <PlainCardContainer cards={dealCards(false)[0].cards} style={{ width: '80%' }} />
         </HowToPlaySection>
 
         <HowToPlaySection
@@ -101,13 +102,13 @@ export default function HowToPlayScreen({ navigation }) {
             <Text style={styles.iconText}>Suits also matter. Suits are ranked alphabetically</Text>
           </View>
           <View style={styles.suitIcons} >
-            <MaterialCommunityIcons name='cards-club' size={60} />
+            <Suit suit={SUITS.CLUB} size={60} />
             <MaterialCommunityIcons name='less-than' style={styles.iconText} />
-            <MaterialCommunityIcons name='cards-diamond' color={'red'} size={60} />
+            <Suit suit={SUITS.DIAMOND} size={60} />
             <MaterialCommunityIcons name='less-than' style={styles.iconText} />
-            <MaterialCommunityIcons name='cards-heart' color={'red'} size={60} />
+            <Suit suit={SUITS.HEART} size={60} />
             <MaterialCommunityIcons name='less-than' style={styles.iconText} />
-            <MaterialCommunityIcons name='cards-spade' size={60} />
+            <Suit suit={SUITS.SPADE} size={60} />
           </View>
           <View style={{ alignItems: 'center' }}>
             <View style={{ marginVertical: 50, flexDirection: 'row', width: 150, justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,11 +1,18 @@
 const NUMBER_OF_CARDS = 52;
 const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
 const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
+export const JOKER = NUMBER_OF_CARDS + 1;
 export const SUITS = {
   CLUB: 'CLUB',
   DIAMOND: 'DIAMOND',
   HEART: 'HEART',
   SPADE: 'SPADE',
+};
+export const SUIT_TO_COLOR_MAP = {
+  CLUB: 'black',
+  DIAMOND: 'red',
+  HEART: 'red',
+  SPADE: 'black',
 };
 export const RANKS = {
   THREE: '3',
@@ -62,8 +69,8 @@ const AVATAR_IMAGES = {
   SNAKE: require('../assets/images/avatars/snake.png'),
   TIGER: require('../assets/images/avatars/tiger.png'),
 };
-const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
-const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
+export const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
+export const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
 const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, AVATARS.MONKEY, AVATARS.OX, AVATARS.PIG, AVATARS.RABBIT, AVATARS.RAT, AVATARS.ROOSTER, AVATARS.SNAKE, AVATARS.TIGER];
 
 export function getRandomAvatars(numAvatars) {
@@ -95,6 +102,10 @@ export function getCardInfo(rank) {
     cardInfo.color = 'red';
   cardInfo.number = ORDERED_RANKS[Math.floor((rank - 1) / 4)];
   return cardInfo;
+}
+
+export function getRank(rank, suit) {
+  return ORDERED_RANKS.indexOf(rank) * 4 + ORDERED_SUITS.indexOf(suit) + 1;
 }
 
 export function getHandType(cardRanks) {
@@ -213,6 +224,10 @@ export function getNextEmptyHandIndex(hands, currentPlayerTurnIndex, numberOfPla
   return currentIndex;
 }
 
+export function sortCards(cards) {
+  return cards.sort((a, b) => a - b);
+}
+
 function getHighestCard(cards) {
   return Math.max(...[].concat(...cards));
 }
@@ -227,14 +242,14 @@ export function findStartingPlayer(hands) {
   return hands.findIndex((hand) => hand.cards.includes(lowestCard));
 }
 
-export function dealCards(numberOfPlayers = 4, useJoker) {
+export function dealCards(useJoker, numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers) {
   const avatars = getRandomAvatars(numberOfPlayers);
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
   return Array.from({ length: numberOfPlayers }, (x, i) => {
     return {
       player: i,
-      cards: deck.splice(0, NUMBER_OF_CARDS / numberOfPlayers),
+      cards: deck.splice(0, numberOfCards),
       avatar: avatars[i]
     }
   });

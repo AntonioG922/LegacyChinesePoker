@@ -81,8 +81,9 @@ export default function GameScreen({ route, navigation }) {
     const player = gameData.currentPlayerTurnIndex;
     let hands = gameData.hands;
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
+    const handIsEmpty = hands[player].cards.length === 0;
 
-    db.collection('CustomGames').doc(gameData.gameName).update({
+    const data = {
       playedCards: firebase.firestore.FieldValue.arrayUnion(...selectedCards),
       lastPlayed: selectedCards,
       lastPlayerToPlay: user.displayName,
@@ -91,9 +92,13 @@ export default function GameScreen({ route, navigation }) {
       // players: {
       //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       // },
-      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
+      // currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       currentHandType: playedHandType,
-    });
+    };
+    if (handIsEmpty)
+      data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+
+    db.collection('CustomGames').doc(gameData.gameName).update(data);
 
     return true;
   }
@@ -153,6 +158,7 @@ export default function GameScreen({ route, navigation }) {
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
+          place={gameData.places.indexOf(user.uid)}
           errorMessage={errorMessage}
           errorCards={errorCards}
           isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
