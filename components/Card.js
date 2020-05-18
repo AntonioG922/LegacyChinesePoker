@@ -1,7 +1,8 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableHighlight, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 import { getCardInfo, SUITS } from '../functions/HelperFunctions';
+import store from '../redux/store';
 
 const SUIT_TO_ICON_NAME_MAP = {
   [SUITS.CLUB]: 'cards-club',
@@ -13,13 +14,16 @@ const SUIT_TO_ICON_NAME_MAP = {
 export function Card({ rank, style, toggleSelected, played = false }) {
   // cards are positioned based off their center
   const maxOffset = 50;
-  const [verticalOffset, setVerticalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
-  const [horizontalOffset, setHorizontalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
-  const [rotation, setRotation] = useState(Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg');
+  const verticalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+  const horizontalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+  const rotation = Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg';
   const [selected, setSelected] = useState(false);
 
   return (
-    <TouchableHighlight underlayColor='#ddd' style={[styles.card, selected && styles.selected, style, played && [{ top: verticalOffset, left: horizontalOffset, transform: [{ rotateZ: rotation }] }]]} onPress={selectCard}>
+    <TouchableHighlight
+      underlayColor='#ddd'
+      style={[styles.card, selected && styles.selected, style, played && [{ top: verticalOffset, left: horizontalOffset, transform: [{ rotateZ: rotation }] }]]}
+      onPress={toggleSelected ? selectCard : null}>
       <View style={styles.cardWrapper}>
         <SuitAndRank cardNumber={rank} containerStyle={styles.upperIcon} numberStyle={styles.cardNumber} />
         <SuitAndRank cardNumber={rank} containerStyle={styles.bottomIcon} numberStyle={styles.cardNumber} />

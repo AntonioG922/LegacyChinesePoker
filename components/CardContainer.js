@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import { Card, CardBack, SuitAndRank } from './Card'
+import { Card, PlainCard, CardBack, SuitAndRank } from './Card'
 import { HeaderText } from './StyledText';
 
 export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
@@ -10,7 +10,7 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
-      <Image source={avatarImage} style={[styles.avatar, {bottom: 60, right: -20}, isCurrentPlayer && styles.currentPlayerAvatar]} />
+      <Image source={avatarImage} style={[styles.avatar, { bottom: 60, right: -20 }, isCurrentPlayer && styles.currentPlayerAvatar]} />
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
@@ -44,6 +44,16 @@ export function UserCardContainer({ cards, errorMessage, errorCards, isCurrentPl
   }
 }
 
+export function PlainCardContainer({ cards, style }) {
+  return (
+    <View key={cards} style={[styles.plainContainer, { left: 37.5 }, style]}>
+      {sortCards(cards).map((rank, index) => (
+        <Card key={rank} rank={rank} style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
+      ))}
+    </View>
+  )
+}
+
 export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCards, style, isCurrentPlayer }) {
   return (
     <View style={style}>
@@ -64,13 +74,13 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
         <View style={styles.lastPlayedCards}>
           {lastPlayedCards.length === 0 ?
-              <View style={styles.suitAndRank}>
-                <Image source={avatarImage} style={{width: 20, height: 20, marginRight: 5}} />
-                <HeaderText> plays first</HeaderText>
-              </View> :
+            <View style={styles.suitAndRank}>
+              <Image source={avatarImage} style={{ width: 20, height: 20, marginRight: 5 }} />
+              <HeaderText> plays first</HeaderText>
+            </View> :
             lastPlayedCards.map((card) =>
-            <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
-          )}
+              <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
+            )}
         </View>
       </View>
       {cards.map((rank) => {
@@ -108,6 +118,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     flexDirection: 'column',
+  },
+  plainContainer: {
+  },
+  animatedContainer: {
+    justifyContent: 'center',
+    flexDirection: 'column'
   },
   errorMessage: {
     alignItems: 'center',
