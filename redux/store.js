@@ -15,6 +15,16 @@ const userDataSlice = createSlice({
   }
 });
 
+const howToPlaySectionSlice = createSlice({
+  name: 'howToPlaySection',
+  initialState: 0,
+  reducers: {
+    setHowToPlaySection(state, action) {
+      return state = action.payload;
+    }
+  }
+})
+
 const gameStateSlice = createSlice({
   name: 'gameState',
   initialState: {
@@ -48,12 +58,14 @@ const gameStateSlice = createSlice({
 
 export const { setUserData, clearUserData } = userDataSlice.actions;
 export const { setGameState, clearGameState } = gameStateSlice.actions;
+export const { setHowToPlaySection } = howToPlaySectionSlice.actions;
 
 let store;
 export default store = configureStore({
   reducer: {
     userData: userDataSlice.reducer,
-    gameState: gameStateSlice.reducer
+    gameState: gameStateSlice.reducer,
+    howToPlaySection: howToPlaySectionSlice.reducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: false,

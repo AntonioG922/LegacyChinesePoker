@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { StyleSheet, View, ScrollView, Text } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { StyleSheet, View, ScrollView, Text, useWindowDimensions, Animated } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 import HowToPlaySection from '../components/HowToPlaySection';
@@ -7,17 +7,34 @@ import { PlainCardContainer } from '../components/CardContainer';
 import { dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind, getUnion, getStraight, getStraightFlush, getFullHouse, SUITS } from '../functions/HelperFunctions';
 import { HeaderText } from '../components/StyledText';
 import { Suit } from '../components/Card';
+import NavBar from '../components/NavBar';
+import store, { setHowToPlaySection } from '../redux/store';
 
 export default function HowToPlayScreen({ navigation }) {
+  const windowWidth = useWindowDimensions().width;
   const cardRankPair = getPair();
   const scrollRef = useRef();
 
+  function handleScroll(e) {
+    let xPos = e.nativeEvent.contentOffset.x;
+    if (xPos % windowWidth == 0) {
+      store.dispatch(setHowToPlaySection(xPos / windowWidth));
+    }
+  }
+
+  function scrollToX(x) {
+    scrollRef.current.scrollTo({ x: x, animated: true });
+  }
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <ScrollView
         horizontal
         pagingEnabled={true}
         decelerationRate={'fast'}
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         ref={scrollRef}
       >
         <HowToPlaySection
@@ -45,7 +62,14 @@ export default function HowToPlayScreen({ navigation }) {
         <HowToPlaySection
           pageTitle={'Rounds'}
         >
-          <Text style={styles.iconText}>Play takes place in rounds{'\n\n'}A round starts with a player playing a playable hand type (see <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollRef.current.scrollTo({ x: 414 * 3, animated: true }) }}>"Hand Types"</Text>){'\n\n'}Play continues clockwise and the next player must either play higher cards of the same hand type or pass{'\n'}(see <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollRef.current.scrollTo({ x: 414 * 4, animated: true }) }}>"Card Ranks"</Text>){'\n\n'}Play continues like this until all other players pass on someones play, at which point the player with the winning hand starts a new round</Text>
+          <Text style={styles.iconText}>Play takes place in rounds{'\n\n'}A round starts with a player
+           playing a playable hand type (see <Text style={{ textDecorationLine: 'underline' }}
+              onPress={() => { scrollToX(windowWidth * 3) }}>"Hand Types"</Text>)
+           {'\n\n'}Play continues clockwise and the next player must either play higher cards of the same hand type or pass
+           {'\n'}(see <Text style={{ textDecorationLine: 'underline' }}
+              onPress={() => { scrollToX(windowWidth * 4) }}>"Card Ranks"</Text>)
+           {'\n\n'}Play continues like this until all other players pass on someones play, at which point the player
+            with the winning hand starts a new round</Text>
         </HowToPlaySection>
 
         <HowToPlaySection
@@ -69,7 +93,8 @@ export default function HowToPlayScreen({ navigation }) {
           <View style={[styles.handTypeRow, { justifyContent: 'space-around' }]}>
             <View style={[styles.handType, { left: -25 }]}>
               <PlainCardContainer cards={getUnion()} style={{ left: 0, width: 80 }} />
-              <Text style={[styles.iconText, { top: 55, flexShrink: 1 }]}>Four of a Kind{'\n'}(See <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollRef.current.scrollTo({ x: 414 * 5, animated: true }) }}>"Unions"</Text>)</Text>
+              <Text style={[styles.iconText, { top: 55, flexShrink: 1 }]}>Four of a Kind{'\n'}(See
+              <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 5) }}>"Unions"</Text>)</Text>
             </View>
             <View style={styles.handType}>
               <PlainCardContainer cards={getFullHouse()} style={{ left: 0, width: 100 }} />
@@ -123,7 +148,8 @@ export default function HowToPlayScreen({ navigation }) {
           pageTitle={'Unions'}
         >
           <View>
-            <Text style={styles.iconText}>Unions are a Four of a Kind{'\n\n'}Unions are unique in that they can be played on any hand type and beat anything except for a higher union</Text>
+            <Text style={styles.iconText}>Unions are a Four of a Kind{'\n\n'}Unions are unique in that they
+            can be played on any hand type and beat anything except for a higher union</Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
             <Text style={styles.iconText}>Any{'\n'}hand{'\n'}type</Text>
@@ -136,7 +162,9 @@ export default function HowToPlayScreen({ navigation }) {
           pageTitle={'Dragons'}
         >
           <View>
-            <Text style={styles.iconText}>A Dragon is a 13 card straight{'\n\n'}If youre dealt a dragon you can immediately play your cards and win the game{'\n\n'}You can only play a dragon in a game with exactly 13 cards dealt</Text>
+            <Text style={styles.iconText}>A Dragon is a 13 card straight{'\n\n'}If youre dealt a dragon
+            you can immediately play your cards and win the game{'\n\n'}You can only play a dragon in a
+            game with exactly 13 cards dealt</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
             <PlainCardContainer cards={releaseTheDragon()} style={{ left: 0, width: 300 }} />
@@ -144,10 +172,12 @@ export default function HowToPlayScreen({ navigation }) {
         </HowToPlaySection>
       </ScrollView>
 
+      <NavBar numPages={7} scrollRef={scrollToX} />
+
       <HeaderText style={styles.backArrow}>
         <Ionicons size={40} name='md-arrow-round-back' onPress={() => navigation.goBack()} />
       </HeaderText>
-    </View>
+    </View >
 
     /*
       <Text style={[styles.sectionText, styles.lastSection]}>
@@ -164,8 +194,10 @@ export default function HowToPlayScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  lastSection: {
-    paddingBottom: 30,
+  container: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+    paddingBottom: 20
   },
   sectionHeader: {
     fontSize: 32,
@@ -209,5 +241,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 30,
     left: 30
-  },
+  }
 });
