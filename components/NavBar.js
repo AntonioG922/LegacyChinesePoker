@@ -21,14 +21,10 @@ export default function NavBar({ numPages, scrollRef }) {
     return currentSection == section ? 'circle' : 'circle-o';
   }
 
-  function getSize(section) {
-    return currentSection == section ? 16 : 12;
-  }
-
   return (
     <View style={styles.navBar}>
       {sectionArray.map((num) => {
-        return <FontAwesome key={num} name={getName(num)} color={'red'} onPress={() => { scrollRef(num * windowWidth) }} size={getSize(num)} style={styles.navBarItem} />
+        return <FontAwesome key={num} name={getName(num)} color={'red'} onPress={() => { scrollRef(num * windowWidth) }} size={15} style={styles.navBarItem} />
       })}
     </View>
   )
