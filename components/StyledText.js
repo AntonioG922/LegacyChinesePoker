@@ -20,21 +20,22 @@ export function ContainedButton(props) {
 }
 
 export function FlatTextInput(props) {
-  return <TextInput {...props} underlineColor={'rgb(217, 56, 27)'} style={styles.flatTextInput} />;
+  return <TextInput {...props} underlineColor={'rgb(217, 56, 27)'} style={styles.textInput} />;
 }
 
 export function OutlineTextInput(props) {
-  return <TextInput {...props} mode={'outlined'} />;
+  return <TextInput {...props} mode={'outlined'} style={styles.textInput} />;
 }
 
 export function PasswordTextInput(props) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View>
-      <FlatTextInput {...props} secureTextEntry={!showPassword} >
-      </FlatTextInput>
-      <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={20} onPress={() => setShowPassword(!showPassword)} style={styles.passwordVisibilityIcon} />
+    <View style={[props.style]}>
+      {!props.outline && <FlatTextInput {...props} secureTextEntry={!showPassword} onSubmitEditing={props.submit} />}
+      {props.outline && <OutlineTextInput {...props} secureTextEntry={!showPassword} />}
+      {!props.submit && <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={20} onPress={() => setShowPassword(!showPassword)} style={styles.passwordIcon} />}
+      {props.submit && <FontAwesome5 name={'arrow-right'} size={20} onPress={props.submit} style={[styles.passwordIcon, {color: 'rgb(217, 56, 27)'}]} />}
     </View>
   )
 }
@@ -51,7 +52,7 @@ export function LogInOptionButton({ textColor, icon, style, message, ...rest }) 
 }
 
 const styles = StyleSheet.create({
-  flatTextInput: {
+  textInput: {
     backgroundColor: '#fbfbfb',
   },
   styledText: {
@@ -71,10 +72,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
-  passwordVisibilityIcon: {
+  passwordIcon: {
     position: 'absolute',
     right: '5%',
-    top: '50%'
+    top: '40%'
   },
   logInOptionButton: {
     flexDirection: 'row',

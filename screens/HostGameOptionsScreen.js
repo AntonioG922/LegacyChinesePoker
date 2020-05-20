@@ -28,7 +28,7 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
 
-  async function gameExists(gameName) {
+  function gameExists(gameName) {
     const gameRef = firebase.firestore().collection('CustomGames').doc(gameName);
 
     return gameRef.get().then((docSnapshot) => docSnapshot.exists);
