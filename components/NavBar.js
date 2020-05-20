@@ -6,10 +6,6 @@ import store from '../redux/store';
 export default function NavBar({ numPages, scrollRef }) {
   const windowWidth = useWindowDimensions().width;
   const [currentSection, setCurrentSection] = useState(0);
-  let sectionArray = [];
-  for (i = 0; i < numPages; i++) {
-    sectionArray.push(i);
-  }
 
   useEffect(() => {
     return store.subscribe(() => {
@@ -23,8 +19,8 @@ export default function NavBar({ numPages, scrollRef }) {
 
   return (
     <View style={styles.navBar}>
-      {sectionArray.map((num) => {
-        return <FontAwesome key={num} name={getName(num)} color={'red'} onPress={() => { scrollRef(num * windowWidth) }} size={15} style={styles.navBarItem} />
+      {[...Array(numPages)].map((num, index) => {
+        return <FontAwesome key={index} name={getName(index)} color={'red'} onPress={() => { scrollRef(index * windowWidth) }} size={15} style={styles.navBarItem} />
       })}
     </View>
   )
