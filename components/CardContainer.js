@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
 import { ContainedButton } from './StyledText'
-import {Card, CardBack, SuitAndRank, SuitedCard} from './Card'
+import { Card, CardBack, SuitAndRank, SuitedCard } from './Card'
 import { HeaderText } from './StyledText';
 import {
   getRank,
@@ -18,17 +18,17 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
-      <Image source={avatarImage} style={[styles.avatar, {bottom: 60, right: -20}, isCurrentPlayer && styles.currentPlayerAvatar]} />
+      <Image source={avatarImage} style={[styles.avatar, { bottom: 60, right: -20 }, isCurrentPlayer && styles.currentPlayerAvatar]} />
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
       </View>
       {place >= 0
-          ? <Place place={place} />
-          : <View style={styles.actionsContainer}>
-            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
-            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
-          </View>}
+        ? <Place place={place} />
+        : <View style={styles.actionsContainer}>
+          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
+          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
+        </View>}
       {selectingJoker && <JokerSelector setJoker={setJoker} />}
       <View style={styles.cardContainer}>
         {sortCards(cards).map((rank, index) => (
@@ -45,7 +45,7 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
         setSelectingJoker(true);
       } else if (playCards(selectedCards))
         setSelectedCards([]);
-        setJokerValue(JOKER);
+      setJokerValue(JOKER);
     }
   }
 
@@ -66,7 +66,7 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
   }
 }
 
-function JokerSelector({setJoker}) {
+function JokerSelector({ setJoker }) {
   const STATES = {
     SUIT: 0,
     RANK: 1
@@ -84,23 +84,33 @@ function JokerSelector({setJoker}) {
   }
 
   return (
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {selectState === STATES.SUIT && ORDERED_SUITS.map((suit, index) =>
-            <SuitedCard key={suit} suit={suit} onSelect={onSuitSelect} style={{ left: `${(100 / ORDERED_SUITS.length * (index + 1 / ORDERED_SUITS.length * index))}%` }} />)}
-        {selectState === STATES.RANK && ORDERED_RANKS.slice(0, -1).map((rank, index) =>
-            <Card key={rank} rank={getRank(rank, selectedSuit)} toggleSelected={toggleSelected} style={{ left: `${(100 / ORDERED_RANKS.length * (index + 1 / ORDERED_RANKS.length * index))}%` }} />)}
-      </View>
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      {selectState === STATES.SUIT && ORDERED_SUITS.map((suit, index) =>
+        <SuitedCard key={suit} suit={suit} onSelect={onSuitSelect} style={{ left: `${(100 / ORDERED_SUITS.length * (index + 1 / ORDERED_SUITS.length * index))}%` }} />)}
+      {selectState === STATES.RANK && ORDERED_RANKS.slice(0, -1).map((rank, index) =>
+        <Card key={rank} rank={getRank(rank, selectedSuit)} toggleSelected={toggleSelected} style={{ left: `${(100 / ORDERED_RANKS.length * (index + 1 / ORDERED_RANKS.length * index))}%` }} />)}
+    </View>
   )
 }
 
-export function Place({place}) {
+export function Place({ place }) {
   const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
 
   return (
-      <View style={styles.placeContainer}>
-        <HeaderText style={styles.place}>{place + 1}</HeaderText>
-        <HeaderText style={styles.placeSuffix}>{PLACE_SUFFIX[place]}</HeaderText>
-      </View>
+    <View style={styles.placeContainer}>
+      <HeaderText style={styles.place}>{place + 1}</HeaderText>
+      <HeaderText style={styles.placeSuffix}>{PLACE_SUFFIX[place]}</HeaderText>
+    </View>
+  )
+}
+
+export function PlainCardContainer({ cards, style }) {
+  return (
+    <View key={cards} style={[styles.plainContainer, { left: 37.5 }, style]}>
+      {sortCards(cards).map((rank, index) => (
+        <Card key={rank} rank={rank} style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
+      ))}
+    </View>
   )
 }
 
@@ -124,13 +134,13 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
         <View style={styles.lastPlayedCards}>
           {lastPlayedCards.length === 0 ?
-              <View style={styles.suitAndRank}>
-                <Image source={avatarImage} style={{width: 20, height: 20, marginRight: 5}} />
-                <HeaderText> plays first</HeaderText>
-              </View> :
+            <View style={styles.suitAndRank}>
+              <Image source={avatarImage} style={{ width: 20, height: 20, marginRight: 5 }} />
+              <HeaderText> plays first</HeaderText>
+            </View> :
             lastPlayedCards.map((card) =>
-            <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
-          )}
+              <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
+            )}
         </View>
       </View>
       {cards.map((rank) => {
@@ -164,6 +174,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     flexDirection: 'column',
+  },
+  plainContainer: {
+  },
+  animatedContainer: {
+    justifyContent: 'center',
+    flexDirection: 'column'
   },
   errorMessage: {
     alignItems: 'center',

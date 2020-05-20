@@ -76,7 +76,7 @@ const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, A
 export function getRandomAvatars(numAvatars) {
   let avatars = [];
 
-  Array.from({length: numAvatars}).map(() => {
+  Array.from({ length: numAvatars }).map(() => {
     let index = Math.floor(Math.random() * (AVATAR_LIST.length));
     while (avatars.includes(index)) {
       index = Math.floor(Math.random() * (AVATAR_LIST.length));
@@ -212,15 +212,14 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
   }
 }
 
-export function getNextEmptyHandIndex(hands, players, currentPlayerTurnIndex, numberOfPlayers, uid) {
-  let currentIndex = (currentPlayerTurnIndex + 1) % numberOfPlayers;
-  let playersCycled = 1;
-  while (hands[currentIndex].cards.length === 0
-    && currentIndex != players[uid]
-    && playersCycled != numberOfPlayers) {
+export function getNextEmptyHandIndex(hands, currentPlayerTurnIndex, numberOfPlayers) {
+  let currentIndex = currentPlayerTurnIndex % numberOfPlayers;
+  for (i = 0; i < numberOfPlayers; i++) {
+    currentIndex = (currentIndex + 1) % numberOfPlayers;
 
-    currentIndex++;
-    playersCycled++;
+    if (hands[currentIndex].cards.length !== 0) {
+      return currentIndex;
+    }
   }
   return currentIndex;
 }
@@ -243,7 +242,7 @@ export function findStartingPlayer(hands) {
   return hands.findIndex((hand) => hand.cards.includes(lowestCard));
 }
 
-export function dealCards(numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers, useJoker) {
+export function dealCards(useJoker, numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers) {
   const avatars = getRandomAvatars(numberOfPlayers);
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
@@ -265,3 +264,72 @@ function shuffle(arr) {
   }
   return shuffledCopy;
 }
+
+export function releaseTheDragon() {
+  let dragon = [];
+  for (let i = 1; i < NUMBER_OF_CARDS; i += 4) {
+    const tempNum = i + Math.floor(Math.random() * 4);
+    dragon.push(tempNum);
+  }
+  return dragon;
+}
+
+export function getRandomCard() {
+  return [Math.floor(Math.random() * 52 + 1)];
+}
+
+export function getPair() {
+  const pairNumber = Math.floor(Math.random() * 13 + 1) * 4;
+  let nums = [0, 1, 2, 3];
+  let pair = [];
+  for (i = 0; i < 2; i++) {
+    const num = nums.splice(Math.floor(Math.random() * nums.length), 1);
+    pair.push(pairNumber - num);
+  }
+  return pair;
+}
+
+export function getThreeOfAKind() {
+  const thriceNumber = Math.floor(Math.random() * 13 + 1) * 4;
+  let nums = [0, 1, 2, 3];
+  let thrice = [];
+  for (i = 0; i < 3; i++) {
+    const num = nums.splice(Math.floor(Math.random() * nums.length), 1);
+    thrice.push(thriceNumber - num);
+  }
+  return thrice;
+}
+
+export function getUnion() {
+  const unionNumber = Math.floor(Math.random() * 13 + 1) * 4;
+  return [unionNumber - 3, unionNumber - 2, unionNumber - 1, unionNumber];
+}
+
+export function getFullHouse() {
+  const pair = getPair();
+  let thrice = getThreeOfAKind();
+  while (Math.ceil((pair[0] / 4) - 1) == Math.ceil((thrice[0] / 4)) - 1) {
+    thrice = getThreeOfAKind();
+  }
+  return pair.concat(thrice);
+}
+
+export function getStraight() {
+  let lowCard = Math.floor(Math.random() * 9 + 1) * 4;
+  let nextCard = lowCard + 4;
+  lowCard = lowCard - Math.floor(Math.random() * 4);
+  let straight = [lowCard];
+  for (i = 0; i < 4; i++) {
+    const card = nextCard - Math.floor(Math.random() * 4);
+    straight.push(card);
+    nextCard += 4;
+  }
+  return straight;
+}
+
+export function getStraightFlush() {
+  let lowCard = Math.floor(Math.random() * 9 + 1) * 4;
+  lowCard = lowCard - Math.floor(Math.random() * 4);
+  return [lowCard, lowCard + 4, lowCard + 8, lowCard + 12, lowCard + 16];
+}
+

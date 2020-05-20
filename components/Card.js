@@ -1,6 +1,7 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+
 import {
   getCardInfo, JOKER,
   SUIT_TO_COLOR_MAP,
@@ -17,15 +18,16 @@ const SUIT_TO_ICON_NAME_MAP = {
 export function Card({ rank, style, toggleSelected, played = false }) {
   // cards are positioned based off their center
   const maxOffset = 50;
-  const [verticalOffset, setVerticalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
-  const [horizontalOffset, setHorizontalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
-  const [rotation, setRotation] = useState(Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg');
+  const verticalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+  const horizontalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
+  const rotation = Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg';
   const [selected, setSelected] = useState(false);
 
   return (
-    <TouchableHighlight underlayColor='#ddd'
-                        style={[styles.card, selected && styles.selected, style, played && [{ top: verticalOffset, left: horizontalOffset, transform: [{ rotateZ: rotation }] }], rank === JOKER && styles.joker]}
-                        onPress={selectCard}>
+    <TouchableHighlight
+      underlayColor='#ddd'
+      style={[styles.card, selected && styles.selected, style, played && [{ top: verticalOffset, left: horizontalOffset, transform: [{ rotateZ: rotation }] }]]}
+      onPress={toggleSelected ? selectCard : null}>
       <View style={styles.cardWrapper}>
         <SuitAndRank cardNumber={rank} containerStyle={styles.upperIcon} numberStyle={styles.cardNumber} />
         <SuitAndRank cardNumber={rank} containerStyle={styles.bottomIcon} numberStyle={styles.cardNumber} />
@@ -39,17 +41,17 @@ export function Card({ rank, style, toggleSelected, played = false }) {
   }
 }
 
-export function SuitedCard({ suit, style, onSelect}) {
+export function SuitedCard({ suit, style, onSelect }) {
   const [selected, setSelected] = useState(false);
 
   return (
-      <TouchableHighlight underlayColor='#ddd'
-                          style={[styles.card, selected && styles.selected, style]}
-                          onPress={selectCard}>
-        <View style={styles.suitedCard}>
-          <Suit suit={suit} />
-        </View>
-      </TouchableHighlight>
+    <TouchableHighlight underlayColor='#ddd'
+      style={[styles.card, selected && styles.selected, style]}
+      onPress={selectCard}>
+      <View style={styles.suitedCard}>
+        <Suit suit={suit} />
+      </View>
+    </TouchableHighlight>
   );
 
   function selectCard() {
@@ -58,7 +60,7 @@ export function SuitedCard({ suit, style, onSelect}) {
   }
 }
 
-export function SuitAndRank({ cardNumber, containerStyle, numberStyle}) {
+export function SuitAndRank({ cardNumber, containerStyle, numberStyle }) {
   const cardInfo = getCardInfo(cardNumber);
 
   return (
@@ -69,11 +71,11 @@ export function SuitAndRank({ cardNumber, containerStyle, numberStyle}) {
   );
 }
 
-export function Suit({ suit }) {
+export function Suit({ suit, size = 20 }) {
   const color = SUIT_TO_COLOR_MAP[suit];
 
   return (
-      <MaterialCommunityIcons name={SUIT_TO_ICON_NAME_MAP[suit]} style={{ color: color }} size={20} />
+    <MaterialCommunityIcons name={SUIT_TO_ICON_NAME_MAP[suit]} style={{ color: color }} size={size} />
   );
 }
 
