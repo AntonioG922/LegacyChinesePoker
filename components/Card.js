@@ -18,9 +18,9 @@ const SUIT_TO_ICON_NAME_MAP = {
 export function Card({ rank, style, toggleSelected, played = false }) {
   // cards are positioned based off their center
   const maxOffset = 50;
-  const verticalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
-  const horizontalOffset = Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1));
-  const rotation = Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg';
+  const [verticalOffset, setVerticalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
+  const [horizontalOffset, setHorizontalOffset] = useState(Math.floor(Math.random() * maxOffset * (Math.random() * 2 - 1)));
+  const [rotation, setRotation] = useState(Math.floor(Math.random() * 90 * (Math.random() * 2 - 1)) + 'deg');
   const [selected, setSelected] = useState(false);
 
   return (

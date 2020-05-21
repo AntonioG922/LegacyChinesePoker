@@ -144,7 +144,7 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
         </View>
       </View>
       {cards.map((rank) => {
-        return <Card key={rank.toString()} rank={rank} played={true} />
+        return <Card key={rank} rank={rank} played={true} />
       })}
     </View>
   );

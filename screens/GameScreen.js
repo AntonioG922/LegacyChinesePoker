@@ -33,10 +33,10 @@ export default function GameScreen({ route, navigation }) {
   }, []);
 
   useEffect(() => {
-    if (!gameStarted && gameData.playersLeftToJoin === 0) {
+    if ((!gameStarted) && gameData.playersLeftToJoin === 0) {
       setGameStarted(true);
     }
-  }, [gameData]);
+  }, [gameData.playersLeftToJoin]);
 
   useEffect(() => {
     return navigation.addListener('blur', () => {
@@ -45,13 +45,37 @@ export default function GameScreen({ route, navigation }) {
         updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
         updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
         db.collection('CustomGames').doc(gameData.gameName).update(updates)
+        setGameStarted(true);
       }
-      setGameStarted(true);
     });
   }, [navigation]);
 
   function getNextEmptyHandIndexLocal() {
-    return getNextEmptyHandIndex(gameData.hands, gameData.players, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers, user.uid);
+    return getNextEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers);
+  }
+
+  function everyonePassAfterWinner() {
+    if (gameData.places.length === 0)
+      return false;
+
+    const lastUIDToPlay = Object.keys(gameData.lastPlayerToPlay)[0];
+    const lastUIDToPlayTurnIndex = gameData.players[lastUIDToPlay];
+    if (gameData.hands[lastUIDToPlayTurnIndex].cards.length)
+      return false;
+
+    const lastPlayTurnNum = Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop();
+    gameData.hands.forEach((hand, index) => {
+      if (hand.cards.length) {
+        const remainingPlayerUID = Object.keys(gameData.players).find(key => gameData.players[key] === index);
+        const remainingPlayerLastPlayTurnNum = Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop();
+        const remainingPlayerLastPlay = gameData.playersTurnHistory[remainingPlayerUID][remainingPlayerLastPlayTurnNum];
+
+        if (remainingPlayerLastPlayTurnNum < lastPlayTurnNum || remainingPlayerLastPlay !== 'PASS')
+          return false;
+      }
+    })
+
+    return true;
   }
 
   function playCards(selectedCards) {
@@ -59,7 +83,7 @@ export default function GameScreen({ route, navigation }) {
     setErrorCards([]);
 
     const playedHandType = getHandType(selectedCards);
-    const everyonePassed = user.displayName === gameData.lastPlayerToPlay;
+    const everyonePassed = user.displayName === gameData.lastPlayerToPlay[user.uid] || everyonePassAfterWinner();
     const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
     const currentHand = gameData.hands[gameData.players[user.uid]].cards;
 
@@ -81,19 +105,28 @@ export default function GameScreen({ route, navigation }) {
     const player = gameData.currentPlayerTurnIndex;
     let hands = gameData.hands;
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
+
+    let overallTurnHistory = gameData.overallTurnHistory;
+    const turnsTaken = Object.keys(overallTurnHistory).length;
+    overallTurnHistory[turnsTaken] = selectedCards;
+    let playersTurnHistory = gameData.playersTurnHistory;
+    playersTurnHistory[user.uid][turnsTaken] = selectedCards;
+
     const handIsEmpty = hands[player].cards.length === 0;
 
     const data = {
       playedCards: firebase.firestore.FieldValue.arrayUnion(...selectedCards),
       lastPlayed: selectedCards,
-      lastPlayerToPlay: user.displayName,
+      lastPlayerToPlay: { [user.uid]: user.displayName },
       hands: hands,
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
       // players: {
       //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       // },
-      // currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
+      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
       currentHandType: playedHandType,
+      playersTurnHistory: playersTurnHistory,
+      overallTurnHistory: overallTurnHistory
     };
     if (handIsEmpty)
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
@@ -112,14 +145,22 @@ export default function GameScreen({ route, navigation }) {
       setErrorCards([getLowestCard(currentHand)]);
       return true;
     }
+
+    let overallTurnHistory = gameData.overallTurnHistory;
+    const turnsTaken = Object.keys(overallTurnHistory).length;
+    overallTurnHistory[turnsTaken] = 'PASS';
+    let playersTurnHistory = gameData.playersTurnHistory;
+    playersTurnHistory[user.uid][Object.keys(playersTurnHistory[user.uid]).length] = 'PASS';
     //REMOVE FOR PROD> ALLOWS TESTER TO PASS
-    /* if (gameData.lastPlayerToPlay === user.displayName) {
+    /* if (gameData.lastPlayerToPlay[user.uid] === user.displayName) {
       setErrorMessage('Must start a new hand');
       setErrorCards([]);
       return true;
     } */
     db.collection('CustomGames').doc(gameData.gameName).update({
       currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
+      playersTurnHistory: playersTurnHistory,
+      overallTurnHistory: overallTurnHistory
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
       // players: {
       //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
@@ -153,7 +194,7 @@ export default function GameScreen({ route, navigation }) {
       <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
-        lastPlayerToPlay={gameData.lastPlayerToPlay}
+        lastPlayerToPlay={gameData.lastPlayerToPlay[user.uid]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
@@ -172,7 +213,7 @@ export default function GameScreen({ route, navigation }) {
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
             style={[styles.opposingPlayerHand, getStyle(index + 2)]}
             avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
-            avatarStyling={{transform: [{rotateZ: getAvatarRotation(index)}]}}
+            avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
         })}
       </View>}

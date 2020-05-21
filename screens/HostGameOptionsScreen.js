@@ -43,7 +43,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
     setErrorMessage('');
     setLoading(true);
-    const hands = dealCards(numberOfPlayers, cardsPerPlayer, useJoker);
+    const hands = dealCards(useJoker, numberOfPlayers, cardsPerPlayer);
     const gameData = {
       gameName: gameName,
       password: password,
@@ -58,6 +58,8 @@ export default function HostGameOptionsScreen({ navigation }) {
       currentPlayerTurnIndex: findStartingPlayer(hands),
       currentHandType: HAND_TYPES.START_OF_GAME,
       places: [],
+      playersTurnHistory: { [user.uid]: {} },
+      overallTurnHistory: {}
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {

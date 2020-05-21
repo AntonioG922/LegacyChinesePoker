@@ -41,6 +41,7 @@ export default function JoinGameMenuScreen({ navigation }) {
     let updates = {};
     updates[`players.${user.uid}`] = playerNumber;
     updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
+    updates[`playersTurnHistory.${user.uid}`] = {};
     db.collection('CustomGames').doc(gameName).update(updates)
       .then(() => {
         const index = activeGames.findIndex(x => x.gameName === gameName);
@@ -85,13 +86,13 @@ export default function JoinGameMenuScreen({ navigation }) {
           <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
         </View>
         {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
-            <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
+          <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
       </TitledPage>
     </ScrollView>
   );
 }
 
-function JoinableGame({game, joinGame}) {
+function JoinableGame({ game, joinGame }) {
   const [password, setPassword] = useState('');
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -122,19 +123,19 @@ function JoinableGame({game, joinGame}) {
   useEffect(() => {
     Animated.parallel([
       Animated.timing(
-          passwordAnim,
-          {
-            toValue: showPasswordInput ? 1 : 0,
-            duration: 500,
-          }
+        passwordAnim,
+        {
+          toValue: showPasswordInput ? 1 : 0,
+          duration: 500,
+        }
       ),
       Animated.timing(
-          otherIconAnim,
-          {
-            toValue: showPasswordInput ? 0 : 1,
-            duration: 250,
-            delay: showPasswordInput ? 0 : 500
-          }
+        otherIconAnim,
+        {
+          toValue: showPasswordInput ? 0 : 1,
+          duration: 250,
+          delay: showPasswordInput ? 0 : 500
+        }
       ),
     ]).start();
   }, [showPasswordInput]);
@@ -156,37 +157,37 @@ function JoinableGame({game, joinGame}) {
   };
 
   return (
-      <View style={styles.game}>
-        <TextButton labelStyle={styles.menuOption} onPress={() => maybeJoinGame(game)}>
-          {game.gameName}
-        </TextButton>
-        <View style={styles.menuOptionIcons}>
-          <Animated.View style={[gameIconsStyle]}>
-            <HeaderText style={styles.numPlayers}>{Object.keys(game.players).length} <Text style={{ fontSize: 15 }}>of</Text> {game.numberOfPlayers}</HeaderText>
-          </Animated.View>
-          <Animated.View style={[gameIconsStyle]}>
-            <HeaderText style={[!game.useJoker && styles.hidden, styles.useJoker]}>
-              <MaterialCommunityIcons size={25} name={'cards-playing-outline'} />
+    <View style={styles.game}>
+      <TextButton labelStyle={styles.menuOption} onPress={() => maybeJoinGame(game)}>
+        {game.gameName}
+      </TextButton>
+      <View style={styles.menuOptionIcons}>
+        <Animated.View style={[gameIconsStyle]}>
+          <HeaderText style={styles.numPlayers}>{Object.keys(game.players).length} <Text style={{ fontSize: 15 }}>of</Text> {game.numberOfPlayers}</HeaderText>
+        </Animated.View>
+        <Animated.View style={[gameIconsStyle]}>
+          <HeaderText style={[!game.useJoker && styles.hidden, styles.useJoker]}>
+            <MaterialCommunityIcons size={25} name={'cards-playing-outline'} />
+          </HeaderText>
+        </Animated.View>
+        <HeaderText style={styles.hidden}>
+          <MaterialCommunityIcons size={25} name={'lock'} />
+        </HeaderText>
+        {Boolean(game.password) && <Animated.View style={[styles.passwordInputContainer, passwordInputContainerStyle]}>
+          <Animated.View>
+            <HeaderText style={styles.password}>
+              <MaterialCommunityIcons size={25} name={'lock'} />
             </HeaderText>
           </Animated.View>
-          <HeaderText style={styles.hidden}>
-            <MaterialCommunityIcons size={25} name={'lock'} />
-          </HeaderText>
-          {Boolean(game.password) && <Animated.View style={[styles.passwordInputContainer, passwordInputContainerStyle]}>
-            <Animated.View>
-              <HeaderText style={styles.password}>
-                <MaterialCommunityIcons size={25} name={'lock'} />
-              </HeaderText>
-            </Animated.View>
-            <Animated.View style={passwordInputStyle}>
-              <PasswordTextInput onChangeText={text => {setShowPasswordError(false); setPassword(text);}} submit={checkPassword} />
-            </Animated.View>
-          </Animated.View>}
-        </View>
-        {showPasswordError && <HeaderText style={styles.passwordErrorText}>
-          Incorrect password
-        </HeaderText>}
+          <Animated.View style={passwordInputStyle}>
+            <PasswordTextInput onChangeText={text => { setShowPasswordError(false); setPassword(text); }} submit={checkPassword} />
+          </Animated.View>
+        </Animated.View>}
       </View>
+      {showPasswordError && <HeaderText style={styles.passwordErrorText}>
+        Incorrect password
+        </HeaderText>}
+    </View>
   );
 }
 
