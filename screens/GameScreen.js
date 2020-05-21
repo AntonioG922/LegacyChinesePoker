@@ -128,8 +128,18 @@ export default function GameScreen({ route, navigation }) {
       playersTurnHistory: playersTurnHistory,
       overallTurnHistory: overallTurnHistory
     };
-    if (handIsEmpty)
+    if (handIsEmpty) {
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+      if (gameData.places.length === gameData.numberOfPlayers - 2) {
+        let temp = Object.keys(gameData.players);
+        temp = temp.filter(value => value !== user.uid);
+        gameData.places.forEach(uid => {
+          temp = temp.filter(value => value !== uid)
+        })
+        const lastPlaceUID = temp[0];
+        data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
+      }
+    }
 
     db.collection('CustomGames').doc(gameData.gameName).update(data);
 
