@@ -42,6 +42,7 @@ export default function JoinGameMenuScreen({ navigation }) {
     updates[`players.${user.uid}`] = playerNumber;
     updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
     updates[`playersTurnHistory.${user.uid}`] = {};
+    updates[`displayNames.${user.uid}`] = user.displayName;
     db.collection('CustomGames').doc(gameName).update(updates)
       .then(() => {
         const index = activeGames.findIndex(x => x.gameName === gameName);
@@ -55,7 +56,7 @@ export default function JoinGameMenuScreen({ navigation }) {
       })
       .catch(() => {
         setLoading(false);
-        alert('Error joining game. Please try again.');
+        alert('Error joining game. Please check your connection and try again.');
       })
   }
 

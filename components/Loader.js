@@ -1,19 +1,16 @@
 import React from 'react';
-import { StyleSheet, View, Modal } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { ActivityIndicator, Colors } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HeaderText } from "../components/StyledText";
 
-export default function Loader({loading, message, navigation}) {
+export default function Loader({ loading, message, navigation }) {
+  const windowDimensions = useWindowDimensions();
+
   return (
-    <Modal
-      transparent={true}
-      animationType={'fade'}
-      statusBarTranslucent={true}
-      visible={loading}
-      onRequestClose={() => loading = false}>
-      <View style={styles.modalBackground}>
+    <View style={{ position: 'absolute', zIndex: 99999, elevation: 99999, width: loading ? windowDimensions.width : 0, height: loading ? windowDimensions.height : 0 }}>
+      {loading && <View style={styles.modalBackground}>
         {navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => navigation.goBack()} /></HeaderText>}
         <HeaderText style={styles.loaderMessage}>{message}</HeaderText>
         <ActivityIndicator
@@ -21,8 +18,8 @@ export default function Loader({loading, message, navigation}) {
           color={Colors.red800}
           size={150}
           style={styles.activityIcon} />
-      </View>
-    </Modal>
+      </View>}
+    </View>
   )
 }
 

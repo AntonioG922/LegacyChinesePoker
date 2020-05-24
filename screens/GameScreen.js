@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
 
@@ -14,29 +14,85 @@ import {
   getHandType, getLowestCard,
   getNextEmptyHandIndex,
   HAND_TYPES,
-  isBetterHand, isLegalPlay
+  isBetterHand, isLegalPlay,
+  dealCards, findStartingPlayer
 } from '../functions/HelperFunctions';
+import PopUpMessage from '../components/popUpMessage';
+import TrophyPlaceDisplay from '../components/trophyPlaceDisplay';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [errorCards, setErrorCards] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
+  const [gameEnded, setGameEnded] = useState(false);
   const user = store.getState().userData.user;
   const db = firebase.firestore();
 
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
-        setGameData(doc.data());
+        setGameData(doc.data())
       });
   }, []);
 
   useEffect(() => {
-    if ((!gameStarted) && gameData.playersLeftToJoin === 0) {
+    if ((!gameStarted) && gameData.playersLeftToJoin === 0 && Object.keys(gameData.playersPlayingAgain).length === 0) {
       setGameStarted(true);
     }
-  }, [gameData.playersLeftToJoin]);
+  }, [gameData.playersLeftToJoin, gameData.playersPlayingAgain]);
+
+  useEffect(() => {
+    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
+      setGameEnded(true);
+    //else if ((gameData.numberOfPlayers !== gameData.places.length) && gameEnded)
+    //  setGameEnded(false);
+  }, [gameData.places]);
+
+  useEffect(() => {
+    const playersPlayingAgainLength = Object.keys(gameData.playersPlayingAgain).length;
+    const lastUIDPlayingAgain = playersPlayingAgainLength ? Object.keys(gameData.playersPlayingAgain)[playersPlayingAgainLength - 1] : null;
+    const allRemainingPlayersPlayingAgain = playersPlayingAgainLength === Object.keys(gameData.players).length;
+
+    if (allRemainingPlayersPlayingAgain && lastUIDPlayingAgain === user.uid) {
+      const hands = dealCards(gameData.useJoker, gameData.numberOfPlayers, gameData.cardsPerPlayer);
+      let players = {};
+      let playersTurnHistory = {};
+      let displayNames = {};
+      let playersLeftToJoin = gameData.numberOfPlayers;
+      Object.keys(gameData.playersPlayingAgain).map((key, index) => {
+        players[key] = index;
+        playersTurnHistory[key] = {};
+        displayNames[key] = gameData.playersPlayingAgain[key];
+        playersLeftToJoin--;
+      })
+
+      const updates = {
+        players: players,
+        playersLeftToJoin: playersLeftToJoin,
+        hands: hands,
+        lastPlayed: [],
+        lastPlayerToPlay: '',
+        playedCards: [],
+        currentPlayerTurnIndex: findStartingPlayer(hands),
+        currentHandType: HAND_TYPES.START_OF_GAME,
+        places: [],
+        playersTurnHistory: playersTurnHistory,
+        overallTurnHistory: {},
+        displayNames: displayNames,
+        playersPlayingAgain: {}
+      };
+
+      firebase.firestore().collection('CustomGames').doc(gameData.gameName).update(updates)
+        .then(() => {
+          setGameEnded(false);
+          setGameStarted(playersLeftToJoin ? false : true);
+        })
+        .catch((error) => {
+          alert('Error trying to play again. Please check your connection and try again.')
+        });
+    }
+  }, [gameData.playersPlayingAgain, gameData.players])
 
   useEffect(() => {
     return navigation.addListener('blur', () => {
@@ -195,13 +251,51 @@ export default function GameScreen({ route, navigation }) {
     }
   }
 
+  function playAgain() {
+    let updates = {};
+    updates[`playersPlayingAgain.${user.uid}`] = user.displayName;
+
+    db.collection('CustomGames').doc(gameData.gameName).update(updates)
+      .then(() => {
+        setGameEnded(false);
+        setGameStarted(false);
+      })
+      .catch((error) => {
+        alert('Error trying to play again. Please check your connection and try again.')
+      });
+  }
+
+  function dontPlayAgain() {
+    const update = {};
+    update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+
+    db.collection('CustomGames').doc(gameData.gameName).update(update)
+      .then(() => navigation.goBack())
+      .catch((error) => {
+        alert('Error trying to exit. Please check your connection and try again.')
+      });
+  }
+
   function getAvatarRotation(index) {
     return (270 - 90 * index) + 'deg';
   }
 
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
-      <Loader loading={!gameStarted} message={`Waiting for ${gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`} navigation={navigation} />
+
+      <Loader loading={!gameStarted}
+        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+        navigation={navigation}
+      />
+      <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+        {gameData.places.map((player, index) => {
+          const displayName = gameData.displayNames[player];
+          const currentUser = player === user.uid;
+          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} />
+        })}
+        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
+      </PopUpMessage>
+
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay[user.uid]}
@@ -228,7 +322,7 @@ export default function GameScreen({ route, navigation }) {
         })}
       </View>}
     </ImageBackground>
-  );
+  )
 }
 
 const styles = StyleSheet.create({

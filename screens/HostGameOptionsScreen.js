@@ -49,6 +49,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       password: password,
       numberOfPlayers: numberOfPlayers,
       useJoker: useJoker,
+      cardsPerPlayer: cardsPerPlayer,
       players: { [user.uid]: 0 },
       playersLeftToJoin: numberOfPlayers - 1,
       hands: hands,
@@ -59,7 +60,9 @@ export default function HostGameOptionsScreen({ navigation }) {
       currentHandType: HAND_TYPES.START_OF_GAME,
       places: [],
       playersTurnHistory: { [user.uid]: {} },
-      overallTurnHistory: {}
+      overallTurnHistory: {},
+      displayNames: { [user.uid]: user.displayName },
+      playersPlayingAgain: {}
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {
@@ -67,7 +70,7 @@ export default function HostGameOptionsScreen({ navigation }) {
         navigation.navigate('Game', gameData);
       })
       .catch((error) => {
-        alert('Error uploading game to database. Please try again.')
+        alert('Error uploading game to database. Please check your connection and try again.')
       });
   }
 

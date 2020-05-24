@@ -3,7 +3,12 @@ import { configureStore, getDefaultMiddleware, createSlice } from "@reduxjs/tool
 const userDataSlice = createSlice({
   name: 'userData',
   initialState: {
-    user: {}
+    user: {
+      displayName: '',
+      email: '',
+      photoURL: '',
+      uid: ''
+    }
   },
   reducers: {
     setUserData(state, action) {
