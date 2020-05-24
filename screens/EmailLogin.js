@@ -82,8 +82,8 @@ export default function Login({ route, navigation }) {
       <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
       <View style={styles.form}>
         {signingUp && <FlatTextInput label={'Username'} onChangeText={text => setUsername(text)} />}
-        <FlatTextInput label={'Email'} onChangeText={text => setEmail(text)} />
-        <PasswordTextInput label={'Password'} onChangeText={text => setPassword(text)} />
+        <FlatTextInput keyboardType={'email-address'} label={'Email'} onChangeText={text => setEmail(text)} textContentType={'emailAddress'} />
+        <PasswordTextInput label={'Password'} onChangeText={text => setPassword(text)} textContentType={signingUp ? 'newPassword' : 'password'} />
         {signingUp && <PasswordTextInput label={'Password Confirm'} onChangeText={text => setPasswordConfirm(text)} />}
       </View>
       <TextButton style={styles.submitButton} onPress={() => signingUp ? signUp(username, email, password, passwordConfirm) : logIn(email, password)} >{signingUp ? 'Sign Up' : 'Log In'}</TextButton>
