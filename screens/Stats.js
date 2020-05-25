@@ -15,7 +15,7 @@ import {ScrollView} from "react-native-gesture-handler";
 import {
   HAND_TYPES,
   MAX_NUMBER_PLAYERS,
-  MIN_NUMBER_PLAYERS
+  MIN_NUMBER_PLAYERS, secondsToTime
 } from '../functions/HelperFunctions';
 
 export default function StatsScreen({ navigation }) {
@@ -52,17 +52,13 @@ function Stats({ userStats }) {
         <UserPlacementStat placementStats={userStats.placement} />
         <Divider subtitle={'Hands'} />
         <UserHandsStats handsStats={userStats.hands} />
+        <Divider subtitle={'Time'} />
+        <TimeStats userStats={userStats} />
       </View>
   )
 }
 
 function TotalStats({ userStats }) {
-  function toTime(seconds) {
-    let date = new Date(0);
-    date.setSeconds(seconds);
-    return date.toISOString().substr(11, 8);
-  }
-
   return (
       <View>
         <View>
@@ -74,7 +70,7 @@ function TotalStats({ userStats }) {
           <View style={{paddingVertical: 10}}>
             <HeaderText center style={{fontSize: 24}}>Playtime</HeaderText>
             <HeaderText  style={{fontSize: 24, color: 'grey', textAlign: 'center'}}>
-              {toTime(userStats.playtime)}
+              {secondsToTime(userStats.totalGameTime)}
             </HeaderText>
           </View>
         </View>
@@ -178,6 +174,16 @@ function UserPlacementStat({ placementStats = {} }) {
               </View>
             </View>
             : <HeaderText fontSize={24} style={{paddingTop: 30}}>No {numberOfPlayers} player games played yet</HeaderText>}
+      </View>
+  )
+}
+
+function TimeStats({ userStats }) {
+  const totalHands = Object.values(userStats.hands).reduce((n1, n2) => n1 + n2);
+
+  return (
+      <View>
+        <NumberStat label={'Average Time To Play'} number={secondsToTime(Math.round(userStats.totalPlayTime / totalHands))} />
       </View>
   )
 }

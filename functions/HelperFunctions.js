@@ -336,3 +336,12 @@ export function getStraightFlush() {
   return [lowCard, lowCard + 4, lowCard + 8, lowCard + 12, lowCard + 16];
 }
 
+export function secondsToTime(sec_num) {
+  let hours   = Math.floor(sec_num / 3600);
+  let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+  let seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+  if (minutes < 10 && hours > 0) {minutes = "0"+minutes;}
+  if (seconds < 10 && minutes > 0) {seconds = "0"+seconds;}
+  return (hours ? hours + ':' : '') + (minutes ? minutes + ':' : '') + seconds;
+}
