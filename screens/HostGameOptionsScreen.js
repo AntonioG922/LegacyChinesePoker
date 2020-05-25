@@ -1,13 +1,13 @@
-import * as firebase from 'firebase';
-import { FontAwesome5 } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
+import firebase from 'firebase';
+import { FontAwesome5 } from '@expo/vector-icons';
 import store from '../redux/store';
 
 import {
   dealCards,
-  findStartingPlayer, getRandomAvatars,
+  findStartingPlayer,
   HAND_TYPES, JOKER_DECK, MAX_NUMBER_PLAYERS, MIN_NUMBER_PLAYERS, STANDARD_DECK
 } from '../functions/HelperFunctions';
 
@@ -36,7 +36,6 @@ export default function HostGameOptionsScreen({ navigation }) {
   useEffect(() => {
     if (cardsPerPlayer > maxCardsAllowed)
       setCardsPerPlayer(maxCardsAllowed);
-    console.log('test')
   }, [maxCardsAllowed]);
 
   function gameExists(gameName) {
