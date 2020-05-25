@@ -3,7 +3,6 @@ import { ImageBackground, StyleSheet, View, Text } from 'react-native';
 import firebase from 'firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PopUpMessage from '../components/PopUpMessage';
-import Dialog, { DialogContent, DialogButton, DialogFooter, DialogTitle } from 'react-native-popup-dialog';
 
 import { HeaderText, TextButton } from '../components/StyledText';
 
