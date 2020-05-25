@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 import store from '../redux/store';
@@ -28,6 +28,16 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
   const [maxCardsAllowed, setMaxCardsAllowed] = useState(13);
+
+  useEffect(() => {
+    setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
+  }, [numberOfPlayers, cardsPerPlayer, useJoker]);
+
+  useEffect(() => {
+    if (cardsPerPlayer > maxCardsAllowed)
+      setCardsPerPlayer(maxCardsAllowed);
+    console.log('test')
+  }, [maxCardsAllowed]);
 
   function gameExists(gameName) {
     const gameRef = firebase.firestore().collection('CustomGames').doc(gameName);
@@ -88,7 +98,6 @@ export default function HostGameOptionsScreen({ navigation }) {
             <Button disabled={numberOfPlayers <= MIN_NUMBER_PLAYERS}
               onPress={() => {
                 setNumberOfPlayers(numberOfPlayers - 1);
-                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
               }}>
               <FontAwesome5 name={'chevron-down'} style={styles.rowText} />
             </Button>
@@ -96,10 +105,6 @@ export default function HostGameOptionsScreen({ navigation }) {
             <Button disabled={numberOfPlayers >= MAX_NUMBER_PLAYERS}
               onPress={() => {
                 setNumberOfPlayers(numberOfPlayers + 1);
-                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
-                if (cardsPerPlayer > maxCardsAllowed) {
-                  setCardsPerPlayer(maxCardsAllowed);
-                }
               }}>
               <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
             </Button>
@@ -108,7 +113,7 @@ export default function HostGameOptionsScreen({ navigation }) {
             <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
             <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
             <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
-            <Button disabled={useJoker ? cardsPerPlayer >= Math.floor(JOKER_DECK.length / numberOfPlayers) : cardsPerPlayer >= Math.floor(STANDARD_DECK.length / numberOfPlayers)}
+            <Button disabled={cardsPerPlayer >= maxCardsAllowed}
               onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}>
               <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
             </Button>
