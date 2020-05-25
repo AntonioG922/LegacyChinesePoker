@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, View, Text } from 'react-native';
 import firebase from 'firebase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import PopUpMessage from '../components/PopUpMessage';
 import Dialog, { DialogContent, DialogButton, DialogFooter, DialogTitle } from 'react-native-popup-dialog';
 
 import { HeaderText, TextButton } from '../components/StyledText';
@@ -10,11 +11,16 @@ export default function HomeScreen({ navigation }) {
   const [showLogoutMessage, setShowLogoutMessage] = useState(false);
 
   function signOut() {
+    setShowLogoutMessage(false);
     firebase.auth().signOut().then(() => {
       console.log('Sign out successful!');
     }).catch(function (error) {
       alert(error);
     });
+  }
+
+  function dismissLogout() {
+    setShowLogoutMessage(false);
   }
 
   return (
@@ -37,30 +43,9 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => setShowLogoutMessage(true)} />
-      <Dialog
-        visible={showLogoutMessage}
-        onTouchOutside={() => setShowLogoutMessage(false)}
-        dialogTitle={<DialogTitle title="Logout" />}
-        footer={
-          <DialogFooter>
-            <DialogButton
-              text="CANCEL"
-              onPress={() => setShowLogoutMessage(false)}
-            />
-            <DialogButton
-              text="OK"
-              onPress={() => {
-                setShowLogoutMessage(false);
-                signOut();
-              }}
-            />
-          </DialogFooter>
-        }
-      >
-        <DialogContent>
-          <Text style={styles.logoutMessage}>Are you sure you want to logout?</Text>
-        </DialogContent>
-      </Dialog>
+      <PopUpMessage showPopUp={showLogoutMessage} exitAction={dismissLogout} exitMessage='No' confirmAction={signOut} confirmMessage='Yes' >
+        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Are you sure you want to logout?</Text>
+      </PopUpMessage>
 
     </View>
   );
