@@ -72,6 +72,9 @@ const AVATAR_IMAGES = {
 export const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
 export const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
 const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, AVATARS.MONKEY, AVATARS.OX, AVATARS.PIG, AVATARS.RABBIT, AVATARS.RAT, AVATARS.ROOSTER, AVATARS.SNAKE, AVATARS.TIGER];
+export const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
+export const MIN_NUMBER_PLAYERS = 2;
+export const MAX_NUMBER_PLAYERS = 5;
 
 export function getRandomAvatars(numAvatars) {
   let avatars = [];
@@ -308,7 +311,7 @@ export function getUnion() {
 export function getFullHouse() {
   const pair = getPair();
   let thrice = getThreeOfAKind();
-  while (Math.ceil((pair[0] / 4) - 1) == Math.ceil((thrice[0] / 4)) - 1) {
+  while (Math.ceil((pair[0] / 4) - 1) === Math.ceil((thrice[0] / 4)) - 1) {
     thrice = getThreeOfAKind();
   }
   return pair.concat(thrice);

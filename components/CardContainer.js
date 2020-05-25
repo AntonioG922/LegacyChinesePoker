@@ -7,7 +7,7 @@ import { HeaderText } from './StyledText';
 import {
   getRank,
   JOKER,
-  ORDERED_RANKS, ORDERED_SUITS,
+  ORDERED_RANKS, ORDERED_SUITS, PLACE_SUFFIX,
   sortCards, SUITS
 } from '../functions/HelperFunctions';
 
@@ -94,8 +94,6 @@ function JokerSelector({ setJoker }) {
 }
 
 export function Place({ place }) {
-  const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
-
   return (
     <View style={styles.placeContainer}>
       <HeaderText style={styles.place}>{place + 1}</HeaderText>

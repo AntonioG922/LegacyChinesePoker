@@ -20,6 +20,7 @@ import GameScreen from './screens/GameScreen';
 import LoginOptions from './screens/LoginOptions';
 import EmailLogin from './screens/EmailLogin';
 import InitialLoadScreen from './screens/InitialLoadScreen';
+import {StatsScreen} from './screens/Stats';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -97,6 +98,7 @@ export default function App(props) {
                 <Stack.Screen name="Game" component={GameScreen} />
                 <Stack.Screen name="LoginOptions" component={LoginOptions} />
                 <Stack.Screen name="EmailLogin" component={EmailLogin} />
+                <Stack.Screen name="Stats" component={StatsScreen} />
               </Stack.Navigator>
             </NavigationContainer>
           </View>
