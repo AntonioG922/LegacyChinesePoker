@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import firebase from 'firebase';
 
 import { FlatTextInput, TextButton, HeaderText, PasswordTextInput } from '../components/StyledText';
-import { TitledPage } from '../components/Template';
+import TitledPage from '../components/TitledPage';
 import Loader from '../components/Loader';
 import { Card } from '../components/Card';
 

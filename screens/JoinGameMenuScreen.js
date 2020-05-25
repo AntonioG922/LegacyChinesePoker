@@ -9,7 +9,7 @@ import {
   PasswordTextInput,
   TextButton
 } from "../components/StyledText";
-import { TitledPage } from "../components/Template";
+import TitledPage from '../components/TitledPage';
 import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader';
 

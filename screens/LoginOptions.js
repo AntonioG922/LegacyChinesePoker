@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { LogInOptionButton } from '../components/StyledText';
-import { TitledPage } from '../components/Template';
+import TitledPage from '../components/TitledPage';
 import Loader from '../components/Loader';
 import { signInWithFacebook, signInWithGoogle } from '../functions/SignInFunctions';
 

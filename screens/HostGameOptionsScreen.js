@@ -15,7 +15,7 @@ import {
   HeaderText, FlatTextInput,
   TextButton
 } from '../components/StyledText';
-import { TitledPage } from '../components/Template';
+import TitledPage from '../components/TitledPage';
 import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
