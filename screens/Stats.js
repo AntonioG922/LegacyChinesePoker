@@ -18,7 +18,7 @@ import {
   MIN_NUMBER_PLAYERS
 } from '../functions/HelperFunctions';
 
-export function StatsScreen({ navigation }) {
+export default function StatsScreen({ navigation }) {
   const user = store.getState().userData.user;
   const [userStats, setUserStats] = useState({});
   const [statsFetched, setStatsFetched] = useState(false);

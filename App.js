@@ -20,7 +20,7 @@ import GameScreen from './screens/GameScreen';
 import LoginOptions from './screens/LoginOptions';
 import EmailLogin from './screens/EmailLogin';
 import InitialLoadScreen from './screens/InitialLoadScreen';
-import {StatsScreen} from './screens/Stats';
+import StatsScreen from './screens/Stats';
 
 // Initialize Firebase
 const firebaseConfig = {
