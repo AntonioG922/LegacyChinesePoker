@@ -200,7 +200,7 @@ function Divider({ subtitle, style }) {
   return (
       <View style={[styles.divider, style]}>
         <View style={styles.dividerLine} />
-        <HeaderText style={{fontSize: 16}}>{subtitle}</HeaderText>
+        <HeaderText style={{fontSize: 16, alignSelf: 'flex-start', textAlign: 'center', width: '35%'}}>{subtitle}</HeaderText>
       </View>
   );
 }
@@ -213,16 +213,15 @@ const styles = StyleSheet.create({
   divider: {
     paddingTop: 50,
     paddingBottom: 30,
-    marginLeft: 30,
-    marginRight: -30,
   },
   dividerLine: {
     height: 1,
     backgroundColor: 'grey',
     marginTop: 20,
     marginBottom: 10,
-    width: '100%',
-    alignSelf: 'flex-end',
+    width: '35%',
+    marginLeft: -30,
+    marginRight: 30,
   },
   scrollContainer: {
     flexGrow: 1,

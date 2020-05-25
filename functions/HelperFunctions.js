@@ -1,6 +1,6 @@
 const NUMBER_OF_CARDS = 52;
-const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
-const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
+export const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
+export const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
 export const JOKER = NUMBER_OF_CARDS + 1;
 export const SUITS = {
   CLUB: 'CLUB',
