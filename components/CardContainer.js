@@ -25,17 +25,20 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
       </View>
       {place >= 0
         ? <Place place={place} />
-        : <View style={styles.actionsContainer}>
-          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
-          {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
+        : <View>
+          <View style={styles.actionsContainer}>
+            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
+            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
+          </View>
+          {selectingJoker && <JokerSelector setJoker={setJoker} />}
+          <View style={styles.cardContainer}>
+            {sortCards(cards).map((rank, index) => (
+              <Card key={rank} rank={rank === JOKER ? jokerValue : rank} toggleSelected={toggleSelected}
+                style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
+            ))}
+          </View>
         </View>}
-      {selectingJoker && <JokerSelector setJoker={setJoker} />}
-      <View style={styles.cardContainer}>
-        {sortCards(cards).map((rank, index) => (
-          <Card key={rank} rank={rank === JOKER ? jokerValue : rank} toggleSelected={toggleSelected}
-            style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
-        ))}
-      </View>
+
     </View>
   );
 

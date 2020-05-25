@@ -83,7 +83,7 @@ export default function HostGameOptionsScreen({ navigation }) {
         <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
         <View style={styles.row}>
           <HeaderText style={styles.rowText} >Players:</HeaderText>
-          <Button disabled={numberOfPlayers <= 3} onPress={() => setNumberOfPlayers(numberOfPlayers - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+          <Button disabled={numberOfPlayers <= 2} onPress={() => setNumberOfPlayers(numberOfPlayers - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
           <HeaderText style={styles.rowText} >{numberOfPlayers}</HeaderText>
           <Button disabled={numberOfPlayers >= 5} onPress={() => setNumberOfPlayers(numberOfPlayers + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
         </View>
