@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
 import firebase from 'firebase';
 
-import { FlatTextInput, TextButton, HeaderText, PasswordTextInput } from '../components/StyledText';
-import { TitledPage } from '../components/Template';
+import { FlatTextInput, TextButton, PasswordTextInput } from '../components/StyledText';
+import TitledPage from '../components/TitledPage';
 import Loader from '../components/Loader';
-import { Card } from '../components/Card';
 
 export default function Login({ route, navigation }) {
   const [signingUp, setSigningUp] = useState(route.params.signingUp);
@@ -74,21 +73,23 @@ export default function Login({ route, navigation }) {
   }
 
   return (
-    <TitledPage
-      pageTitle={' '}
-      navigation={navigation}
-      contentContainerStyle={styles.container}>
+    <View style={{ flex: 1 }}>
       <Loader loading={loading} message={signingUp ? 'Signing Up' : 'Logging In'} />
-      <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
-      <View style={styles.form}>
-        {signingUp && <FlatTextInput label={'Username'} onChangeText={text => setUsername(text)} />}
-        <FlatTextInput keyboardType={'email-address'} label={'Email'} onChangeText={text => setEmail(text)} textContentType={'emailAddress'} />
-        <PasswordTextInput label={'Password'} onChangeText={text => setPassword(text)} textContentType={signingUp ? 'newPassword' : 'password'} />
-        {signingUp && <PasswordTextInput label={'Password Confirm'} onChangeText={text => setPasswordConfirm(text)} />}
-      </View>
-      <TextButton style={styles.submitButton} onPress={() => signingUp ? signUp(username, email, password, passwordConfirm) : logIn(email, password)} >{signingUp ? 'Sign Up' : 'Log In'}</TextButton>
-      <Text style={styles.errorMessage}>{errorMessage}</Text>
-    </TitledPage>
+      <TitledPage
+        pageTitle={' '}
+        navigation={navigation}
+        contentContainerStyle={styles.container}>
+        <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
+        <View style={styles.form}>
+          {signingUp && <FlatTextInput label={'Username'} onChangeText={text => setUsername(text)} />}
+          <FlatTextInput keyboardType={'email-address'} label={'Email'} onChangeText={text => setEmail(text)} textContentType={'emailAddress'} />
+          <PasswordTextInput label={'Password'} onChangeText={text => setPassword(text)} textContentType={signingUp ? 'newPassword' : 'password'} />
+          {signingUp && <PasswordTextInput label={'Password Confirm'} onChangeText={text => setPasswordConfirm(text)} />}
+        </View>
+        <TextButton style={styles.submitButton} onPress={() => signingUp ? signUp(username, email, password, passwordConfirm) : logIn(email, password)} >{signingUp ? 'Sign Up' : 'Log In'}</TextButton>
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
+      </TitledPage>
+    </View>
   )
 }
 

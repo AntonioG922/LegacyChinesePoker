@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 import store from '../redux/store';
@@ -15,7 +15,7 @@ import {
   HeaderText, FlatTextInput,
   TextButton
 } from '../components/StyledText';
-import { TitledPage } from '../components/Template';
+import TitledPage from '../components/TitledPage';
 import Loader from '../components/Loader';
 
 export default function HostGameOptionsScreen({ navigation }) {
@@ -76,49 +76,51 @@ export default function HostGameOptionsScreen({ navigation }) {
   }
 
   return (
-    <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
+    <View style={{ flex: 1 }}>
       <Loader loading={loading} message={'Creating Game'} />
-      <View style={styles.form}>
-        <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
-        <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
-        <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Players:</HeaderText>
-          <Button disabled={numberOfPlayers <= MIN_NUMBER_PLAYERS}
-                  onPress={() => {
-                    setNumberOfPlayers(numberOfPlayers - 1);
-                    setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
-                  }}>
-            <FontAwesome5 name={'chevron-down'} style={styles.rowText} />
-          </Button>
-          <HeaderText style={styles.rowText} >{numberOfPlayers}</HeaderText>
-          <Button disabled={numberOfPlayers >= MAX_NUMBER_PLAYERS}
-                  onPress={() => {
-                    setNumberOfPlayers(numberOfPlayers + 1);
-                    setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
-                    if (cardsPerPlayer > maxCardsAllowed) {
-                      setCardsPerPlayer(maxCardsAllowed);
-                    }
-                  }}>
-            <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
-          </Button>
+      <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
+        <View style={styles.form}>
+          <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
+          <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
+          <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Players:</HeaderText>
+            <Button disabled={numberOfPlayers <= MIN_NUMBER_PLAYERS}
+              onPress={() => {
+                setNumberOfPlayers(numberOfPlayers - 1);
+                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
+              }}>
+              <FontAwesome5 name={'chevron-down'} style={styles.rowText} />
+            </Button>
+            <HeaderText style={styles.rowText} >{numberOfPlayers}</HeaderText>
+            <Button disabled={numberOfPlayers >= MAX_NUMBER_PLAYERS}
+              onPress={() => {
+                setNumberOfPlayers(numberOfPlayers + 1);
+                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
+                if (cardsPerPlayer > maxCardsAllowed) {
+                  setCardsPerPlayer(maxCardsAllowed);
+                }
+              }}>
+              <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
+            </Button>
+          </View>
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
+            <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+            <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
+            <Button disabled={useJoker ? cardsPerPlayer >= Math.floor(JOKER_DECK.length / numberOfPlayers) : cardsPerPlayer >= Math.floor(STANDARD_DECK.length / numberOfPlayers)}
+              onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}>
+              <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
+            </Button>
+          </View>
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
+            <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
+          </View>
         </View>
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
-          <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
-          <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
-          <Button disabled={useJoker ? cardsPerPlayer >= Math.floor(JOKER_DECK.length / numberOfPlayers) : cardsPerPlayer >= Math.floor(STANDARD_DECK.length / numberOfPlayers)}
-                  onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}>
-            <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
-          </Button>
-        </View>
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
-          <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
-        </View>
-      </View>
-      <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
-    </TitledPage>
+        <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
+      </TitledPage>
+    </View>
   );
 }
 
