@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, Platform, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import {PLACE_SUFFIX} from '../functions/HelperFunctions';
 
 export function HeaderText(props) {
-  return <Text {...props} style={[styles.styledText, props.style]} />;
+  return <Text {...props} style={[styles.styledText, props.center && styles.centerText, props.fontSize && {fontSize: props.fontSize}, props.style]} />;
 }
 
 export function PageTitle(props) {
@@ -12,7 +13,9 @@ export function PageTitle(props) {
 }
 
 export function TextButton(props) {
-  return <Button {...props} labelStyle={[styles.styledText, { fontSize: 32 }, props.labelStyle]} />;
+  return <TouchableOpacity {...props} style={{paddingVertical: 10, paddingHorizontal: 20}}>
+    <HeaderText center style={[styles.styledText, { fontSize: 32 }, props.labelStyle]}>{props.children}</HeaderText>
+  </TouchableOpacity>;
 }
 
 export function ContainedButton(props) {
@@ -40,6 +43,15 @@ export function PasswordTextInput(props) {
   )
 }
 
+export function PlaceAndSuffix({ place, style }) {
+  return (
+      <View style={styles.placeAndSuffix}>
+        <HeaderText style={[styles.place, style]}>{place}</HeaderText>
+        <HeaderText style={[styles.placeSuffix, style]}>{PLACE_SUFFIX[place - 1]}</HeaderText>
+      </View>
+  )
+}
+
 export function LogInOptionButton({ textColor, icon, style, message, ...rest }) {
   return (
     <TouchableOpacity {...rest} style={[styles.logInOptionButton, style]}>
@@ -58,6 +70,9 @@ const styles = StyleSheet.create({
   styledText: {
     fontFamily: 'gang-of-three',
     color: 'rgb(217, 56, 27)',
+  },
+  centerText: {
+    textAlign: 'center',
   },
   containedButtonText: {
     color: '#ddd'
@@ -106,6 +121,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white'
+  },
+  placeAndSuffix: {
+    flexDirection: 'row',
+  },
+  place: {
+    fontSize: 25,
+  },
+  placeSuffix: {
+    fontSize: 15,
+    lineHeight: 20
   },
   googleImage: {
     width: 27,
