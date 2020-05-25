@@ -301,7 +301,7 @@ export default function GameScreen({ route, navigation }) {
 
       <Loader loading={!gameStarted}
         message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
-        navigation={navigation}
+        exitAction={navigation.goBack}
       />
       <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
         {gameData.places.map((player, index) => {
@@ -398,5 +398,3 @@ const styles = StyleSheet.create({
   }
 
 });
-
-// Have loser of the hand send the game data to the DB stats collector to minimize the # of writes
