@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, StatusBar } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
 import { setUserData, clearUserData } from '../redux/store';
@@ -27,6 +27,7 @@ export default function InitialLoaderScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle='dark-content' />
       <Image
         source={require('../assets/images/dragon_1350x2400.png')}
         style={styles.loaderImage}
