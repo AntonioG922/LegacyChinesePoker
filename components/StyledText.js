@@ -13,7 +13,9 @@ export function PageTitle(props) {
 }
 
 export function TextButton(props) {
-  return <Button {...props} labelStyle={[styles.styledText, { fontSize: 32 }, props.labelStyle]} />;
+  return <TouchableOpacity {...props} style={{paddingVertical: 10, paddingHorizontal: 20}}>
+    <HeaderText center style={[styles.styledText, { fontSize: 32 }, props.labelStyle]}>{props.children}</HeaderText>
+  </TouchableOpacity>;
 }
 
 export function ContainedButton(props) {
