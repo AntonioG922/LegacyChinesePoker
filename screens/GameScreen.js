@@ -17,8 +17,8 @@ import {
   isBetterHand, isLegalPlay,
   dealCards, findStartingPlayer
 } from '../functions/HelperFunctions';
-import PopUpMessage from '../components/popUpMessage';
-import TrophyPlaceDisplay from '../components/trophyPlaceDisplay';
+import PopUpMessage from '../components/PopUpMessage';
+import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -53,8 +53,11 @@ export default function GameScreen({ route, navigation }) {
     const playersPlayingAgainLength = Object.keys(gameData.playersPlayingAgain).length;
     const lastUIDPlayingAgain = playersPlayingAgainLength ? Object.keys(gameData.playersPlayingAgain)[playersPlayingAgainLength - 1] : null;
     const allRemainingPlayersPlayingAgain = playersPlayingAgainLength === Object.keys(gameData.players).length;
+    console.log('1')
 
     if (allRemainingPlayersPlayingAgain && lastUIDPlayingAgain === user.uid) {
+      console.log('2')
+
       const hands = dealCards(gameData.useJoker, gameData.numberOfPlayers, gameData.cardsPerPlayer);
       let players = {};
       let playersTurnHistory = {};
@@ -97,11 +100,12 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return navigation.addListener('blur', () => {
       if (!gameStarted) {
+        console.log(gameStarted);
         let updates = {};
         updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+        updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
         updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
-        db.collection('CustomGames').doc(gameData.gameName).update(updates)
-        setGameStarted(true);
+        db.collection('CustomGames').doc(gameData.gameName).update(updates);
       }
     });
   }, [navigation]);
@@ -263,17 +267,29 @@ export default function GameScreen({ route, navigation }) {
       .catch((error) => {
         alert('Error trying to play again. Please check your connection and try again.')
       });
+
+    return true;
   }
 
   function dontPlayAgain() {
-    const update = {};
-    update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+    if (Object.keys(gameData.players).length === 1) {
+      db.collection('CustomGames').doc(gameData.gameName).delete()
+        .then(() => navigation.goBack())
+        .catch((error) => {
+          alert('Error trying to exit. Please check your connection and try again.')
+        });
+    } else {
+      const update = {};
+      update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
 
-    db.collection('CustomGames').doc(gameData.gameName).update(update)
-      .then(() => navigation.goBack())
-      .catch((error) => {
-        alert('Error trying to exit. Please check your connection and try again.')
-      });
+      db.collection('CustomGames').doc(gameData.gameName).update(update)
+        .then(() => navigation.goBack())
+        .catch((error) => {
+          alert('Error trying to exit. Please check your connection and try again.')
+        });
+    }
+
+    return true;
   }
 
   function getAvatarRotation(index) {
