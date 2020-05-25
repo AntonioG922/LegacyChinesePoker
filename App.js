@@ -90,12 +90,12 @@ export default function App(props) {
             <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
               <Stack.Navigator initialRouteName={'InitialLoadScreen'} screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="InitialLoadScreen" component={InitialLoadScreen} />
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+                <Stack.Screen name="Home" options={{ gestureEnabled: false }} component={HomeScreen} />
+                <Stack.Screen name="HowToPlay" options={{ gestureEnabled: false }} component={HowToPlayScreen} />
                 <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
                 <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
-                <Stack.Screen name="Game" component={GameScreen} />
-                <Stack.Screen name="LoginOptions" component={LoginOptions} />
+                <Stack.Screen name="Game" options={{ gestureEnabled: false }} component={GameScreen} />
+                <Stack.Screen name="LoginOptions" options={{ gestureEnabled: false }} component={LoginOptions} />
                 <Stack.Screen name="EmailLogin" component={EmailLogin} />
               </Stack.Navigator>
             </NavigationContainer>
