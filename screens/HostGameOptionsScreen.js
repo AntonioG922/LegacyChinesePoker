@@ -1,13 +1,13 @@
 import * as firebase from 'firebase';
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 import store from '../redux/store';
 
 import {
   dealCards,
-  findStartingPlayer, getRandomAvatars,
+  findStartingPlayer,
   HAND_TYPES
 } from '../functions/HelperFunctions';
 
@@ -75,31 +75,33 @@ export default function HostGameOptionsScreen({ navigation }) {
   }
 
   return (
-    <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
+    <View style={{ flex: 1 }}>
       <Loader loading={loading} message={'Creating Game'} />
-      <View style={styles.form}>
-        <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
-        <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
-        <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Players:</HeaderText>
-          <Button disabled={numberOfPlayers <= 2} onPress={() => setNumberOfPlayers(numberOfPlayers - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
-          <HeaderText style={styles.rowText} >{numberOfPlayers}</HeaderText>
-          <Button disabled={numberOfPlayers >= 5} onPress={() => setNumberOfPlayers(numberOfPlayers + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
+      <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
+        <View style={styles.form}>
+          <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
+          <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
+          <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Players:</HeaderText>
+            <Button disabled={numberOfPlayers <= 2} onPress={() => setNumberOfPlayers(numberOfPlayers - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+            <HeaderText style={styles.rowText} >{numberOfPlayers}</HeaderText>
+            <Button disabled={numberOfPlayers >= 5} onPress={() => setNumberOfPlayers(numberOfPlayers + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
+          </View>
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
+            <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+            <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
+            <Button disabled={cardsPerPlayer >= 20} onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
+          </View>
+          <View style={styles.row}>
+            <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
+            <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
+          </View>
         </View>
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
-          <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
-          <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
-          <Button disabled={cardsPerPlayer >= 20} onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}><FontAwesome5 name={'chevron-up'} style={styles.rowText} /></Button>
-        </View>
-        <View style={styles.row}>
-          <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
-          <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
-        </View>
-      </View>
-      <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
-    </TitledPage>
+        <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
+      </TitledPage>
+    </View>
   );
 }
 

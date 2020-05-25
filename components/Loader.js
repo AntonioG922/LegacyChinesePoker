@@ -11,7 +11,7 @@ export default function Loader({ loading, message, exitAction }) {
   return (
     <View style={{ position: 'absolute', zIndex: 99999, elevation: 99999, width: loading ? windowDimensions.width : 0, height: loading ? windowDimensions.height : 0 }}>
       {loading && <View style={styles.modalBackground}>
-        {navigation && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => exitAction()} /></HeaderText>}
+        {exitAction && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => exitAction()} /></HeaderText>}
         <HeaderText style={styles.loaderMessage}>{message}</HeaderText>
         <ActivityIndicator
           animating={loading}
