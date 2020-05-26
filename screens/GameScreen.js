@@ -320,7 +320,7 @@ export default function GameScreen({ route, navigation }) {
 
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
-        lastPlayerToPlay={gameData.lastPlayerToPlay[user.uid]}
+        lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
