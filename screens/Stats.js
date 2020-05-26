@@ -14,9 +14,24 @@ import TitledPage from '../components/TitledPage';
 import { ScrollView } from "react-native-gesture-handler";
 import {
   HAND_TYPES,
-  MAX_NUMBER_PLAYERS,
-  MIN_NUMBER_PLAYERS, secondsToTime
+  MIN_NUMBER_PLAYERS, secondsToTime, GAME_TYPES, animateNextLayout
 } from '../functions/HelperFunctions';
+ const ALL = 'All';
+const sliderValues = [ALL, 2, 3, 4, 5];
+const sliderValueToGameTypeMap = {
+  All: GAME_TYPES.ALL_GAMES,
+  2: GAME_TYPES.TWO_PLAYER,
+  3: GAME_TYPES.THREE_PLAYER,
+  4: GAME_TYPES.FOUR_PLAYER,
+  5: GAME_TYPES.FIVE_PLAYER,
+};
+const displayValueMap = {
+  All: '',
+  2: '2 player ',
+  3: '3 player ',
+  4: '4 player ',
+  5: '5 player ',
+};
 
 export default function StatsScreen({ navigation }) {
   const user = store.getState().userData.user;
@@ -44,37 +59,93 @@ export default function StatsScreen({ navigation }) {
 }
 
 function Stats({ userStats }) {
+  const [sliderValue, setSliderValue] = useState(ALL);
+  const [hasPlayedGameType, setHasPlayedGameType] = useState(false);
+
+  function onSliderSelect(sliderValue) {
+    setSliderValue(sliderValue);
+    setHasPlayedGameType(!!userStats && !!userStats[sliderValueToGameTypeMap[sliderValue]])
+  }
+
   return (
-      <View style={{width: '100%'}}>
-        <Divider subtitle={'Lifetime'} style={{paddingTop: 0}} />
-        <TotalStats userStats={userStats} />
-        <Divider subtitle={'Per Game'} />
-        <UserPlacementStat placementStats={userStats.placement} />
-        <Divider subtitle={'Hands'} />
-        <UserHandsStats handsStats={userStats.hands} />
-        <Divider subtitle={'Time'} />
-        <TimeStats userStats={userStats} />
+    <View style={[{width: '100%'}]}>
+      <Slider onSliderSelect={onSliderSelect} />
+      {hasPlayedGameType &&
+        <View>
+          <UserPlacementStat userStats={userStats} gameType={sliderValueToGameTypeMap[sliderValue]} />
+          <Divider subtitle={'Hands'} />
+          <UserHandsStats handsStats={userStats[sliderValueToGameTypeMap[sliderValue]].hands} />
+        </View>}
+      {!hasPlayedGameType && <HeaderText fontSize={24} style={{ marginTop: 100, textAlign: 'center' }}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
+    </View>
+  )
+}
+
+function Slider({onSliderSelect}) {
+  const [sliderValue, setSliderValue] = useState(ALL);
+  const [sliderIndicatorMarginLeft, setSliderIndicatorMarginLeft] = useState(10);
+
+  function onSelect(sliderValue) {
+    setSliderValue(sliderValue);
+    setSliderIndicatorMarginLeft(sliderValue === 'All' ? 10 :  10 + (sliderValue - MIN_NUMBER_PLAYERS + 1) * 60);
+    onSliderSelect(sliderValue);
+  }
+
+  return (
+      <View>
+        <View style={styles.slider}>
+          {sliderValues.map((sliderValue) =>
+              <TouchableOpacity key={sliderValue} style={{ width: 60 }} onPress={() => onSelect(sliderValue)}>
+                <HeaderText fontSize={24} center>{sliderValue}</HeaderText>
+              </TouchableOpacity>)}
+          <Animated.View style={[styles.sliderCurrentValue, { marginLeft: sliderIndicatorMarginLeft }]}>
+            <HeaderText center fontSize={24} style={styles.sliderCurrentValueText}>{sliderValue}</HeaderText>
+          </Animated.View>
+        </View>
+        <HeaderText center style={styles.sliderHelpText}>(Number of players)</HeaderText>
       </View>
   )
 }
 
-function TotalStats({ userStats }) {
+function UserPlacementStat({ userStats = {}, gameType }) {
+  const [placements, setPlacements] = useState([]);
+  const [totalGames, setTotalGames] = useState(1);
+  const [playtime, setPlaytime] = useState(0);
+
+  useEffect(() => {
+    animateNextLayout();
+
+    const gameTypeStats = userStats[gameType];
+    const hasNotPlayedGamesForGameType = !gameTypeStats;
+    if (hasNotPlayedGamesForGameType) {setTotalGames(0); return;}
+
+    const p = gameType === GAME_TYPES.ALL_GAMES
+        ? [1, 'last']
+        : Array.from({length: Object.keys(sliderValueToGameTypeMap).find(key => sliderValueToGameTypeMap[key] === gameType)}).map((v, i) => i + 1);
+    const placements = p.map((placement) => {return {place: placement, numberOfGames: gameTypeStats.placements && gameTypeStats.placements[placement] || 0}});
+
+    setTotalGames(gameTypeStats.totalGames);
+    setPlaytime(gameTypeStats.playtime);
+    setPlacements(placements);
+  }, [gameType]);
+
   return (
-      <View>
-        <View>
-          <NumberStat label={'Total Games'} number={userStats.totalGames} />
-          <View style={styles.row}>
-            <NumberStat label={'Wins'} number={userStats.totalWins} percent={Math.round((userStats.totalWins / userStats.totalGames) * 100)} />
-            <NumberStat label={'Losses'} number={userStats.totalLosses} percent={Math.round((userStats.totalLosses / userStats.totalGames) * 100)} />
-          </View>
-          <View style={{paddingVertical: 10}}>
-            <HeaderText center style={{fontSize: 24}}>Playtime</HeaderText>
-            <HeaderText  style={{fontSize: 24, color: 'grey', textAlign: 'center'}}>
-              {secondsToTime(userStats.totalGameTime)}
-            </HeaderText>
-          </View>
-        </View>
+    <View>
+      <NumberStat label={'Games'} number={totalGames} />
+      <View style={styles.row}>
+        {placements.map((placement) => {
+          const label = typeof placement.place === 'string' ? <HeaderText fontSize={24}>{placement.place}</HeaderText> : <PlaceAndSuffix place={placement.place}/>;
+
+          return <NumberStat key={placement.place}
+                             label={label}
+                             number={placement.numberOfGames}
+                             percent={Math.floor(
+                                 (placement.numberOfGames / Math.max(
+                                     totalGames, 1)) * 100)}/>
+        })}
       </View>
+      <NumberStat label={'Playtime'} number={secondsToTime(playtime)} />
+    </View>
   )
 }
 
@@ -82,116 +153,38 @@ function UserHandsStats({ handsStats }) {
   const totalHands = Object.values(handsStats).reduce((n1, n2) => n1 + n2);
 
   function HandStat({ label, handType }) {
-    return (
-      <NumberStat label={label} number={handsStats[handType]} percent={Math.round((handsStats[handType] / totalHands) * 100)} style={{ flexGrow: 1 }} />
-    )
-  }
-
-  return (
-    <View>
-      <NumberStat label={'Total Hands'} number={totalHands} />
-      <View style={styles.row}>
-        <HandStat label={'Singles'} handType={HAND_TYPES.SINGLE} />
-        <HandStat label={'Pairs'} handType={HAND_TYPES.PAIR} />
-      </View>
-      <View style={styles.row}>
-        <HandStat label={'3-of-a-Kind'} handType={HAND_TYPES.THREE_OF_A_KIND} />
-        <HandStat label={'Full House'} handType={HAND_TYPES.FULL_HOUSE} />
-      </View>
-      <View style={styles.row}>
-        <HandStat label={'Straight'} handType={HAND_TYPES.STRAIGHT} />
-        <HandStat label={'Straight Flush'} handType={HAND_TYPES.STRAIGHT_FLUSH} />
-      </View>
-      <View style={styles.row}>
-        <HandStat label={'Union'} handType={HAND_TYPES.UNION} />
-      </View>
-    </View>
-  )
-}
-
-/**
- * Placement stats schema:
- *  # of players
- *  `-> placement (i.e. 1, 2, 3, 4, 5)
- *      `-> game finish timestamp
- *          `-> user's hand (arr)
- *
- */
-function UserPlacementStat({ placementStats = {} }) {
-  const [numberOfPlayers, setNumberOfPlayers] = useState(4);
-  const [filteredData, setFilteredData] = useState([]);
-  const [totalGames, setTotalGames] = useState(1);
-
-  useEffect(() => {
-    if (Object.keys(placementStats).length === 0) {
-      return;
-    }
-    const currentData = placementStats[numberOfPlayers];
-    const td = Array.from({ length: numberOfPlayers }).map((v, i) => i + 1);
-
-    const transformedCurrentData = td.map((placement) => {
-      return {
-        place: placement,
-        numberOfGames: currentData === undefined || currentData[placement] === undefined ? 0 : Object.keys(currentData[placement]).length
-      }
-    });
-
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setFilteredData(transformedCurrentData);
-    setTotalGames(transformedCurrentData.map((placementData) => placementData.numberOfGames).reduce((n1, n2) => n1 + n2));
-  }, [numberOfPlayers]);
-
-  function Slider() {
-    const fontSize = 24;
-    const sliderOptions = Array.from({ length: MAX_NUMBER_PLAYERS - MIN_NUMBER_PLAYERS + 1 }).map((v, i) => i + MIN_NUMBER_PLAYERS);
+    const timesPlayed = handsStats[handType] || 0;
 
     return (
-      <View style={styles.slider}>
-        {sliderOptions.map((sliderValue) =>
-          <TouchableOpacity key={sliderValue} style={{ flexGrow: 1 }} onPress={() => setNumberOfPlayers(sliderValue)}>
-            <HeaderText fontSize={fontSize} center>{sliderValue}</HeaderText>
-          </TouchableOpacity>)}
-        <Animated.View style={[styles.sliderCurrentValue, { marginLeft: 5 + (numberOfPlayers - MIN_NUMBER_PLAYERS) * 60 }]}>
-          <HeaderText center fontSize={fontSize} style={styles.sliderCurrentValueText}>{numberOfPlayers}</HeaderText>
-        </Animated.View>
-      </View>
+        <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / totalHands) * 100)} style={{ flexGrow: 1 }} />
     )
   }
-
-  return (
-    <View>
-      <Slider />
-      {totalGames > 0
-        ?
-        <View>
-          <NumberStat label={'Games'} number={totalGames} />
-          <View style={styles.row}>
-            {filteredData.map((placementInfo) =>
-              <NumberStat key={placementInfo.place}
-                label={<PlaceAndSuffix place={placementInfo.place} />}
-                number={placementInfo.numberOfGames}
-                percent={Math.floor((placementInfo.numberOfGames / Math.max(totalGames, 1)) * 100)} />
-            )}
-          </View>
-        </View>
-        : <HeaderText fontSize={24} style={{ paddingTop: 30 }}>No {numberOfPlayers} player games played yet</HeaderText>}
-    </View>
-  )
-}
-
-function TimeStats({ userStats }) {
-  const totalHands = Object.values(userStats.hands).reduce((n1, n2) => n1 + n2);
 
   return (
       <View>
-        <NumberStat label={'Average Time To Play'} number={secondsToTime(Math.round(userStats.totalPlayTime / totalHands))} />
+        <NumberStat label={'Total Hands'} number={totalHands} />
+        <View style={styles.row}>
+          <HandStat label={'Singles'} handType={HAND_TYPES.SINGLE} />
+          <HandStat label={'Pairs'} handType={HAND_TYPES.PAIR} />
+        </View>
+        <View style={styles.row}>
+          <HandStat label={'3-of-a-Kind'} handType={HAND_TYPES.THREE_OF_A_KIND} />
+          <HandStat label={'Full House'} handType={HAND_TYPES.FULL_HOUSE} />
+        </View>
+        <View style={styles.row}>
+          <HandStat label={'Straight'} handType={HAND_TYPES.STRAIGHT} />
+          <HandStat label={'Straight Flush'} handType={HAND_TYPES.STRAIGHT_FLUSH} />
+        </View>
+        <View style={styles.row}>
+          <HandStat label={'Union'} handType={HAND_TYPES.UNION} />
+        </View>
       </View>
   )
 }
 
 function NumberStat({ label, number, percent, inline, style }) {
   return (
-    <View style={[{ paddingVertical: 10 }, inline && { flexDirection: 'row-reverse', justifyContent: 'center' }, style]}>
+    <View style={[{ paddingVertical: 10, alignItems: 'center' }, inline && { flexDirection: 'row-reverse', justifyContent: 'center' }, style]}>
       {typeof label === 'string' || typeof label === number ? <HeaderText center style={{ fontSize: 24 }}>{label}</HeaderText> : label}
       <HeaderText style={[{ fontSize: 24, color: 'grey', textAlign: 'center' }, inline && { marginLeft: 10 }]}>
         {number}
@@ -207,7 +200,8 @@ function Divider({ subtitle, style }) {
   return (
     <View style={[styles.divider, style]}>
       <View style={styles.dividerLine} />
-      <HeaderText style={{ fontSize: 16, alignSelf: 'flex-start', textAlign: 'center', width: '35%' }}>{subtitle}</HeaderText>
+      <HeaderText style={{ fontSize: 32 }}>{subtitle}</HeaderText>
+      <View style={styles.dividerLine} />
     </View>
   );
 }
@@ -220,38 +214,42 @@ const styles = StyleSheet.create({
   divider: {
     paddingTop: 50,
     paddingBottom: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 250,
+    alignSelf: 'center',
+    overflow: 'hidden'
   },
   dividerLine: {
     height: 1,
     backgroundColor: 'grey',
-    marginTop: 20,
-    marginBottom: 10,
     width: '35%',
-    marginLeft: -30,
-    marginRight: 30,
+    marginHorizontal: 20,
   },
   scrollContainer: {
     flexGrow: 1,
   },
   slider: {
     backgroundColor: 'white',
-    width: 240,
+    width: 320,
     height: 45,
     alignSelf: 'center',
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 10,
+    marginBottom: 5,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: 'lightgrey'
   },
   sliderCurrentValue: {
     position: 'absolute',
-    width: 50,
+    width: 60,
     height: 30,
     backgroundColor: 'rgb(217, 56, 27)',
     color: '#fff',
-    borderRadius: 20,
+    borderRadius: 13,
     shadowColor: '#333',
     shadowOffset: {
       width: 0,
@@ -263,5 +261,9 @@ const styles = StyleSheet.create({
   sliderCurrentValueText: {
     lineHeight: 30,
     color: '#fff',
+  },
+  sliderHelpText: {
+    color: 'lightgrey',
+    marginBottom: 30,
   },
 });

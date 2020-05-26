@@ -1,3 +1,5 @@
+import {LayoutAnimation} from 'react-native';
+
 const NUMBER_OF_CARDS = 52;
 export const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
 export const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
@@ -75,6 +77,13 @@ const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, A
 export const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
 export const MIN_NUMBER_PLAYERS = 2;
 export const MAX_NUMBER_PLAYERS = 5;
+export const GAME_TYPES = {
+  ALL_GAMES: 'ALL_GAMES',
+  TWO_PLAYER: 'TWO_PLAYER',
+  THREE_PLAYER: 'THREE_PLAYER',
+  FOUR_PLAYER: 'FOUR_PLAYER',
+  FIVE_PLAYER: 'FIVE_PLAYER',
+};
 
 export function getRandomAvatars(numAvatars) {
   let avatars = [];
@@ -344,4 +353,8 @@ export function secondsToTime(sec_num) {
   if (minutes < 10 && hours > 0) {minutes = "0"+minutes;}
   if (seconds < 10 && minutes > 0) {seconds = "0"+seconds;}
   return (hours ? hours + ':' : '') + (minutes ? minutes + ':' : '') + seconds;
+}
+
+export function animateNextLayout() {
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 }
