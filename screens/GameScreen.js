@@ -44,9 +44,7 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
-      setGameEnded(true);
-    //else if ((gameData.numberOfPlayers !== gameData.places.length) && gameEnded)
-    //  setGameEnded(false);
+      setTimeout(setGameEnded(true), 2000);
   }, [gameData.places]);
 
   useEffect(() => {
