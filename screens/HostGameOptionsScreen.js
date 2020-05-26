@@ -72,7 +72,9 @@ export default function HostGameOptionsScreen({ navigation }) {
       playersTurnHistory: { [user.uid]: {} },
       overallTurnHistory: {},
       displayNames: { [user.uid]: user.displayName },
-      playersPlayingAgain: {}
+      playersPlayingAgain: {},
+      gamesPlayed: 0,
+      gamesWon: { [user.uid]: 0 }
     };
     firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
       .then(() => {

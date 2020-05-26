@@ -190,6 +190,12 @@ export default function GameScreen({ route, navigation }) {
     };
     if (handIsEmpty) {
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+
+      if (!gameData.places.length) {
+        data[`gamesWon.${user.uid}`] = firebase.firestore.FieldValue.increment(1);
+        data['gamesPlayed'] = firebase.firestore.FieldValue.increment(1);
+      }
+
       if (gameData.places.length === gameData.numberOfPlayers - 2) {
         let temp = Object.keys(gameData.players);
         temp = temp.filter(value => value !== user.uid);
@@ -307,8 +313,10 @@ export default function GameScreen({ route, navigation }) {
         {gameData.places.map((player, index) => {
           const displayName = gameData.displayNames[player];
           const currentUser = player === user.uid;
-          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} />
+          const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
+          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} gamesWon={gamesWon} />
         })}
+
         <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
       </PopUpMessage>
 
