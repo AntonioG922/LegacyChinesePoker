@@ -53,11 +53,8 @@ export default function GameScreen({ route, navigation }) {
     const playersPlayingAgainLength = Object.keys(gameData.playersPlayingAgain).length;
     const lastUIDPlayingAgain = playersPlayingAgainLength ? Object.keys(gameData.playersPlayingAgain)[playersPlayingAgainLength - 1] : null;
     const allRemainingPlayersPlayingAgain = playersPlayingAgainLength === Object.keys(gameData.players).length;
-    console.log('1')
 
     if (allRemainingPlayersPlayingAgain && lastUIDPlayingAgain === user.uid) {
-      console.log('2')
-
       const hands = dealCards(gameData.useJoker, gameData.numberOfPlayers, gameData.cardsPerPlayer);
       let players = {};
       let playersTurnHistory = {};
@@ -68,7 +65,7 @@ export default function GameScreen({ route, navigation }) {
         playersTurnHistory[key] = {};
         displayNames[key] = gameData.playersPlayingAgain[key];
         playersLeftToJoin--;
-      })
+      });
 
       const updates = {
         players: players,
@@ -89,9 +86,9 @@ export default function GameScreen({ route, navigation }) {
       firebase.firestore().collection('CustomGames').doc(gameData.gameName).update(updates)
         .then(() => {
           setGameEnded(false);
-          setGameStarted(playersLeftToJoin ? false : true);
+          setGameStarted(!playersLeftToJoin);
         })
-        .catch((error) => {
+        .catch(() => {
           alert('Error trying to play again. Please check your connection and try again.')
         });
     }
@@ -133,7 +130,7 @@ export default function GameScreen({ route, navigation }) {
         if (remainingPlayerLastPlayTurnNum < lastPlayTurnNum || remainingPlayerLastPlay !== 'PASS')
           return false;
       }
-    })
+    });
 
     return true;
   }
@@ -191,12 +188,7 @@ export default function GameScreen({ route, navigation }) {
     if (handIsEmpty) {
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
       if (gameData.places.length === gameData.numberOfPlayers - 2) {
-        let temp = Object.keys(gameData.players);
-        temp = temp.filter(value => value !== user.uid);
-        gameData.places.forEach(uid => {
-          temp = temp.filter(value => value !== uid)
-        })
-        const lastPlaceUID = temp[0];
+        const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== user.uid || !gameData.places.includes(playerUid));
         data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
       }
     }
@@ -264,18 +256,16 @@ export default function GameScreen({ route, navigation }) {
         setGameEnded(false);
         setGameStarted(false);
       })
-      .catch((error) => {
+      .catch(() => {
         alert('Error trying to play again. Please check your connection and try again.')
       });
-
-    return true;
   }
 
   function dontPlayAgain() {
     if (Object.keys(gameData.players).length === 1) {
       db.collection('CustomGames').doc(gameData.gameName).delete()
         .then(() => navigation.goBack())
-        .catch((error) => {
+        .catch(() => {
           alert('Error trying to exit. Please check your connection and try again.')
         });
     } else {
@@ -288,8 +278,6 @@ export default function GameScreen({ route, navigation }) {
           alert('Error trying to exit. Please check your connection and try again.')
         });
     }
-
-    return true;
   }
 
   function getAvatarRotation(index) {
