@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LayoutAnimation,
   StyleSheet,
   View,
   TouchableOpacity,
@@ -16,7 +15,8 @@ import {
   HAND_TYPES,
   MIN_NUMBER_PLAYERS, secondsToTime, GAME_TYPES, animateNextLayout
 } from '../functions/HelperFunctions';
- const ALL = 'All';
+
+const ALL = 'All';
 const sliderValues = [ALL, 2, 3, 4, 5];
 const sliderValueToGameTypeMap = {
   All: GAME_TYPES.ALL_GAMES,
@@ -37,6 +37,13 @@ export default function StatsScreen({ navigation }) {
   const user = store.getState().userData.user;
   const [userStats, setUserStats] = useState({});
   const [statsFetched, setStatsFetched] = useState(false);
+  const [sliderValue, setSliderValue] = useState(ALL);
+  const [hasPlayedGameType, setHasPlayedGameType] = useState(false);
+
+  function onSliderSelect(sliderValue) {
+    setSliderValue(sliderValue);
+    setHasPlayedGameType(!!userStats && !!userStats[sliderValueToGameTypeMap[sliderValue]])
+  }
 
   useEffect(() => {
     return firebase.firestore().collection('Stats').doc(user.uid)
@@ -50,33 +57,20 @@ export default function StatsScreen({ navigation }) {
     <View style={{ flexGrow: 1 }}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TitledPage navigation={navigation} pageTitle={'Stats'} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
-          {statsFetched ? <Stats userStats={userStats} />
-            : <HeaderText style={{ fontSize: 32 }}>Fetching Stats...</HeaderText>}
+          <Slider onSliderSelect={onSliderSelect} />
+          {statsFetched
+            ? <View style={[{width: '100%'}]}>
+                {hasPlayedGameType &&
+                <View>
+                  <UserPlacementStat userStats={userStats} gameType={sliderValueToGameTypeMap[sliderValue]} />
+                  <Divider subtitle={'Hands'} />
+                  <UserHandsStats handsStats={userStats[sliderValueToGameTypeMap[sliderValue]].hands} />
+                </View>}
+                {!hasPlayedGameType && <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
+              </View>
+            : <HeaderText style={styles.statusDisplayText}>Fetching Stats...</HeaderText>}
         </TitledPage>
       </ScrollView>
-    </View>
-  )
-}
-
-function Stats({ userStats }) {
-  const [sliderValue, setSliderValue] = useState(ALL);
-  const [hasPlayedGameType, setHasPlayedGameType] = useState(false);
-
-  function onSliderSelect(sliderValue) {
-    setSliderValue(sliderValue);
-    setHasPlayedGameType(!!userStats && !!userStats[sliderValueToGameTypeMap[sliderValue]])
-  }
-
-  return (
-    <View style={[{width: '100%'}]}>
-      <Slider onSliderSelect={onSliderSelect} />
-      {hasPlayedGameType &&
-        <View>
-          <UserPlacementStat userStats={userStats} gameType={sliderValueToGameTypeMap[sliderValue]} />
-          <Divider subtitle={'Hands'} />
-          <UserHandsStats handsStats={userStats[sliderValueToGameTypeMap[sliderValue]].hands} />
-        </View>}
-      {!hasPlayedGameType && <HeaderText fontSize={24} style={{ marginTop: 100, textAlign: 'center' }}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
     </View>
   )
 }
@@ -207,6 +201,11 @@ function Divider({ subtitle, style }) {
 }
 
 const styles = StyleSheet.create({
+  statusDisplayText: {
+    marginTop: 100,
+    textAlign: 'center',
+    fontSize: 24,
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-around',
