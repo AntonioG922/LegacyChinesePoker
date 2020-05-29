@@ -44,17 +44,15 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
-      setTimeout(setGameEnded(true), 2000);
+      setTimeout(() => setGameEnded(true), 2000);
   }, [gameData.places]);
 
   useEffect(() => {
     const playersPlayingAgainLength = Object.keys(gameData.playersPlayingAgain).length;
     const lastUIDPlayingAgain = playersPlayingAgainLength ? Object.keys(gameData.playersPlayingAgain)[playersPlayingAgainLength - 1] : null;
     const allRemainingPlayersPlayingAgain = playersPlayingAgainLength === Object.keys(gameData.players).length;
-    console.log('1')
 
     if (allRemainingPlayersPlayingAgain && lastUIDPlayingAgain === user.uid) {
-      console.log('2')
 
       const hands = dealCards(gameData.useJoker, gameData.numberOfPlayers, gameData.cardsPerPlayer);
       let players = {};
@@ -98,7 +96,6 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return navigation.addListener('blur', () => {
       if (!gameStarted) {
-        console.log(gameStarted);
         let updates = {};
         updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
         updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
@@ -224,7 +221,7 @@ export default function GameScreen({ route, navigation }) {
     const turnsTaken = Object.keys(overallTurnHistory).length;
     overallTurnHistory[turnsTaken] = 'PASS';
     let playersTurnHistory = gameData.playersTurnHistory;
-    playersTurnHistory[user.uid][Object.keys(playersTurnHistory[user.uid]).length] = 'PASS';
+    playersTurnHistory[user.uid][turnsTaken] = 'PASS';
     //REMOVE FOR PROD> ALLOWS TESTER TO PASS
     /* if (gameData.lastPlayerToPlay[user.uid] === user.displayName) {
       setErrorMessage('Must start a new hand');
@@ -322,6 +319,9 @@ export default function GameScreen({ route, navigation }) {
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
+        gameInProgress={gameStarted && !gameEnded}
+        pass={pass}
+        isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
