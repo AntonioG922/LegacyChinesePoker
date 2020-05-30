@@ -13,18 +13,11 @@ import TitledPage from '../components/TitledPage';
 import { ScrollView } from "react-native-gesture-handler";
 import {
   HAND_TYPES,
-  MIN_NUMBER_PLAYERS, secondsToTime, GAME_TYPES, animateNextLayout
+  MIN_NUMBER_PLAYERS, secondsToTime, GAME_TYPES, GAME_TYPE_BY_NUMBER_OF_PLAYERS, animateNextLayout
 } from '../functions/HelperFunctions';
 
 const ALL = 'All';
 const sliderValues = [ALL, 2, 3, 4, 5];
-const sliderValueToGameTypeMap = {
-  All: GAME_TYPES.ALL_GAMES,
-  2: GAME_TYPES.TWO_PLAYER,
-  3: GAME_TYPES.THREE_PLAYER,
-  4: GAME_TYPES.FOUR_PLAYER,
-  5: GAME_TYPES.FIVE_PLAYER,
-};
 const displayValueMap = {
   All: '',
   2: '2 player ',
@@ -38,12 +31,6 @@ export default function StatsScreen({ navigation }) {
   const [userStats, setUserStats] = useState({});
   const [statsFetched, setStatsFetched] = useState(false);
   const [sliderValue, setSliderValue] = useState(ALL);
-  const [hasPlayedGameType, setHasPlayedGameType] = useState(false);
-
-  function onSliderSelect(sliderValue) {
-    setSliderValue(sliderValue);
-    setHasPlayedGameType(!!userStats && !!userStats[sliderValueToGameTypeMap[sliderValue]])
-  }
 
   useEffect(() => {
     return firebase.firestore().collection('Stats').doc(user.uid)
@@ -57,16 +44,16 @@ export default function StatsScreen({ navigation }) {
     <View style={{ flexGrow: 1 }}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TitledPage navigation={navigation} pageTitle={'Stats'} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Slider onSliderSelect={onSliderSelect} />
+          <Slider onSliderSelect={setSliderValue} />
           {statsFetched
             ? <View style={[{width: '100%'}]}>
-                {hasPlayedGameType &&
-                <View>
-                  <UserPlacementStat userStats={userStats} gameType={sliderValueToGameTypeMap[sliderValue]} />
-                  <Divider subtitle={'Hands'} />
-                  <UserHandsStats handsStats={userStats[sliderValueToGameTypeMap[sliderValue]].hands} />
-                </View>}
-                {!hasPlayedGameType && <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
+                {!!userStats && !!userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]]
+                    ? <View>
+                        <UserPlacementStat userStats={userStats} gameType={GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]} />
+                        <Divider subtitle={'Hands'} />
+                        <UserHandsStats handsStats={userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]].hands} />
+                      </View>
+                    : <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
               </View>
             : <HeaderText style={styles.statusDisplayText}>Fetching Stats...</HeaderText>}
         </TitledPage>
@@ -115,7 +102,7 @@ function UserPlacementStat({ userStats = {}, gameType }) {
 
     const p = gameType === GAME_TYPES.ALL_GAMES
         ? [1, 'last']
-        : Array.from({length: Object.keys(sliderValueToGameTypeMap).find(key => sliderValueToGameTypeMap[key] === gameType)}).map((v, i) => i + 1);
+        : Array.from({length: Object.keys(GAME_TYPE_BY_NUMBER_OF_PLAYERS).find(key => GAME_TYPE_BY_NUMBER_OF_PLAYERS[key] === gameType)}).map((v, i) => i + 1);
     const placements = p.map((placement) => {return {place: placement, numberOfGames: gameTypeStats.placements && gameTypeStats.placements[placement] || 0}});
 
     setTotalGames(gameTypeStats.totalGames);
@@ -144,7 +131,7 @@ function UserPlacementStat({ userStats = {}, gameType }) {
 }
 
 function UserHandsStats({ handsStats }) {
-  const totalHands = Object.values(handsStats).reduce((n1, n2) => n1 + n2);
+  const totalHands = Object.values(handsStats).length > 0 ? Object.values(handsStats).reduce((n1, n2) => n1 + n2) : 0;
 
   function HandStat({ label, handType }) {
     const timesPlayed = handsStats[handType] || 0;

@@ -84,6 +84,13 @@ export const GAME_TYPES = {
   FOUR_PLAYER: 'FOUR_PLAYER',
   FIVE_PLAYER: 'FIVE_PLAYER',
 };
+export const GAME_TYPE_BY_NUMBER_OF_PLAYERS = {
+  All: GAME_TYPES.ALL_GAMES,
+  2: GAME_TYPES.TWO_PLAYER,
+  3: GAME_TYPES.THREE_PLAYER,
+  4: GAME_TYPES.FOUR_PLAYER,
+  5: GAME_TYPES.FIVE_PLAYER,
+};
 
 export function getRandomAvatars(numAvatars) {
   let avatars = [];

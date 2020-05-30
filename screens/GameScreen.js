@@ -15,7 +15,7 @@ import {
   getNextEmptyHandIndex,
   HAND_TYPES,
   isBetterHand, isLegalPlay,
-  dealCards, findStartingPlayer
+  dealCards, findStartingPlayer, GAME_TYPE_BY_NUMBER_OF_PLAYERS, GAME_TYPES
 } from '../functions/HelperFunctions';
 import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
@@ -26,6 +26,7 @@ export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const [gameEnded, setGameEnded] = useState(false);
+  const [handsPlayed, setHandsPlayed] = useState({});
   const user = store.getState().userData.user;
   const db = firebase.firestore();
 
@@ -43,8 +44,10 @@ export default function GameScreen({ route, navigation }) {
   }, [gameData.playersLeftToJoin, gameData.playersPlayingAgain]);
 
   useEffect(() => {
-    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
+    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0) {
+      updateUserStats();
       setGameEnded(true);
+    }
     //else if ((gameData.numberOfPlayers !== gameData.places.length) && gameEnded)
     //  setGameEnded(false);
   }, [gameData.places]);
@@ -97,7 +100,6 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return navigation.addListener('blur', () => {
       if (!gameStarted) {
-        console.log(gameStarted);
         let updates = {};
         updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
         updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
@@ -106,6 +108,42 @@ export default function GameScreen({ route, navigation }) {
       }
     });
   }, [navigation]);
+
+  function updateUserStats() {
+    const gameType = GAME_TYPE_BY_NUMBER_OF_PLAYERS[gameData.numberOfPlayers];
+    const userPlacement = gameData.places.indexOf(user.uid) + 1;
+    let allGamesUpdates = {
+      totalGames: firebase.firestore.FieldValue.increment(1),
+      playtime: firebase.firestore.FieldValue.increment(326),
+      placements: {
+        1: userPlacement === 1 ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+        last: userPlacement === gameData.numberOfPlayers ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+      }
+    };
+    let specificGameTypeUpdates = {
+      totalGames: firebase.firestore.FieldValue.increment(1),
+      playtime: firebase.firestore.FieldValue.increment(326),
+    };
+
+    let place = {};
+    place[userPlacement] = firebase.firestore.FieldValue.increment(1);
+    specificGameTypeUpdates.placements = place;
+
+    if (Object.keys(handsPlayed).length > 0) {
+      let hands = {};
+      Object.keys(handsPlayed).forEach((handType) => {
+        hands[handType] = firebase.firestore.FieldValue.increment(handsPlayed[handType]);
+      });
+      allGamesUpdates.hands = hands;
+      specificGameTypeUpdates.hands = hands;
+    }
+
+    const updates = {};
+    updates[GAME_TYPES.ALL_GAMES] = allGamesUpdates;
+    updates[gameType] = specificGameTypeUpdates;
+
+    db.collection('Stats').doc(user.uid).set(updates, {merge: true}).then(() => setHandsPlayed({}));
+  }
 
   function getNextEmptyHandIndexLocal() {
     return getNextEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers);
@@ -188,10 +226,14 @@ export default function GameScreen({ route, navigation }) {
     if (handIsEmpty) {
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
       if (gameData.places.length === gameData.numberOfPlayers - 2) {
-        const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== user.uid || !gameData.places.includes(playerUid));
+        const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== user.uid && !gameData.places.includes(playerUid));
         data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
       }
     }
+
+    let updatedHandsPlayed = handsPlayed;
+    updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + 1;
+    setHandsPlayed(updatedHandsPlayed);
 
     db.collection('CustomGames').doc(gameData.gameName).update(data);
 
