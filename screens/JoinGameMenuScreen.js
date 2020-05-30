@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useReducer, useState } from "react";
-import { Animated, StyleSheet, Text, View, LayoutAnimation } from "react-native";
+import { Animated, StyleSheet, Text, View, LayoutAnimation, KeyboardAvoidingView } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import firebase from 'firebase';
 import store from '../redux/store';
@@ -80,17 +80,19 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Loader loading={loading} message={'Entering Game'} />
-      <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
-        <View style={styles.iconInfo}>
-          <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
-          <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
-        </View>
-        {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
-          <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
-      </TitledPage>
-    </ScrollView>
+    <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column',justifyContent: 'center',}} behavior="padding">
+      <ScrollView>
+        <Loader loading={loading} message={'Entering Game'} />
+        <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
+          <View style={styles.iconInfo}>
+            <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
+            <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
+          </View>
+          {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
+            <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
+        </TitledPage>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

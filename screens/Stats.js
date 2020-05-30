@@ -51,7 +51,7 @@ export default function StatsScreen({ navigation }) {
                     ? <View>
                         <UserPlacementStat userStats={userStats} gameType={GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]} />
                         <Divider subtitle={'Hands'} />
-                        <UserHandsStats handsStats={userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]].hands} />
+                        <UserHandsStats handsStats={userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]].hands || {}} />
                       </View>
                     : <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
               </View>
@@ -137,7 +137,7 @@ function UserHandsStats({ handsStats }) {
     const timesPlayed = handsStats[handType] || 0;
 
     return (
-        <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / totalHands) * 100)} style={{ flexGrow: 1 }} />
+        <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / (totalHands || 1)) * 100)} style={{ flexGrow: 1 }} />
     )
   }
 

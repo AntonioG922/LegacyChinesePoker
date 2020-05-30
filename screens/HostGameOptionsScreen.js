@@ -85,14 +85,14 @@ export default function HostGameOptionsScreen({ navigation }) {
           setLoading(false);
           navigation.navigate('Game', gameData);
         })
-        .catch((error) => {
+        .catch(() => {
           alert('Error uploading game to database. Please check your connection and try again.')
         });
     }
   }
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView contentContainerStyle={{ flex: 1 }}>
       <Loader loading={loading} message={'Creating Game'} />
       <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
         <View style={styles.form}>
@@ -137,10 +137,10 @@ export default function HostGameOptionsScreen({ navigation }) {
           {showAdvancedOptions && <View>
             <View style={styles.row}>
               <HeaderText style={styles.rowText} >Turn Length:</HeaderText>
-              <Button disabled={turnLength <= 1} onPress={() => setTurnLength(turnLength - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+              <Button disabled={turnLength <= 5} onPress={() => setTurnLength(turnLength - 5)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
               <HeaderText style={styles.rowText} >{turnLength}<HeaderText style={{ fontSize: 15 }}> s</HeaderText></HeaderText>
               <Button disabled={turnLength >= 60}
-                onPress={() => setTurnLength(turnLength + 1)}>
+                onPress={() => setTurnLength(turnLength + 5)}>
                 <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
               </Button>
             </View>
