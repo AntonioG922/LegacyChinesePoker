@@ -79,10 +79,12 @@ export default function Login({ route, navigation }) {
         pageTitle={' '}
         navigation={navigation}
         contentContainerStyle={styles.container}>
-        <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
         <View style={styles.form}>
           {signingUp && <FlatTextInput label={'Username'} onChangeText={text => setUsername(text)} />}
-          <FlatTextInput keyboardType={'email-address'} label={'Email'} onChangeText={text => setEmail(text)} textContentType={'emailAddress'} />
+          <View>
+            <FlatTextInput keyboardType={'email-address'} label={'Email'} onChangeText={text => setEmail(text)} textContentType={'emailAddress'} />
+            <Image source={require('../assets/images/dragon4.png')} style={styles.backgroundImage} />
+          </View>
           <PasswordTextInput label={'Password'} onChangeText={text => setPassword(text)} textContentType={signingUp ? 'newPassword' : 'password'} />
           {signingUp && <PasswordTextInput label={'Password Confirm'} onChangeText={text => setPasswordConfirm(text)} />}
         </View>
@@ -117,8 +119,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 265,
     position: 'absolute',
-    right: -20,
-    top: -85,
+    right: -30,
+    top: -215,
     zIndex: 2
   },
   card1: {
