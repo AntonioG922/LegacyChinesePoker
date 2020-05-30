@@ -40,6 +40,7 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     if ((!gameStarted) && gameData.playersLeftToJoin === 0 && Object.keys(gameData.playersPlayingAgain).length === 0) {
       setGameStarted(true);
+      maybeSetGameStartTime();
     }
   }, [gameData.playersLeftToJoin, gameData.playersPlayingAgain]);
 
@@ -90,12 +91,13 @@ export default function GameScreen({ route, navigation }) {
         .then(() => {
           setGameEnded(false);
           setGameStarted(!playersLeftToJoin);
+          maybeSetGameStartTime();
         })
         .catch(() => {
           alert('Error trying to play again. Please check your connection and try again.')
         });
     }
-  }, [gameData.playersPlayingAgain, gameData.players])
+  }, [gameData.playersPlayingAgain, gameData.players]);
 
   useEffect(() => {
     return navigation.addListener('blur', () => {
@@ -114,7 +116,7 @@ export default function GameScreen({ route, navigation }) {
     const userPlacement = gameData.places.indexOf(user.uid) + 1;
     let allGamesUpdates = {
       totalGames: firebase.firestore.FieldValue.increment(1),
-      playtime: firebase.firestore.FieldValue.increment(326),
+      playtime: firebase.firestore.FieldValue.increment(Date.now() - gameData.gameStartTime),
       placements: {
         1: userPlacement === 1 ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
         last: userPlacement === gameData.numberOfPlayers ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
@@ -122,7 +124,7 @@ export default function GameScreen({ route, navigation }) {
     };
     let specificGameTypeUpdates = {
       totalGames: firebase.firestore.FieldValue.increment(1),
-      playtime: firebase.firestore.FieldValue.increment(326),
+      playtime: firebase.firestore.FieldValue.increment(Date.now() - gameData.gameStartTime),
     };
 
     let place = {};
@@ -143,6 +145,18 @@ export default function GameScreen({ route, navigation }) {
     updates[gameType] = specificGameTypeUpdates;
 
     db.collection('Stats').doc(user.uid).set(updates, {merge: true}).then(() => setHandsPlayed({}));
+  }
+
+  function maybeSetGameStartTime() {
+    const isLastPlayer = Object.keys(gameData.players).find(key => gameData.players[key] === gameData.numberOfPlayers - 1) === user.uid;
+
+    if (isLastPlayer) {
+      db.collection('CustomGames').doc(gameData.gameName).update({
+        gameStartTime: Date.now()
+      }).then(() => true);
+    }
+
+    return false;
   }
 
   function getNextEmptyHandIndexLocal() {

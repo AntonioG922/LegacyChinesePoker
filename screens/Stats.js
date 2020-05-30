@@ -106,7 +106,7 @@ function UserPlacementStat({ userStats = {}, gameType }) {
     const placements = p.map((placement) => {return {place: placement, numberOfGames: gameTypeStats.placements && gameTypeStats.placements[placement] || 0}});
 
     setTotalGames(gameTypeStats.totalGames);
-    setPlaytime(gameTypeStats.playtime);
+    setPlaytime(Math.round(gameTypeStats.playtime / 1000));
     setPlacements(placements);
   }, [gameType]);
 
