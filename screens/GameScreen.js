@@ -319,6 +319,7 @@ export default function GameScreen({ route, navigation }) {
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
+        turnLength={gameData.turnLength}
         gameInProgress={gameStarted && !gameEnded}
         pass={pass}
         isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}

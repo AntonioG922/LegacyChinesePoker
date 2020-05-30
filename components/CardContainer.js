@@ -127,7 +127,7 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCar
   )
 }
 
-export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style, gameInProgress, pass, isCurrentPlayer }) {
+export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
   const user = store.getState().userData.user;
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
@@ -139,7 +139,7 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
       let reducingNum = 5;
 
       let fadeAnim = useRef(new Animated.Value(0)).current;
-      let yPosAnim = useRef(new Animated.Value(-80)).current;
+      let yPosAnim = useRef(new Animated.Value(-75)).current;
       const AnimatedText = Animated.createAnimatedComponent(Text);
 
       useEffect(() => {
@@ -151,19 +151,20 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
               Animated.parallel([
                 Animated.timing(fadeAnim, {
                   toValue: 1,
-                  duration: 575
+                  duration: 400
                 }),
                 Animated.timing(yPosAnim, {
-                  toValue: -40,
-                  duration: 575
+                  toValue: -35,
+                  duration: 400
                 })
               ]),
               Animated.timing(fadeAnim, {
                 toValue: 0,
-                duration: 325
+                duration: 325,
+                delay: 175
               }),
               Animated.timing(yPosAnim, {
-                toValue: -80,
+                toValue: -75,
                 duration: 75
               })
             ]).start();
@@ -244,7 +245,6 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
 
     return (
       <View style={styles.container}>
-        <CountdownNum />
         <Svg width={width} height={height}>
           <Path
             stroke={'black'}
@@ -260,6 +260,7 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
             {...{ d, strokeDashoffset, strokeWidth }}
           />
         </Svg>
+        <CountdownNum />
       </View>
     );
   }
@@ -277,7 +278,7 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
             lastPlayedCards.map((card) =>
               <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
             )}
-          {showTimer && <Timer height={46} width={252} time={30000} delay={1000} color={'rgb(217, 56, 27)'} borderWidth={3} />}
+          {showTimer && <Timer height={46} width={252} time={turnLength * 1000} delay={1000} color={'rgb(217, 56, 27)'} borderWidth={3} />}
         </View>
       </View>
       {cards.map((rank) => {
