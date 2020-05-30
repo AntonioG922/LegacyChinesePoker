@@ -45,12 +45,9 @@ export default function GameScreen({ route, navigation }) {
   }, [gameData.playersLeftToJoin, gameData.playersPlayingAgain]);
 
   useEffect(() => {
-    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0) {
+    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
       updateUserStats();
-      setGameEnded(true);
-    }
-    //else if ((gameData.numberOfPlayers !== gameData.places.length) && gameEnded)
-    //  setGameEnded(false);
+      setTimeout(() => setGameEnded(true), 2000);
   }, [gameData.places]);
 
   useEffect(() => {
@@ -239,6 +236,12 @@ export default function GameScreen({ route, navigation }) {
     };
     if (handIsEmpty) {
       data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+
+      if (!gameData.places.length) {
+        data[`gamesWon.${user.uid}`] = firebase.firestore.FieldValue.increment(1);
+        data['gamesPlayed'] = firebase.firestore.FieldValue.increment(1);
+      }
+
       if (gameData.places.length === gameData.numberOfPlayers - 2) {
         const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== user.uid && !gameData.places.includes(playerUid));
         data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
@@ -268,7 +271,7 @@ export default function GameScreen({ route, navigation }) {
     const turnsTaken = Object.keys(overallTurnHistory).length;
     overallTurnHistory[turnsTaken] = 'PASS';
     let playersTurnHistory = gameData.playersTurnHistory;
-    playersTurnHistory[user.uid][Object.keys(playersTurnHistory[user.uid]).length] = 'PASS';
+    playersTurnHistory[user.uid][turnsTaken] = 'PASS';
     //REMOVE FOR PROD> ALLOWS TESTER TO PASS
     /* if (gameData.lastPlayerToPlay[user.uid] === user.displayName) {
       setErrorMessage('Must start a new hand');
@@ -351,15 +354,21 @@ export default function GameScreen({ route, navigation }) {
         {gameData.places.map((player, index) => {
           const displayName = gameData.displayNames[player];
           const currentUser = player === user.uid;
-          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} />
+          const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
+          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} gamesWon={gamesWon} />
         })}
+
         <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
       </PopUpMessage>
 
       <PlayedCardsContainer cards={gameData.playedCards}
         lastPlayedCards={gameData.lastPlayed}
-        lastPlayerToPlay={gameData.lastPlayerToPlay[user.uid]}
+        lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
+        turnLength={gameData.turnLength}
+        gameInProgress={gameStarted && !gameEnded}
+        pass={pass}
+        isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
         style={styles.playedCards} />
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}

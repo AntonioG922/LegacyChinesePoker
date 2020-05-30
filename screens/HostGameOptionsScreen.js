@@ -1,13 +1,13 @@
-import * as firebase from 'firebase';
-import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
+import firebase from 'firebase';
+import { FontAwesome5 } from '@expo/vector-icons';
 import store from '../redux/store';
 
 import {
   dealCards,
-  findStartingPlayer, getRandomAvatars,
+  findStartingPlayer,
   HAND_TYPES, JOKER_DECK, MAX_NUMBER_PLAYERS, MIN_NUMBER_PLAYERS, STANDARD_DECK
 } from '../functions/HelperFunctions';
 
@@ -28,6 +28,17 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
   const [maxCardsAllowed, setMaxCardsAllowed] = useState(13);
+  const [turnLength, setTurnLength] = useState(30);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+
+  useEffect(() => {
+    setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
+  }, [numberOfPlayers, cardsPerPlayer, useJoker]);
+
+  useEffect(() => {
+    if (cardsPerPlayer > maxCardsAllowed)
+      setCardsPerPlayer(maxCardsAllowed);
+  }, [maxCardsAllowed]);
 
   function gameExists(gameName) {
     const gameRef = firebase.firestore().collection('CustomGames').doc(gameName);
@@ -36,47 +47,52 @@ export default function HostGameOptionsScreen({ navigation }) {
   }
 
   async function createGame() {
-    const exists = await gameExists(gameName);
-    if (exists) {
-      setErrorMessage(' Game ' + gameName + ' already exists');
-      return false;
-    }
+    if (gameName) {
+      const exists = await gameExists(gameName);
+      if (exists) {
+        setErrorMessage(' Game ' + gameName + ' already exists');
+        return false;
+      }
 
-    setErrorMessage('');
-    setLoading(true);
-    const hands = dealCards(useJoker, numberOfPlayers, cardsPerPlayer);
-    const gameData = {
-      gameName: gameName,
-      password: password,
-      numberOfPlayers: numberOfPlayers,
-      useJoker: useJoker,
-      cardsPerPlayer: cardsPerPlayer,
-      players: { [user.uid]: 0 },
-      playersLeftToJoin: numberOfPlayers - 1,
-      hands: hands,
-      lastPlayed: [],
-      lastPlayerToPlay: '',
-      playedCards: [],
-      currentPlayerTurnIndex: findStartingPlayer(hands),
-      currentHandType: HAND_TYPES.START_OF_GAME,
-      places: [],
-      playersTurnHistory: { [user.uid]: {} },
-      overallTurnHistory: {},
-      displayNames: { [user.uid]: user.displayName },
-      playersPlayingAgain: {}
-    };
-    firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
-      .then(() => {
-        setLoading(false);
-        navigation.navigate('Game', gameData);
-      })
-      .catch((error) => {
-        alert('Error uploading game to database. Please check your connection and try again.')
-      });
+      setErrorMessage('');
+      setLoading(true);
+      const hands = dealCards(useJoker, numberOfPlayers, cardsPerPlayer);
+      const gameData = {
+        gameName: gameName,
+        password: password,
+        numberOfPlayers: numberOfPlayers,
+        useJoker: useJoker,
+        cardsPerPlayer: cardsPerPlayer,
+        players: { [user.uid]: 0 },
+        playersLeftToJoin: numberOfPlayers - 1,
+        hands: hands,
+        lastPlayed: [],
+        lastPlayerToPlay: '',
+        playedCards: [],
+        currentPlayerTurnIndex: findStartingPlayer(hands),
+        currentHandType: HAND_TYPES.START_OF_GAME,
+        places: [],
+        playersTurnHistory: { [user.uid]: {} },
+        overallTurnHistory: {},
+        displayNames: { [user.uid]: user.displayName },
+        playersPlayingAgain: {},
+        gamesPlayed: 0,
+        gamesWon: { [user.uid]: 0 },
+        turnLength: turnLength
+      };
+      firebase.firestore().collection('CustomGames').doc(gameName).set(gameData)
+        .then(() => {
+          setLoading(false);
+          navigation.navigate('Game', gameData);
+        })
+        .catch((error) => {
+          alert('Error uploading game to database. Please check your connection and try again.')
+        });
+    }
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1 }}>
       <Loader loading={loading} message={'Creating Game'} />
       <TitledPage pageTitle={'Host Game'} navigation={navigation} contentContainerStyle={styles.container}>
         <View style={styles.form}>
@@ -88,7 +104,6 @@ export default function HostGameOptionsScreen({ navigation }) {
             <Button disabled={numberOfPlayers <= MIN_NUMBER_PLAYERS}
               onPress={() => {
                 setNumberOfPlayers(numberOfPlayers - 1);
-                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
               }}>
               <FontAwesome5 name={'chevron-down'} style={styles.rowText} />
             </Button>
@@ -96,10 +111,6 @@ export default function HostGameOptionsScreen({ navigation }) {
             <Button disabled={numberOfPlayers >= MAX_NUMBER_PLAYERS}
               onPress={() => {
                 setNumberOfPlayers(numberOfPlayers + 1);
-                setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
-                if (cardsPerPlayer > maxCardsAllowed) {
-                  setCardsPerPlayer(maxCardsAllowed);
-                }
               }}>
               <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
             </Button>
@@ -108,7 +119,7 @@ export default function HostGameOptionsScreen({ navigation }) {
             <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
             <Button disabled={cardsPerPlayer <= 1} onPress={() => setCardsPerPlayer(cardsPerPlayer - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
             <HeaderText style={styles.rowText} >{cardsPerPlayer}</HeaderText>
-            <Button disabled={useJoker ? cardsPerPlayer >= Math.floor(JOKER_DECK.length / numberOfPlayers) : cardsPerPlayer >= Math.floor(STANDARD_DECK.length / numberOfPlayers)}
+            <Button disabled={cardsPerPlayer >= maxCardsAllowed}
               onPress={() => setCardsPerPlayer(cardsPerPlayer + 1)}>
               <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
             </Button>
@@ -117,10 +128,27 @@ export default function HostGameOptionsScreen({ navigation }) {
             <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
             <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} onPress={() => setUseJoker(!useJoker)} />
           </View>
+          <View style={styles.row}>
+            <HeaderText>Advanced Options</HeaderText>
+            <Button onPress={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+              <FontAwesome5 name={showAdvancedOptions ? 'chevron-up' : 'chevron-down'} style={[styles.rowText, { fontSize: 18 }]} />
+            </Button>
+          </View>
+          {showAdvancedOptions && <View>
+            <View style={styles.row}>
+              <HeaderText style={styles.rowText} >Turn Length:</HeaderText>
+              <Button disabled={turnLength <= 1} onPress={() => setTurnLength(turnLength - 1)}><FontAwesome5 name={'chevron-down'} style={styles.rowText} /></Button>
+              <HeaderText style={styles.rowText} >{turnLength}<HeaderText style={{ fontSize: 15 }}> s</HeaderText></HeaderText>
+              <Button disabled={turnLength >= 60}
+                onPress={() => setTurnLength(turnLength + 1)}>
+                <FontAwesome5 name={'chevron-up'} style={styles.rowText} />
+              </Button>
+            </View>
+          </View>}
         </View>
         <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
       </TitledPage>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -129,7 +157,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   createButton: {
-    marginTop: 50,
+    marginTop: 25,
   },
   errorMessage: {
     textAlign: 'center',

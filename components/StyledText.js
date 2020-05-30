@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Platform, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import {PLACE_SUFFIX} from '../functions/HelperFunctions';
+import { PLACE_SUFFIX } from '../functions/HelperFunctions';
 
 export function HeaderText(props) {
-  return <Text {...props} style={[styles.styledText, props.center && styles.centerText, props.fontSize && {fontSize: props.fontSize}, props.style]} />;
+  return <Text {...props} style={[styles.styledText, props.center && styles.centerText, props.fontSize && { fontSize: props.fontSize }, props.style]} />;
 }
 
 export function PageTitle(props) {
@@ -13,7 +13,7 @@ export function PageTitle(props) {
 }
 
 export function TextButton(props) {
-  return <TouchableOpacity {...props} style={{paddingVertical: 10, paddingHorizontal: 20}}>
+  return <TouchableOpacity {...props} style={[{ paddingVertical: 10, paddingHorizontal: 20 }, props.style]}>
     <HeaderText center style={[styles.styledText, { fontSize: 32 }, props.labelStyle]}>{props.children}</HeaderText>
   </TouchableOpacity>;
 }
@@ -38,17 +38,17 @@ export function PasswordTextInput(props) {
       {!props.outline && <FlatTextInput {...props} secureTextEntry={!showPassword} onSubmitEditing={props.submit} />}
       {props.outline && <OutlineTextInput {...props} secureTextEntry={!showPassword} />}
       {!props.submit && <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={20} onPress={() => setShowPassword(!showPassword)} style={styles.passwordIcon} />}
-      {props.submit && <FontAwesome5 name={'arrow-right'} size={20} onPress={props.submit} style={[styles.passwordIcon, {color: 'rgb(217, 56, 27)'}]} />}
+      {props.submit && <FontAwesome5 name={'arrow-right'} size={20} onPress={props.submit} style={[styles.passwordIcon, { color: 'rgb(217, 56, 27)' }]} />}
     </View>
   )
 }
 
 export function PlaceAndSuffix({ place, style }) {
   return (
-      <View style={styles.placeAndSuffix}>
-        <HeaderText style={[styles.place, style]}>{place}</HeaderText>
-        <HeaderText style={[styles.placeSuffix, style]}>{PLACE_SUFFIX[place - 1]}</HeaderText>
-      </View>
+    <View style={styles.placeAndSuffix}>
+      <HeaderText style={[styles.place, style]}>{place}</HeaderText>
+      <HeaderText style={[styles.placeSuffix, style]}>{PLACE_SUFFIX[place - 1]}</HeaderText>
+    </View>
   )
 }
 

@@ -43,6 +43,7 @@ export default function JoinGameMenuScreen({ navigation }) {
     updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
     updates[`playersTurnHistory.${user.uid}`] = {};
     updates[`displayNames.${user.uid}`] = user.displayName;
+    updates[`gamesWon.${user.uid}`] = 0;
     db.collection('CustomGames').doc(gameName).update(updates)
       .then(() => {
         const index = activeGames.findIndex(x => x.gameName === gameName);

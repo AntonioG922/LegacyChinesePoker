@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, Image, Text, Animated, Easing } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { ContainedButton } from './StyledText'
 import { Card, CardBack, SuitAndRank, SuitedCard } from './Card'
@@ -10,6 +11,7 @@ import {
   ORDERED_RANKS, ORDERED_SUITS, PLACE_SUFFIX,
   sortCards, SUITS
 } from '../functions/HelperFunctions';
+import store from '../redux/store';
 
 export function UserCardContainer({ cards, place, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
@@ -125,15 +127,149 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCar
   )
 }
 
-export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style }) {
+export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
+  const user = store.getState().userData.user;
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
+  const showTimer = gameInProgress && lastPlayerToPlay && isCurrentPlayer;
+
+  function Timer({ height, width, time, delay, borderWidth, color }) {
+    function CountdownNum() {
+      const [countdownNum, setCountdownNum] = useState(5);
+      let reducingNum = 5;
+
+      let fadeAnim = useRef(new Animated.Value(0)).current;
+      let yPosAnim = useRef(new Animated.Value(-75)).current;
+      const AnimatedText = Animated.createAnimatedComponent(Text);
+
+      useEffect(() => {
+        let interval;
+        const intervalDelay = 1000;
+        let timeout = setTimeout(() => {
+          interval = setInterval(() => {
+            Animated.sequence([
+              Animated.parallel([
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 400
+                }),
+                Animated.timing(yPosAnim, {
+                  toValue: -35,
+                  duration: 400
+                })
+              ]),
+              Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 325,
+                delay: 175
+              }),
+              Animated.timing(yPosAnim, {
+                toValue: -75,
+                duration: 75
+              })
+            ]).start();
+
+            setCountdownNum(reducingNum);
+            reducingNum--;
+            if (reducingNum === -1) {
+              clearInterval(interval);
+              pass();
+            }
+          }, intervalDelay);
+        }, time + delay - intervalDelay - countdownNum * 1000);
+        return () => { clearTimeout(timeout), clearInterval(interval) };
+      }, []);
+
+      const styles = StyleSheet.create({
+        countdownNum: {
+          position: 'absolute',
+          fontSize: 100,
+          fontFamily: 'gang-of-three',
+          color: 'rgb(217, 56, 27)',
+          textShadowColor: 'black',
+          textShadowRadius: 2,
+          textShadowOffset: { width: 10, height: 10 }
+        }
+      })
+
+      return (
+        <AnimatedText style={[styles.countdownNum, { top: yPosAnim, opacity: fadeAnim }]}>{countdownNum}</AnimatedText>
+      )
+    }
+
+    const AnimatedPath = Animated.createAnimatedComponent(Path);
+    const strokeWidth = borderWidth;
+    const { PI, cos, sin } = Math;
+    const r = (height - strokeWidth) / 2;
+    const cx = width - r - strokeWidth / 2;
+    const cy = height / 2;
+    const A = PI;
+    const startAngle = 2 * PI * .75;
+    const endAngle = 2 * PI * .25;
+    const x1 = cx - r * cos(startAngle);
+    const y1 = -r * sin(startAngle) + cy;
+    const x2 = cx - r * cos(endAngle);
+    const y2 = -r * sin(endAngle) + cy;
+    const d = `
+      M ${width / 2} ${0 + strokeWidth / 2}
+      L ${width - x1} ${y2}
+      A ${r} ${r} 0 1 0 ${width - x1} ${y1}
+      L ${x2} ${y1}
+      A ${r} ${r} 0 1 0 ${x2} ${y2}
+      L ${width / 2} ${0 + strokeWidth / 2}
+    `;
+
+    const circumference = r * A;
+    const strokePercentLeft = new Animated.Value(0);
+    const length = (width - (2 * r + strokeWidth)) * 2 + (circumference * 2);
+
+    let strokeDashoffset = strokePercentLeft.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, length],
+      easing: Easing.linear
+    });
+
+    Animated.timing(strokePercentLeft, {
+      toValue: 1,
+      duration: time,
+      delay: delay
+    }).start();
+
+    const styles = StyleSheet.create({
+      container: {
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center'
+      },
+    })
+
+    return (
+      <View style={styles.container}>
+        <Svg width={width} height={height}>
+          <Path
+            stroke={'black'}
+            fill="none"
+            strokeDasharray={`${length}`}
+            {...{ d, strokeDashoffset, strokeWidth }}
+          />
+          <AnimatedPath
+            key={borderWidth}
+            stroke={color}
+            fill="none"
+            strokeDasharray={`${length}`}
+            {...{ d, strokeDashoffset, strokeWidth }}
+          />
+        </Svg>
+        <CountdownNum />
+      </View>
+    );
+  }
 
   return (
     <View style={style}>
       <View style={styles.lastPlayed}>
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
-        <View style={styles.lastPlayedCards}>
+        <View style={[styles.lastPlayedCards, { borderWidth: showTimer ? 0 : 0 }]}>
           {lastPlayedCards.length === 0 ?
             <View style={styles.suitAndRank}>
               <Image source={avatarImage} style={{ width: 20, height: 20, marginRight: 5 }} />
@@ -142,6 +278,7 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
             lastPlayedCards.map((card) =>
               <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
             )}
+          {showTimer && <Timer height={46} width={252} time={turnLength * 1000} delay={1000} color={'rgb(217, 56, 27)'} borderWidth={3} />}
         </View>
       </View>
       {cards.map((rank) => {
@@ -237,7 +374,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: 'white',
     borderColor: 'black',
-    borderWidth: 2,
     borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',

@@ -43,7 +43,7 @@ export default function HomeScreen({ navigation }) {
 
       <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => setShowLogoutMessage(true)} />
       <PopUpMessage showPopUp={showLogoutMessage} exitAction={dismissLogout} exitMessage='No' confirmAction={signOut} confirmMessage='Yes' >
-        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Are you sure you want to logout?</Text>
+        <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: 'gang-of-three', }}>Are you sure you want to logout?</Text>
       </PopUpMessage>
 
     </View>
@@ -53,12 +53,12 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-evenly',
     backgroundColor: '#fff',
   },
   headerContainer: {
     alignItems: 'center',
-    marginTop: 100,
-    marginBottom: 50,
+    marginTop: 50
   },
   headerImage: {
     width: 250,
@@ -80,10 +80,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 30,
     right: 10
-  },
-  logoutMessage: {
-    marginVertical: 20,
-    position: 'relative',
-    top: 10
   }
 });
