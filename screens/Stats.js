@@ -8,7 +8,7 @@ import {
 import firebase from 'firebase';
 import store from '../redux/store';
 
-import { HeaderText, PlaceAndSuffix } from '../components/StyledText';
+import { HeaderText, PlaceAndSuffix, Divider } from '../components/StyledText';
 import TitledPage from '../components/TitledPage';
 import { ScrollView } from "react-native-gesture-handler";
 import {
@@ -46,15 +46,15 @@ export default function StatsScreen({ navigation }) {
         <TitledPage navigation={navigation} pageTitle={'Stats'} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
           <Slider onSliderSelect={setSliderValue} />
           {statsFetched
-            ? <View style={[{width: '100%'}]}>
-                {!!userStats && !!userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]]
-                    ? <View>
-                        <UserPlacementStat userStats={userStats} gameType={GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]} />
-                        <Divider subtitle={'Hands'} />
-                        <UserHandsStats handsStats={userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]].hands || {}} />
-                      </View>
-                    : <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
-              </View>
+            ? <View style={[{ width: '100%' }]}>
+              {!!userStats && !!userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]]
+                ? <View>
+                  <UserPlacementStat userStats={userStats} gameType={GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]} />
+                  <Divider subtitle={'Hands'} />
+                  <UserHandsStats handsStats={userStats[GAME_TYPE_BY_NUMBER_OF_PLAYERS[sliderValue]].hands || {}} />
+                </View>
+                : <HeaderText style={styles.statusDisplayText}>No {displayValueMap[sliderValue]}games played yet</HeaderText>}
+            </View>
             : <HeaderText style={styles.statusDisplayText}>Fetching Stats...</HeaderText>}
         </TitledPage>
       </ScrollView>
@@ -62,29 +62,29 @@ export default function StatsScreen({ navigation }) {
   )
 }
 
-function Slider({onSliderSelect}) {
+function Slider({ onSliderSelect }) {
   const [sliderValue, setSliderValue] = useState(ALL);
   const [sliderIndicatorMarginLeft, setSliderIndicatorMarginLeft] = useState(10);
 
   function onSelect(sliderValue) {
     setSliderValue(sliderValue);
-    setSliderIndicatorMarginLeft(sliderValue === 'All' ? 10 :  10 + (sliderValue - MIN_NUMBER_PLAYERS + 1) * 60);
+    setSliderIndicatorMarginLeft(sliderValue === 'All' ? 10 : 10 + (sliderValue - MIN_NUMBER_PLAYERS + 1) * 60);
     onSliderSelect(sliderValue);
   }
 
   return (
-      <View>
-        <View style={styles.slider}>
-          {sliderValues.map((sliderValue) =>
-              <TouchableOpacity key={sliderValue} style={{ width: 60 }} onPress={() => onSelect(sliderValue)}>
-                <HeaderText fontSize={24} center>{sliderValue}</HeaderText>
-              </TouchableOpacity>)}
-          <Animated.View style={[styles.sliderCurrentValue, { marginLeft: sliderIndicatorMarginLeft }]}>
-            <HeaderText center fontSize={24} style={styles.sliderCurrentValueText}>{sliderValue}</HeaderText>
-          </Animated.View>
-        </View>
-        <HeaderText center style={styles.sliderHelpText}>(Number of players)</HeaderText>
+    <View>
+      <View style={styles.slider}>
+        {sliderValues.map((sliderValue) =>
+          <TouchableOpacity key={sliderValue} style={{ width: 60 }} onPress={() => onSelect(sliderValue)}>
+            <HeaderText fontSize={24} center>{sliderValue}</HeaderText>
+          </TouchableOpacity>)}
+        <Animated.View style={[styles.sliderCurrentValue, { marginLeft: sliderIndicatorMarginLeft }]}>
+          <HeaderText center fontSize={24} style={styles.sliderCurrentValueText}>{sliderValue}</HeaderText>
+        </Animated.View>
       </View>
+      <HeaderText center style={styles.sliderHelpText}>(Number of players)</HeaderText>
+    </View>
   )
 }
 
@@ -98,12 +98,12 @@ function UserPlacementStat({ userStats = {}, gameType }) {
 
     const gameTypeStats = userStats[gameType];
     const hasNotPlayedGamesForGameType = !gameTypeStats;
-    if (hasNotPlayedGamesForGameType) {setTotalGames(0); return;}
+    if (hasNotPlayedGamesForGameType) { setTotalGames(0); return; }
 
     const p = gameType === GAME_TYPES.ALL_GAMES
-        ? [1, 'last']
-        : Array.from({length: Object.keys(GAME_TYPE_BY_NUMBER_OF_PLAYERS).find(key => GAME_TYPE_BY_NUMBER_OF_PLAYERS[key] === gameType)}).map((v, i) => i + 1);
-    const placements = p.map((placement) => {return {place: placement, numberOfGames: gameTypeStats.placements && gameTypeStats.placements[placement] || 0}});
+      ? [1, 'last']
+      : Array.from({ length: Object.keys(GAME_TYPE_BY_NUMBER_OF_PLAYERS).find(key => GAME_TYPE_BY_NUMBER_OF_PLAYERS[key] === gameType) }).map((v, i) => i + 1);
+    const placements = p.map((placement) => { return { place: placement, numberOfGames: gameTypeStats.placements && gameTypeStats.placements[placement] || 0 } });
 
     setTotalGames(gameTypeStats.totalGames);
     setPlaytime(Math.round(gameTypeStats.playtime / 1000));
@@ -115,14 +115,14 @@ function UserPlacementStat({ userStats = {}, gameType }) {
       <NumberStat label={'Games'} number={totalGames} />
       <View style={styles.row}>
         {placements.map((placement) => {
-          const label = typeof placement.place === 'string' ? <HeaderText fontSize={24}>{placement.place}</HeaderText> : <PlaceAndSuffix place={placement.place}/>;
+          const label = typeof placement.place === 'string' ? <HeaderText fontSize={24}>{placement.place}</HeaderText> : <PlaceAndSuffix place={placement.place} />;
 
           return <NumberStat key={placement.place}
-                             label={label}
-                             number={placement.numberOfGames}
-                             percent={Math.floor(
-                                 (placement.numberOfGames / Math.max(
-                                     totalGames, 1)) * 100)}/>
+            label={label}
+            number={placement.numberOfGames}
+            percent={Math.floor(
+              (placement.numberOfGames / Math.max(
+                totalGames, 1)) * 100)} />
         })}
       </View>
       <NumberStat label={'Playtime'} number={secondsToTime(playtime)} />
@@ -137,29 +137,29 @@ function UserHandsStats({ handsStats }) {
     const timesPlayed = handsStats[handType] || 0;
 
     return (
-        <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / (totalHands || 1)) * 100)} style={{ flexGrow: 1 }} />
+      <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / (totalHands || 1)) * 100)} style={{ flexGrow: 1 }} />
     )
   }
 
   return (
-      <View>
-        <NumberStat label={'Total Hands'} number={totalHands} />
-        <View style={styles.row}>
-          <HandStat label={'Singles'} handType={HAND_TYPES.SINGLE} />
-          <HandStat label={'Pairs'} handType={HAND_TYPES.PAIR} />
-        </View>
-        <View style={styles.row}>
-          <HandStat label={'3-of-a-Kind'} handType={HAND_TYPES.THREE_OF_A_KIND} />
-          <HandStat label={'Full House'} handType={HAND_TYPES.FULL_HOUSE} />
-        </View>
-        <View style={styles.row}>
-          <HandStat label={'Straight'} handType={HAND_TYPES.STRAIGHT} />
-          <HandStat label={'Straight Flush'} handType={HAND_TYPES.STRAIGHT_FLUSH} />
-        </View>
-        <View style={styles.row}>
-          <HandStat label={'Union'} handType={HAND_TYPES.UNION} />
-        </View>
+    <View>
+      <NumberStat label={'Total Hands'} number={totalHands} />
+      <View style={styles.row}>
+        <HandStat label={'Singles'} handType={HAND_TYPES.SINGLE} />
+        <HandStat label={'Pairs'} handType={HAND_TYPES.PAIR} />
       </View>
+      <View style={styles.row}>
+        <HandStat label={'3-of-a-Kind'} handType={HAND_TYPES.THREE_OF_A_KIND} />
+        <HandStat label={'Full House'} handType={HAND_TYPES.FULL_HOUSE} />
+      </View>
+      <View style={styles.row}>
+        <HandStat label={'Straight'} handType={HAND_TYPES.STRAIGHT} />
+        <HandStat label={'Straight Flush'} handType={HAND_TYPES.STRAIGHT_FLUSH} />
+      </View>
+      <View style={styles.row}>
+        <HandStat label={'Union'} handType={HAND_TYPES.UNION} />
+      </View>
+    </View>
   )
 }
 
@@ -177,16 +177,6 @@ function NumberStat({ label, number, percent, inline, style }) {
   )
 }
 
-function Divider({ subtitle, style }) {
-  return (
-    <View style={[styles.divider, style]}>
-      <View style={styles.dividerLine} />
-      <HeaderText style={{ fontSize: 32 }}>{subtitle}</HeaderText>
-      <View style={styles.dividerLine} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   statusDisplayText: {
     marginTop: 100,
@@ -196,22 +186,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-  },
-  divider: {
-    paddingTop: 50,
-    paddingBottom: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 250,
-    alignSelf: 'center',
-    overflow: 'hidden'
-  },
-  dividerLine: {
-    height: 1,
-    backgroundColor: 'grey',
-    width: '35%',
-    marginHorizontal: 20,
   },
   scrollContainer: {
     flexGrow: 1,

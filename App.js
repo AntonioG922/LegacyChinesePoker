@@ -17,10 +17,10 @@ import HowToPlayScreen from './screens/HowToPlayScreen';
 import HostGameOptionsScreen from './screens/HostGameOptionsScreen';
 import JoinGameMenuScreen from './screens/JoinGameMenuScreen';
 import GameScreen from './screens/GameScreen';
-import LoginOptions from './screens/LoginOptions';
-import EmailLogin from './screens/EmailLogin';
 import InitialLoadScreen from './screens/InitialLoadScreen';
 import StatsScreen from './screens/Stats';
+import SettingsScreen from './screens/Settings/SettingsScreen';
+import AccountRecoverySyncScreen from './screens/Settings/AccountRecoverySync';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -96,9 +96,9 @@ export default function App(props) {
                 <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />
                 <Stack.Screen name="JoinGameMenu" component={JoinGameMenuScreen} />
                 <Stack.Screen name="Game" options={{ gestureEnabled: false }} component={GameScreen} />
-                <Stack.Screen name="LoginOptions" options={{ gestureEnabled: false }} component={LoginOptions} />
-                <Stack.Screen name="EmailLogin" component={EmailLogin} />
                 <Stack.Screen name="Stats" component={StatsScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="AccountRecoverySync" component={AccountRecoverySyncScreen} />
               </Stack.Navigator>
             </NavigationContainer>
           </View>

@@ -18,8 +18,18 @@ export default function InitialLoaderScreen({ navigation }) {
           }));
           navigation.navigate('Home');
         } else {
-          store.dispatch(clearUserData());
-          navigation.navigate('LoginOptions');
+          firebase.auth().signInAnonymously()
+            .catch((error) => {
+              alert('Error connecting. Attempting to connect again.');
+              console.log('First connection attempt error: ', error);
+              setTimeout(() => {
+                firebase.auth().signInAnonymously()
+                  .catch((error) => {
+                    alert('Error connecting. Please check your internet connection and reopen the app.');
+                    console.log('Second connection attempt error: ', error);
+                  });
+              }, 10000)
+            });
         }
       });
     }, 1000)

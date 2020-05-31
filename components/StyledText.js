@@ -23,11 +23,11 @@ export function ContainedButton(props) {
 }
 
 export function FlatTextInput(props) {
-  return <TextInput {...props} underlineColor={'rgb(217, 56, 27)'} style={styles.textInput} />;
+  return <TextInput {...props} underlineColor={'rgb(217, 56, 27)'} style={[styles.textInput, props.style]} />;
 }
 
 export function OutlineTextInput(props) {
-  return <TextInput {...props} mode={'outlined'} style={styles.textInput} />;
+  return <TextInput {...props} mode={'outlined'} style={[styles.textInput, props.style]} />;
 }
 
 export function PasswordTextInput(props) {
@@ -61,6 +61,36 @@ export function LogInOptionButton({ textColor, icon, style, message, ...rest }) 
       <Text style={[styles.logInOptionMessage, { color: textColor }]}>{message}</Text>
     </TouchableOpacity>
   )
+}
+
+export function Divider({ subtitle, style }) {
+  const styles = StyleSheet.create({
+    divider: {
+      paddingTop: 50,
+      paddingBottom: 30,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 250,
+      alignSelf: 'center',
+      overflow: 'hidden'
+    },
+    dividerLine: {
+      height: 1,
+      backgroundColor: 'grey',
+      width: '35%',
+      marginHorizontal: 20,
+    },
+  })
+
+
+  return (
+    <View style={[styles.divider, style]}>
+      <View style={styles.dividerLine} />
+      <HeaderText style={{ fontSize: 32, textAlign: 'center' }}>{subtitle}</HeaderText>
+      <View style={styles.dividerLine} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -135,5 +165,5 @@ const styles = StyleSheet.create({
   googleImage: {
     width: 27,
     height: 28
-  }
+  },
 });

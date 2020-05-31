@@ -1,27 +1,10 @@
-import React, { useState } from 'react';
-import { ImageBackground, StyleSheet, View, Text } from 'react-native';
-import firebase from 'firebase';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import PopUpMessage from '../components/PopUpMessage';
+import React from 'react';
+import { ImageBackground, StyleSheet, View } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 import { HeaderText, TextButton } from '../components/StyledText';
 
 export default function HomeScreen({ navigation }) {
-  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
-
-  function signOut() {
-    setShowLogoutMessage(false);
-    firebase.auth().signOut().then(() => {
-      console.log('Sign out successful!');
-    }).catch(function (error) {
-      alert(error);
-    });
-  }
-
-  function dismissLogout() {
-    setShowLogoutMessage(false);
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -41,10 +24,7 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
 
-      <MaterialCommunityIcons name={'logout'} size={30} style={styles.logoutIcon} onPress={() => setShowLogoutMessage(true)} />
-      <PopUpMessage showPopUp={showLogoutMessage} exitAction={dismissLogout} exitMessage='No' confirmAction={signOut} confirmMessage='Yes' >
-        <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: 'gang-of-three', }}>Are you sure you want to logout?</Text>
-      </PopUpMessage>
+      <FontAwesome5 name={'cog'} size={30} style={styles.logoutIcon} onPress={() => navigation.navigate('Settings')} />
 
     </View>
   );
@@ -54,7 +34,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-evenly',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
   },
   headerContainer: {
     alignItems: 'center',
