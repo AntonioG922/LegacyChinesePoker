@@ -45,9 +45,12 @@ export default function GameScreen({ route, navigation }) {
   }, [gameData.playersLeftToJoin, gameData.playersPlayingAgain]);
 
   useEffect(() => {
-    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0)
+    if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0) {
       updateUserStats();
-      setTimeout(() => setGameEnded(true), 2000);
+      setTimeout(() => {
+        setGameEnded(true)
+      }, 2000);
+    }
   }, [gameData.places]);
 
   useEffect(() => {
