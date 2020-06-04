@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useReducer, useState } from "react";
-import { Animated, StyleSheet, Text, View, LayoutAnimation, KeyboardAvoidingView } from "react-native";
+import { Animated, StyleSheet, Text, View, LayoutAnimation, KeyboardAvoidingView, useWindowDimensions } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import firebase from 'firebase';
 import store from '../redux/store';
@@ -80,7 +80,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column',justifyContent: 'center',}} behavior="padding">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#fafafa', flexDirection: 'column', justifyContent: 'center', }} behavior={Platform.OS == "ios" ? "padding" : "height"}>
       <ScrollView>
         <Loader loading={loading} message={'Entering Game'} />
         <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>

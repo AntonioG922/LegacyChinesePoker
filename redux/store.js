@@ -7,6 +7,7 @@ const userDataSlice = createSlice({
       displayName: '',
       email: '',
       photoURL: '',
+      providerData: '',
       uid: ''
     }
   },
@@ -14,8 +15,21 @@ const userDataSlice = createSlice({
     setUserData(state, action) {
       state.user = action.payload;
     },
+    updateUserData(state, action) {
+      state.user.displayName = action.payload.displayName || state.user.displayName;
+      state.user.email = action.payload.email || state.user.email;
+      state.user.photoURL = action.payload.photoURL || state.user.photoURL;
+      state.user.providerData = action.payload.providerData || state.user.providerData;
+      state.user.uid = action.payload.uid || state.user.uid;
+    },
     clearUserData(state) {
-      state.user = {}
+      state.user = {
+        displayName: '',
+        email: '',
+        photoURL: '',
+        providerData: '',
+        uid: ''
+      }
     }
   }
 });
@@ -61,7 +75,7 @@ const gameStateSlice = createSlice({
   }
 });
 
-export const { setUserData, clearUserData } = userDataSlice.actions;
+export const { setUserData, updateUserData, clearUserData } = userDataSlice.actions;
 export const { setGameState, clearGameState } = gameStateSlice.actions;
 export const { setHowToPlaySection } = howToPlaySectionSlice.actions;
 

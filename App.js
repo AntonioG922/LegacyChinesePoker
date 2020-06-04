@@ -20,7 +20,7 @@ import GameScreen from './screens/GameScreen';
 import InitialLoadScreen from './screens/InitialLoadScreen';
 import StatsScreen from './screens/Stats';
 import SettingsScreen from './screens/Settings/SettingsScreen';
-import AccountRecoverySyncScreen from './screens/Settings/AccountRecoverySync';
+import LinkAccountScreen from './screens/Settings/LinkAccount';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -98,7 +98,7 @@ export default function App(props) {
                 <Stack.Screen name="Game" options={{ gestureEnabled: false }} component={GameScreen} />
                 <Stack.Screen name="Stats" component={StatsScreen} />
                 <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="AccountRecoverySync" component={AccountRecoverySyncScreen} />
+                <Stack.Screen name="LinkAccount" component={LinkAccountScreen} />
               </Stack.Navigator>
             </NavigationContainer>
           </View>

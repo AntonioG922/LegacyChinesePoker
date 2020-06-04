@@ -52,13 +52,51 @@ export function PlaceAndSuffix({ place, style }) {
   )
 }
 
-export function LogInOptionButton({ textColor, icon, style, message, ...rest }) {
+export function LogInOptionButton({ textColor, icon, style, message, check, ...rest }) {
+  const styles = StyleSheet.create({
+    logInOptionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 5,
+      padding: 20,
+      borderWidth: .5,
+      borderColor: 'lightgray',
+      ...Platform.select({
+        ios: {
+          shadowColor: 'black',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.2,
+          shadowRadius: 2,
+        },
+        android: {
+          elevation: 20,
+        },
+      }),
+    },
+    logInOptionIcon: {
+      flex: 1,
+      marginTop: 5,
+      color: 'white'
+    },
+    logInOptionMessage: {
+      flex: 3,
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: 'white'
+    },
+    googleImage: {
+      width: 27,
+      height: 28
+    },
+  })
+
   return (
     <TouchableOpacity {...rest} style={[styles.logInOptionButton, style]}>
       {icon === 'email' && <MaterialCommunityIcons name={icon} size={30} style={[styles.logInOptionIcon, { color: textColor }]} />
         || icon === 'google' && <View style={styles.logInOptionIcon}><Image source={require('../assets/images/google-icon.png')} style={styles.googleImage} /></View>
         || <FontAwesome5 name={icon} size={30} style={[styles.logInOptionIcon, { color: textColor }]} />}
-      <Text style={[styles.logInOptionMessage, { color: textColor }]}>{message}</Text>
+      <Text numberOfLines={1} style={[styles.logInOptionMessage, { color: textColor }]}>{message}</Text>
+      {check && <FontAwesome5 name={'check'} size={30} style={{ color: '#47ba00' }} />}
     </TouchableOpacity>
   )
 }
@@ -122,36 +160,6 @@ const styles = StyleSheet.create({
     right: '5%',
     top: '40%'
   },
-  logInOptionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 5,
-    padding: 20,
-    borderWidth: .5,
-    borderColor: 'lightgray',
-    ...Platform.select({
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 20,
-      },
-    }),
-  },
-  logInOptionIcon: {
-    flex: 1,
-    marginTop: 5,
-    color: 'white'
-  },
-  logInOptionMessage: {
-    flex: 3,
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white'
-  },
   placeAndSuffix: {
     flexDirection: 'row',
   },
@@ -161,9 +169,5 @@ const styles = StyleSheet.create({
   placeSuffix: {
     fontSize: 15,
     lineHeight: 20
-  },
-  googleImage: {
-    width: 27,
-    height: 28
   },
 });

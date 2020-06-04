@@ -2,21 +2,22 @@ import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, StatusBar } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
-import { setUserData, clearUserData } from '../redux/store';
+import { setUserData } from '../redux/store';
 
 export default function InitialLoaderScreen({ navigation }) {
   useEffect(() => {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          const { displayName, email, photoURL, uid } = user;
+          console.log(user);
+          const { displayName, email, photoURL, providerData, uid } = user;
           store.dispatch(setUserData({
             displayName: displayName,
             email: email,
             photoURL: photoURL,
+            providerData: providerData,
             uid: uid
           }));
-          navigation.navigate('Home');
         } else {
           firebase.auth().signInAnonymously()
             .catch((error) => {
@@ -32,6 +33,7 @@ export default function InitialLoaderScreen({ navigation }) {
             });
         }
       });
+      navigation.navigate('Home');
     }, 1000)
   }, []);
 

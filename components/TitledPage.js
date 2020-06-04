@@ -9,7 +9,7 @@ export default function TitledPage(props) {
     <View style={[styles.container, props.containerStyle]}>
       {props.navigation &&
         <HeaderText style={styles.backArrow}>
-          <Ionicons size={40} name='md-arrow-round-back' onPress={() => props.navigation.goBack()} />
+          <Ionicons size={40} name='md-arrow-round-back' onPress={() => { props.exitFunction ? props.exitFunction() : null; props.navigation.goBack() }} />
         </HeaderText>}
       <HeaderText style={[styles.pageTitle, props.titleStyle]} >{props.pageTitle}</HeaderText>
       <View style={props.contentContainerStyle}>
