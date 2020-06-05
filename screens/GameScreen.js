@@ -349,6 +349,12 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function getAvatarRotation(index) {
+    if (gameData.numberOfPlayers === 2) {
+      return '180deg';
+    }
+    if (gameData.numberOfPlayers === 3 && index === 1) {
+      return '90deg';
+    }
     return (270 - 90 * index) + 'deg';
   }
 
