@@ -144,7 +144,7 @@ export default function GameScreen({ route, navigation }) {
     updates[GAME_TYPES.ALL_GAMES] = allGamesUpdates;
     updates[gameType] = specificGameTypeUpdates;
 
-    db.collection('Stats').doc(user.uid).set(updates, {merge: true}).then(() => setHandsPlayed({}));
+    db.collection('Stats').doc(user.uid).set(updates, { merge: true }).then(() => setHandsPlayed({}));
   }
 
   function maybeSetGameStartTime() {
@@ -300,8 +300,14 @@ export default function GameScreen({ route, navigation }) {
   function getStyle(index) {
     switch (index) {
       case 2:
+        if (gameData.numberOfPlayers === 2) {
+          return styles.player3Hand;
+        }
         return styles.player2Hand;
       case 3:
+        if (gameData.numberOfPlayers === 3) {
+          return styles.player4Hand;
+        }
         return styles.player3Hand;
       case 4:
       default:
