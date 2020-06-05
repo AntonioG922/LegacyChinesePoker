@@ -370,7 +370,16 @@ export default function GameScreen({ route, navigation }) {
           const displayName = gameData.displayNames[player];
           const currentUser = player === user.uid;
           const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
-          return <TrophyPlaceDisplay key={index} place={index} displayName={displayName} currentUser={currentUser} gamesWon={gamesWon} />
+          return (
+            <TrophyPlaceDisplay
+              key={index}
+              place={index}
+              displayName={displayName}
+              currentUser={currentUser}
+              gamesWon={gamesWon}
+              playersPlayingAgain={gameData.playersPlayingAgain}
+              playersNotPlayingAgain={gameData.playersNotPlayingAgain} />
+          )
         })}
 
         <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>

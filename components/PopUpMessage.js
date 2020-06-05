@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 100,
-    width: 275,
+    minWidth: 275,
     padding: 25
   },
   buttons: {

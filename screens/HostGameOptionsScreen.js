@@ -76,6 +76,7 @@ export default function HostGameOptionsScreen({ navigation }) {
         overallTurnHistory: {},
         displayNames: { [user.uid]: user.displayName },
         playersPlayingAgain: {},
+        playersNotPlayingAgain: {},
         gamesPlayed: 0,
         gamesWon: { [user.uid]: 0 },
         turnLength: turnLength

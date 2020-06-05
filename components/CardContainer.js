@@ -11,7 +11,6 @@ import {
   ORDERED_RANKS, ORDERED_SUITS, PLACE_SUFFIX,
   sortCards, SUITS
 } from '../functions/HelperFunctions';
-import store from '../redux/store';
 
 export function UserCardContainer({ cards, place, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
@@ -128,7 +127,6 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCar
 }
 
 export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
-  const user = store.getState().userData.user;
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
   const showTimer = gameInProgress && lastPlayerToPlay && isCurrentPlayer;
