@@ -18,6 +18,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   const user = store.getState().userData.user;
 
   const [loading, setLoading] = useState(false);
+  const [gamesFetched, setGamesFetched] = useState(false);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
       case "add":
@@ -67,6 +68,7 @@ export default function JoinGameMenuScreen({ navigation }) {
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
+            setGamesFetched(true);
             dispatch({ type: "add", value: change.doc.data() });
           }
           if (change.type === "modified") {
@@ -88,8 +90,10 @@ export default function JoinGameMenuScreen({ navigation }) {
             <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
             <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
           </View>
-          {activeGames.length && activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
-            <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />) || <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>}
+          {gamesFetched ? activeGames.length ? activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
+            <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />)
+            : <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>
+            : <HeaderText style={styles.noGames}>Fetching Games...</HeaderText>}
         </TitledPage>
       </ScrollView>
     </KeyboardAvoidingView>
