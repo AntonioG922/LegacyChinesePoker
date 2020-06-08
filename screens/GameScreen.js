@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, StyleSheet, View, Text } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text, Vibration } from 'react-native';
 import firebase from 'firebase';
 import store from '../redux/store';
 
@@ -33,7 +33,12 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
-        setGameData(doc.data())
+        const docData = doc.data();
+        setGameData(docData);
+        const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
+        if (isCurrentPlayer) {
+          Vibration.vibrate();
+        }
       });
   }, []);
 
