@@ -26,6 +26,7 @@ export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const [gameEnded, setGameEnded] = useState(false);
+  const [exitingGame, setExitingGame] = useState(false);
   const [handsPlayed, setHandsPlayed] = useState({});
   const user = store.getState().userData.user;
   const db = firebase.firestore();
@@ -33,7 +34,7 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
-        setGameData(doc.data())
+        setGameData(doc.data());
       });
   }, []);
 
@@ -98,18 +99,6 @@ export default function GameScreen({ route, navigation }) {
         });
     }
   }, [gameData.playersPlayingAgain, gameData.players]);
-
-  useEffect(() => {
-    return navigation.addListener('blur', () => {
-      if (!gameStarted) {
-        let updates = {};
-        updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
-        updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
-        updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
-        db.collection('CustomGames').doc(gameData.gameName).update(updates);
-      }
-    });
-  }, [navigation]);
 
   function updateUserStats() {
     const gameType = GAME_TYPE_BY_NUMBER_OF_PLAYERS[gameData.numberOfPlayers];
@@ -330,21 +319,31 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function dontPlayAgain() {
-    if (Object.keys(gameData.players).length === 1) {
+    setExitingGame(true);
+    if (Object.keys(gameData.players).length === -2/*Change to 1 to delete*/) {
       db.collection('CustomGames').doc(gameData.gameName).delete()
-        .then(() => navigation.goBack())
-        .catch(() => {
-          alert('Error trying to exit. Please check your connection and try again.')
-        });
+        .then(() => {
+          console.log('Game successfully deleted');
+        })
+        .catch((error) => {
+          alert('Error exiting game. Please check your connection and try again.');
+          console.log('Error trying to delete game: ', error);
+        })
+      navigation.goBack();
     } else {
       const update = {};
       update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      update[`playersNotPlayingAgain.${user.uid}`] = user.displayName;
 
       db.collection('CustomGames').doc(gameData.gameName).update(update)
-        .then(() => navigation.goBack())
+        .then(() => {
+          console.log('Successfully exited game');
+        })
         .catch((error) => {
-          alert('Error trying to exit. Please check your connection and try again.')
+          alert('Error exiting game. Please check your connection and try again.');
+          console.log('Error trying to exit game: ', error);
         });
+      navigation.goBack();
     }
   }
 
@@ -358,61 +357,77 @@ export default function GameScreen({ route, navigation }) {
     return (270 - 90 * index) + 'deg';
   }
 
+  function loaderExitFunction() {
+    if (!gameStarted) {
+      setExitingGame(true);
+      let updates = {};
+      updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
+      db.collection('CustomGames').doc(gameData.gameName).update(updates)
+        .then(() => {
+          navigation.goBack();
+        });
+    }
+  }
+
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
 
-      <Loader loading={!gameStarted}
-        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
-        exitAction={navigation.goBack}
-      />
-      <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
-        {gameData.places.map((player, index) => {
-          const displayName = gameData.displayNames[player];
-          const currentUser = player === user.uid;
-          const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
-          return (
-            <TrophyPlaceDisplay
-              key={index}
-              place={index}
-              displayName={displayName}
-              currentUser={currentUser}
-              gamesWon={gamesWon}
-              playersPlayingAgain={gameData.playersPlayingAgain}
-              playersNotPlayingAgain={gameData.playersNotPlayingAgain} />
-          )
-        })}
+      {!exitingGame && <View style={{ flex: 1 }}>
+        <Loader loading={!gameStarted}
+          message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+          exitAction={loaderExitFunction}
+        />
+        <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+          {gameData.places.map((player, index) => {
+            const displayName = gameData.displayNames[player];
+            const currentUser = player === user.uid;
+            const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
+            return (
+              <TrophyPlaceDisplay
+                key={index}
+                place={index}
+                displayName={displayName}
+                currentUser={currentUser}
+                gamesWon={gamesWon}
+                playersPlayingAgain={gameData.playersPlayingAgain}
+                playersNotPlayingAgain={gameData.playersNotPlayingAgain} />
+            )
+          })}
 
-        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
-      </PopUpMessage>
+          <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
+        </PopUpMessage>
 
-      <PlayedCardsContainer cards={gameData.playedCards}
-        lastPlayedCards={gameData.lastPlayed}
-        lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
-        avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
-        turnLength={gameData.turnLength}
-        gameInProgress={gameStarted && !gameEnded}
-        pass={pass}
-        isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
-        style={styles.playedCards} />
-      {gameStarted && <View style={styles.container}>
-        <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
-          place={gameData.places.indexOf(user.uid)}
-          errorMessage={errorMessage}
-          errorCards={errorCards}
-          isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
-          avatarImage={getAvatarImage(gameData.hands[gameData.players[user.uid]].avatar)}
-          playCards={playCards}
+        <PlayedCardsContainer cards={gameData.playedCards}
+          lastPlayedCards={gameData.lastPlayed}
+          lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
+          avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
+          turnLength={gameData.turnLength}
+          gameInProgress={gameStarted && !gameEnded}
           pass={pass}
-          style={styles.player1Hand} />
-        {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
-          const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
+          isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
+          style={styles.playedCards} />
+        {gameStarted && <View style={styles.container}>
+          <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
+            place={gameData.places.indexOf(user.uid)}
+            errorMessage={errorMessage}
+            errorCards={errorCards}
+            isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
+            avatarImage={getAvatarImage(gameData.hands[gameData.players[user.uid]].avatar)}
+            playCards={playCards}
+            pass={pass}
+            style={styles.player1Hand} />
+          {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
+            const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
 
-          return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
-            style={[styles.opposingPlayerHand, getStyle(index + 2)]}
-            avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
-            avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
-            isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
-        })}
+            return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
+              style={[styles.opposingPlayerHand, getStyle(index + 2)]}
+              avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
+              avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
+              isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+          })}
+        </View>}
       </View>}
     </ImageBackground>
   )
