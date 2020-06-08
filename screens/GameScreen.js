@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity, Vibration } from 'react-native';
 import firebase from 'firebase';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import store from '../redux/store';
@@ -41,7 +41,12 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
-        setGameData(doc.data());
+        const docData = doc.data();
+        setGameData(docData);
+        const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
+        if (isCurrentPlayer) {
+          Vibration.vibrate();
+        }
       });
   }, []);
 
