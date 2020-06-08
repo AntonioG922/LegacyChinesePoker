@@ -116,10 +116,11 @@ export function PlainCardContainer({ cards, style }) {
   )
 }
 
-export function FaceDownCardsContainer({ avatarImage, avatarStyling, numberOfCards, style, isCurrentPlayer }) {
+export function FaceDownCardsContainer({ avatarImage, avatarStyling, displayName, numberOfCards, style, isCurrentPlayer }) {
   return (
     <View style={style}>
       {avatarImage && <Image source={avatarImage} style={[styles.avatar, isCurrentPlayer && styles.currentPlayerAvatar, avatarStyling]} />}
+      <HeaderText numberOfLines={1} style={[styles.displayName, avatarStyling]}>{displayName}</HeaderText>
       {Array.from({ length: numberOfCards }, (v, i) => i).map(index =>
         <CardBack key={index} style={[{ borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%` }]} />)}
     </View>
@@ -333,23 +334,13 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
   },
-  currentPlayerChip: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 0,
-    borderColor: '#333',
-    backgroundColor: '#444',
-    shadowColor: '#333',
-    shadowOffset: {
-      width: 0,
-      height: 0
-    },
-    shadowRadius: 3,
-    shadowOpacity: 1.0,
+  displayName: {
+    width: 150,
     position: 'absolute',
-    bottom: 20,
-    left: 20,
+    left: 0,
+    bottom: 10,
+    fontSize: 30,
+    textAlign: 'center'
   },
   cardContainer: {
     top: 75,
