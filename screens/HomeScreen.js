@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { ImageBackground, StyleSheet, View, SafeAreaView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 import { HeaderText, TextButton } from '../components/StyledText';
@@ -23,8 +23,9 @@ export default function HomeScreen({ navigation }) {
         <TextButton onPress={() => navigation.navigate('Stats')}>Stats</TextButton>
         <TextButton onPress={() => navigation.navigate('HowToPlay')}>How To Play</TextButton>
       </View>
-
-      <FontAwesome5 name={'cog'} size={30} style={styles.logoutIcon} onPress={() => navigation.navigate('Settings')} />
+      <SafeAreaView style={styles.logoutIcon} >
+        <FontAwesome5 name={'cog'} style={{ color: 'rgb(96,100,109)', fontSize: 30 }} onPress={() => navigation.navigate('Settings')} />
+      </SafeAreaView>
 
     </View>
   );
@@ -56,7 +57,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   logoutIcon: {
-    color: 'rgb(96,100,109)',
     position: 'absolute',
     top: 30,
     right: 10
