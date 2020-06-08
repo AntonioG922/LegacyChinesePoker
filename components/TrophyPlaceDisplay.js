@@ -66,8 +66,8 @@ export default function TrophyPlaceDisplay({ place, displayName, currentUser, ga
       {gamesWon !== null && <Text style={[styles.gamesWon, styles.text]}>{gamesWon}</Text>}
       {Object.keys(playersPlayingAgain).find(key => playersPlayingAgain[key] === displayName)
         && <FontAwesome5 name={'check'} size={30} style={[styles.playingAgainIcon, { color: '#47ba00' }]} />
-        || Object.keys(playersNotPlayingAgain).find(key => playersPlayingAgain[key] === displayName)
-        && <FontAwesome5 name={'times'} size={30} style={[styles.playingAgainIcon, { color: 'rgb(150, 56, 27)' }]} />
+        || Object.keys(playersNotPlayingAgain).find(key => playersNotPlayingAgain[key] === displayName)
+        && <FontAwesome5 name={'times'} size={30} style={[styles.playingAgainIcon, { color: 'rgb(217, 56, 27)' }]} />
         || <FontAwesome5 name={'check'} size={30} style={[styles.playingAgainIcon, { color: '#fff' }]} />}
     </View>
   )
