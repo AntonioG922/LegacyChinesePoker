@@ -28,7 +28,6 @@ export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const [gameEnded, setGameEnded] = useState(false);
-  const [exitingGame, setExitingGame] = useState(false);
   const [handsPlayed, setHandsPlayed] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [showDisplayNames, setShowDisplayNames] = useState(true);
@@ -42,10 +41,14 @@ export default function GameScreen({ route, navigation }) {
     return db.collection('CustomGames').doc(gameData.gameName)
       .onSnapshot((doc) => {
         const docData = doc.data();
-        setGameData(docData);
-        const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
-        if (isCurrentPlayer) {
-          Vibration.vibrate();
+        const leavingGame = docData === undefined || Boolean(docData.playersNotPlayingAgain[user.uid]);
+
+        if (!leavingGame) {
+          setGameData(docData);
+          const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
+          if (isCurrentPlayer) {
+            Vibration.vibrate();
+          }
         }
       });
   }, []);
@@ -349,8 +352,8 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function dontPlayAgain() {
-    setExitingGame(true);
-    if (Object.keys(gameData.players).length === -2/*Change to 1 to delete*/) {
+    setGameEnded(false);
+    if (Object.keys(gameData.players).length === 1/*Change to 1 to delete*/) {
       db.collection('CustomGames').doc(gameData.gameName).delete()
         .then(() => {
           console.log('Game successfully deleted');
@@ -379,7 +382,6 @@ export default function GameScreen({ route, navigation }) {
 
   function loaderExitFunction() {
     if (!gameStarted) {
-      setExitingGame(true);
       let updates = {};
       updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
@@ -462,66 +464,64 @@ export default function GameScreen({ route, navigation }) {
   return (
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
 
-      {!exitingGame && <View style={{ flex: 1 }}>
-        <Loader loading={!gameStarted}
-          message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
-          exitAction={loaderExitFunction}
-        />
-        <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
-          {gameData.places.map((player, index) => {
-            const displayName = gameData.displayNames[player];
-            const currentUser = player === user.uid;
-            const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
-            return (
-              <TrophyPlaceDisplay
-                key={index}
-                place={index}
-                displayName={displayName}
-                currentUser={currentUser}
-                gamesWon={gamesWon}
-                playersPlayingAgain={gameData.playersPlayingAgain}
-                playersNotPlayingAgain={gameData.playersNotPlayingAgain} />
-            )
-          })}
-
-          <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
-        </PopUpMessage>
-
-        <PlayedCardsContainer cards={gameData.playedCards}
-          lastPlayedCards={gameData.lastPlayed}
-          lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
-          avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
-          turnLength={gameData.turnLength}
-          gameInProgress={gameStarted && !gameEnded}
-          pass={pass}
-          isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
-          style={styles.playedCards} />
-        {gameStarted && <View style={styles.container}>
-          <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
-            place={gameData.places.indexOf(user.uid)}
-            errorMessage={errorMessage}
-            errorCards={errorCards}
-            isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
-            avatarImage={getAvatarImage(gameData.hands[gameData.players[user.uid]].avatar)}
-            playCards={playCards}
-            pass={pass}
-            style={styles.player1Hand} />
-          {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
-            const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
-            const displayName = showDisplayNames ?
-              gameData.displayNames[Object.keys(gameData.players).find(key => gameData.players[key] === playerIndex)]
-              : '';
-
-            return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
-              style={[styles.opposingPlayerHand, getStyle(index + 2)]}
+      <Loader loading={!gameStarted}
+        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+        exitAction={loaderExitFunction}
+      />
+      <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+        {gameData.places.map((player, index) => {
+          const displayName = gameData.displayNames[player];
+          const currentUser = player === user.uid;
+          const gamesWon = gameData.gamesPlayed > 1 ? gameData.gamesWon[player] : null;
+          return (
+            <TrophyPlaceDisplay
+              key={index}
+              place={index}
               displayName={displayName}
-              avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
-              avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
-              isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
-          })}
-        </View>}
-        <Menu />
+              currentUser={currentUser}
+              gamesWon={gamesWon}
+              playersPlayingAgain={gameData.playersPlayingAgain}
+              playersNotPlayingAgain={gameData.playersNotPlayingAgain} />
+          )
+        })}
+
+        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
+      </PopUpMessage>
+
+      <PlayedCardsContainer cards={gameData.playedCards}
+        lastPlayedCards={gameData.lastPlayed}
+        lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
+        avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}
+        turnLength={gameData.turnLength}
+        gameInProgress={gameStarted && !gameEnded}
+        pass={pass}
+        isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
+        style={styles.playedCards} />
+      {gameStarted && <View style={styles.container}>
+        <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
+          place={gameData.places.indexOf(user.uid)}
+          errorMessage={errorMessage}
+          errorCards={errorCards}
+          isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
+          avatarImage={getAvatarImage(gameData.hands[gameData.players[user.uid]].avatar)}
+          playCards={playCards}
+          pass={pass}
+          style={styles.player1Hand} />
+        {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
+          const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
+          const displayName = showDisplayNames ?
+            gameData.displayNames[Object.keys(gameData.players).find(key => gameData.players[key] === playerIndex)]
+            : '';
+
+          return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
+            style={[styles.opposingPlayerHand, getStyle(index + 2)]}
+            displayName={displayName}
+            avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
+            avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
+            isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+        })}
       </View>}
+      <Menu />
     </ImageBackground>
   )
 }
