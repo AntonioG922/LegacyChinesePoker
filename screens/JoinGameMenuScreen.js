@@ -66,9 +66,9 @@ export default function JoinGameMenuScreen({ navigation }) {
     return db.collection('CustomGames')
       .where('playersLeftToJoin', '>', 0)
       .onSnapshot((snapshot) => {
+        setGamesFetched(true);
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
-            setGamesFetched(true);
             dispatch({ type: "add", value: change.doc.data() });
           }
           if (change.type === "modified") {
