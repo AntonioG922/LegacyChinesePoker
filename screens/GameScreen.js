@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { ImageBackground, StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity } from 'react-native';
 import firebase from 'firebase';
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import store from '../redux/store';
 
 import Loader from '../components/Loader';
@@ -19,6 +20,7 @@ import {
 } from '../functions/HelperFunctions';
 import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
+import { HeaderText } from '../components/StyledText';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -28,8 +30,13 @@ export default function GameScreen({ route, navigation }) {
   const [gameEnded, setGameEnded] = useState(false);
   const [exitingGame, setExitingGame] = useState(false);
   const [handsPlayed, setHandsPlayed] = useState({});
+  const [showMenu, setShowMenu] = useState(false);
+  const [showDisplayNames, setShowDisplayNames] = useState(true);
   const user = store.getState().userData.user;
   const db = firebase.firestore();
+  const menuHeight = useRef(new Animated.Value(0)).current;
+  const menuWidth = useRef(new Animated.Value(0)).current;
+  const menuPadding = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     return db.collection('CustomGames').doc(gameData.gameName)
@@ -99,6 +106,24 @@ export default function GameScreen({ route, navigation }) {
         });
     }
   }, [gameData.playersPlayingAgain, gameData.players]);
+
+  useEffect(() => {
+    const duration = 250;
+    Animated.parallel([
+      Animated.timing(menuHeight, {
+        toValue: showMenu ? 150 : 0,
+        duration: duration
+      }),
+      Animated.timing(menuWidth, {
+        toValue: showMenu ? 220 : 0,
+        duration: duration
+      }),
+      Animated.timing(menuPadding, {
+        toValue: showMenu ? 15 : 0,
+        duration: duration
+      })
+    ]).start();
+  }, [showMenu]);
 
   function updateUserStats() {
     const gameType = GAME_TYPE_BY_NUMBER_OF_PLAYERS[gameData.numberOfPlayers];
@@ -347,16 +372,6 @@ export default function GameScreen({ route, navigation }) {
     }
   }
 
-  function getAvatarRotation(index) {
-    if (gameData.numberOfPlayers === 2) {
-      return '180deg';
-    }
-    if (gameData.numberOfPlayers === 3 && index === 1) {
-      return '90deg';
-    }
-    return (270 - 90 * index) + 'deg';
-  }
-
   function loaderExitFunction() {
     if (!gameStarted) {
       setExitingGame(true);
@@ -369,6 +384,74 @@ export default function GameScreen({ route, navigation }) {
           navigation.goBack();
         });
     }
+  }
+
+  function leaveGame() {
+    navigation.goBack();
+  }
+
+  function getAvatarRotation(index) {
+    if (gameData.numberOfPlayers === 2) {
+      return '180deg';
+    }
+    if (gameData.numberOfPlayers === 3 && index === 1) {
+      return '90deg';
+    }
+    return (270 - 90 * index) + 'deg';
+  }
+
+  function Menu() {
+
+    const styles = StyleSheet.create({
+      menuContainer: {
+        alignItems: 'flex-end',
+        position: 'absolute',
+        top: 30,
+        right: 20
+      },
+      menu: {
+        backgroundColor: '#fafafa',
+        borderRadius: 10,
+        marginRight: 10,
+        overflow: 'hidden'
+      },
+      row: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 15
+      },
+      text: {
+        fontSize: 20
+      },
+      iconContainer: {
+        marginLeft: 20
+      }
+    });
+
+    return (
+      <SafeAreaView style={styles.menuContainer}>
+        <FontAwesome5 name={'bars'} style={{ fontSize: 30 }} onPress={() => setShowMenu(!showMenu)} />
+        <Animated.View style={[styles.menu, { height: menuHeight, width: menuWidth, padding: menuPadding }]}>
+
+          <TouchableOpacity style={styles.row} onPress={() => setShowDisplayNames(!showDisplayNames)}>
+            <HeaderText style={[styles.text]} >Display Names</HeaderText>
+            <HeaderText style={styles.iconContainer}>
+              <FontAwesome5 name={showDisplayNames ? 'check-square' : 'square'} style={styles.text} />
+            </HeaderText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
+            <HeaderText style={[styles.text]} >Exit Game</HeaderText>
+            <HeaderText style={styles.iconContainer}>
+              <MaterialCommunityIcons name={'logout'} style={styles.text} />
+            </HeaderText>
+          </TouchableOpacity>
+
+        </Animated.View>
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -420,14 +503,19 @@ export default function GameScreen({ route, navigation }) {
             style={styles.player1Hand} />
           {Array.from({ length: gameData.numberOfPlayers - 1 }).map((value, index) => {
             const playerIndex = (gameData.players[user.uid] + index + 1) % gameData.numberOfPlayers;
+            const displayName = showDisplayNames ?
+              gameData.displayNames[Object.keys(gameData.players).find(key => gameData.players[key] === playerIndex)]
+              : '';
 
             return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
               style={[styles.opposingPlayerHand, getStyle(index + 2)]}
+              displayName={displayName}
               avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
               avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
               isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
           })}
         </View>}
+        <Menu />
       </View>}
     </ImageBackground>
   )
@@ -487,6 +575,6 @@ const styles = StyleSheet.create({
     transform: [
       { rotateZ: '-90deg' },
     ],
-  }
+  },
 
 });
