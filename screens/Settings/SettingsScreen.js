@@ -71,7 +71,7 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.inputFields} >
           <View style={styles.row}>
             <HeaderText style={styles.headerText}>Display Name: </HeaderText>
-            <OutlineTextInput style={styles.input} value={displayName} placeholder={user.displayName} onChangeText={text => setDisplayName(text)} />
+            <OutlineTextInput maxLength={12} style={styles.input} value={displayName} placeholder={user.displayName} onChangeText={text => setDisplayName(text)} />
           </View>
         </View>
 
