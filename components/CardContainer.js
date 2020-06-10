@@ -12,7 +12,7 @@ import {
   sortCards, SUITS, HAND_TYPES
 } from '../functions/HelperFunctions';
 
-export function UserCardContainer({ cards, place, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
+export function UserCardContainer({ cards, place, currentHandType, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
   const [selectingJoker, setSelectingJoker] = useState(false);
   const [jokerValue, setJokerValue] = useState(JOKER);
@@ -28,8 +28,20 @@ export function UserCardContainer({ cards, place, errorMessage, errorCards, isCu
         ? <Place place={place} />
         : <View>
           <View style={styles.actionsContainer}>
-            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={pass}>Pass</ContainedButton>}
-            {!selectingJoker && <ContainedButton style={styles.actionButton} disabled={!isCurrentPlayer} onPress={playSelectedCards}>Play</ContainedButton>}
+            {!selectingJoker &&
+              <ContainedButton
+                style={styles.actionButton}
+                disabled={!isCurrentPlayer || currentHandType === HAND_TYPES.START_OF_ROUND || currentHandType === HAND_TYPES.START_OF_GAME}
+                onPress={pass}>Pass
+              </ContainedButton>
+            }
+            {!selectingJoker &&
+              <ContainedButton
+                style={styles.actionButton}
+                disabled={!isCurrentPlayer}
+                onPress={playSelectedCards}>Play
+              </ContainedButton>
+            }
           </View>
           {selectingJoker && <JokerSelector setJoker={setJoker} />}
           <View style={styles.cardContainer}>
