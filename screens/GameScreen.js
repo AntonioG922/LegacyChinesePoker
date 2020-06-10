@@ -407,6 +407,14 @@ export default function GameScreen({ route, navigation }) {
     return (270 - 90 * index) + 'deg';
   }
 
+  function getDisplayNameRotation(index) {
+    if (gameData.numberOfPlayers === 2 || gameData.numberOfPlayers === 4 && index == 1) {
+      return '180deg';
+    }
+
+    return '0deg';
+  }
+
   function Menu() {
 
     const styles = StyleSheet.create({
@@ -516,6 +524,7 @@ export default function GameScreen({ route, navigation }) {
           return <FaceDownCardsContainer key={playerIndex} numberOfCards={gameData.hands[playerIndex].cards.length}
             style={[styles.opposingPlayerHand, getStyle(index + 2)]}
             displayName={displayName}
+            displayNameStyling={{ transform: [{ rotateZ: getDisplayNameRotation(index) }] }}
             avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
             avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />

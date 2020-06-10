@@ -116,11 +116,11 @@ export function PlainCardContainer({ cards, style }) {
   )
 }
 
-export function FaceDownCardsContainer({ avatarImage, avatarStyling, displayName, numberOfCards, style, isCurrentPlayer }) {
+export function FaceDownCardsContainer({ avatarImage, avatarStyling, displayName, displayNameStyling, numberOfCards, style, isCurrentPlayer }) {
   return (
     <View style={style}>
       {avatarImage && <Image source={avatarImage} style={[styles.avatar, isCurrentPlayer && styles.currentPlayerAvatar, avatarStyling]} />}
-      <HeaderText numberOfLines={1} style={[styles.displayName, avatarStyling]}>{displayName}</HeaderText>
+      <HeaderText numberOfLines={1} style={[styles.displayName, displayNameStyling]}>{displayName}</HeaderText>
       {Array.from({ length: numberOfCards }, (v, i) => i).map(index =>
         <CardBack key={index} style={[{ borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%` }]} />)}
     </View>
