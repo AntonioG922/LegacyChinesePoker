@@ -182,10 +182,11 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function getNextEmptyHandIndexLocal() {
-    return getNextEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers);
+    return getNextEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers;
   }
 
   function everyonePassAfterWinner() {
+    // called while last player needed to pass is passing
     if (gameData.places.length === 0)
       return false;
 
@@ -201,7 +202,7 @@ export default function GameScreen({ route, navigation }) {
         const remainingPlayerLastPlayTurnNum = Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop();
         const remainingPlayerLastPlay = gameData.playersTurnHistory[remainingPlayerUID][remainingPlayerLastPlayTurnNum];
 
-        if (remainingPlayerLastPlayTurnNum < lastPlayTurnNum || remainingPlayerLastPlay !== 'PASS')
+        if (remainingPlayerLastPlayTurnNum < lastPlayTurnNum || remainingPlayerLastPlay !== 'PASS' || remainingPlayerUID == user.uid)
           return false;
       }
     });
@@ -214,7 +215,7 @@ export default function GameScreen({ route, navigation }) {
     setErrorCards([]);
 
     const playedHandType = getHandType(selectedCards);
-    const everyonePassed = user.displayName === gameData.lastPlayerToPlay[user.uid] || everyonePassAfterWinner();
+    const everyonePassed = gameData.currentHandType === HAND_TYPES.START_OF_ROUND;
     const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
     const currentHand = gameData.hands[gameData.players[user.uid]].cards;
 
@@ -254,7 +255,7 @@ export default function GameScreen({ route, navigation }) {
       // players: {
       //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
       // },
-      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
+      currentPlayerTurnIndex: getNextEmptyHandIndexLocal(),
       currentHandType: playedHandType,
       playersTurnHistory: playersTurnHistory,
       overallTurnHistory: overallTurnHistory
@@ -292,6 +293,12 @@ export default function GameScreen({ route, navigation }) {
       return true;
     }
 
+    const nextPlayerDisplayName = gameData.displayNames[Object.keys(gameData.players).find(uid => { gameData.players[uid] === ((gameData.currentPlayerTurnIndex + 1) % gameData.numberOfPlayers) })]
+    const everyonePassed = nextPlayerDisplayName === gameData.lastPlayerToPlay[user.uid] || everyonePassAfterWinner();
+    if (everyonePassed) {
+      console.log('errybooty passed');
+    }
+
     let overallTurnHistory = gameData.overallTurnHistory;
     const turnsTaken = Object.keys(overallTurnHistory).length;
     overallTurnHistory[turnsTaken] = 'PASS';
@@ -304,7 +311,8 @@ export default function GameScreen({ route, navigation }) {
       return true;
     } */
     db.collection('CustomGames').doc(gameData.gameName).update({
-      currentPlayerTurnIndex: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers),
+      currentHandType: everyonePassed ? HAND_TYPES.START_OF_ROUND : gameData.currentHandType,
+      currentPlayerTurnIndex: getNextEmptyHandIndexLocal(),
       playersTurnHistory: playersTurnHistory,
       overallTurnHistory: overallTurnHistory
       // REMOVE FOR PROD. Allows tester to play every hand in a game.
@@ -496,7 +504,9 @@ export default function GameScreen({ route, navigation }) {
         <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
       </PopUpMessage>
 
-      <PlayedCardsContainer cards={gameData.playedCards}
+      <PlayedCardsContainer
+        cards={gameData.playedCards}
+        currentHandType={gameData.currentHandType}
         lastPlayedCards={gameData.lastPlayed}
         lastPlayerToPlay={gameData.lastPlayerToPlay[Object.keys(gameData.lastPlayerToPlay)[0]]}
         avatarImage={getAvatarImage(gameData.hands[gameData.currentPlayerTurnIndex].avatar)}

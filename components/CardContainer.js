@@ -9,7 +9,7 @@ import {
   getRank,
   JOKER,
   ORDERED_RANKS, ORDERED_SUITS, PLACE_SUFFIX,
-  sortCards, SUITS
+  sortCards, SUITS, HAND_TYPES
 } from '../functions/HelperFunctions';
 
 export function UserCardContainer({ cards, place, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
@@ -127,7 +127,7 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, displayName
   )
 }
 
-export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
+export function PlayedCardsContainer({ cards, avatarImage, currentHandType, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
   const showTimer = gameInProgress && lastPlayerToPlay && isCurrentPlayer;
@@ -269,10 +269,10 @@ export function PlayedCardsContainer({ cards, avatarImage, lastPlayedCards, last
       <View style={styles.lastPlayed}>
         <HeaderText style={styles.lastPlayedText}>{lastPlayerToPlay}</HeaderText>
         <View style={[styles.lastPlayedCards, { borderWidth: showTimer ? 0 : 0 }]}>
-          {lastPlayedCards.length === 0 ?
+          {(currentHandType === HAND_TYPES.START_OF_GAME || currentHandType === HAND_TYPES.START_OF_ROUND) ?
             <View style={styles.suitAndRank}>
               <Image source={avatarImage} style={{ width: 20, height: 20, marginRight: 5 }} />
-              <HeaderText> plays first</HeaderText>
+              <HeaderText>{currentHandType === HAND_TYPES.START_OF_GAME ? 'plays first' : 'starts a new round'}</HeaderText>
             </View> :
             lastPlayedCards.map((card) =>
               <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
