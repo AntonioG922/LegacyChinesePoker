@@ -26,8 +26,14 @@ export default function SettingsScreen({ navigation }) {
           }));
         })
         .catch((error) => {
-          alert('Error saving preferences. Please check your internet connection and try again.');
-          console.log('Error saving preferences: ', error, typeof (error));
+          if (error.message === 'Attempting to change configurable attribute of unconfigurable property.') {
+            store.dispatch(updateUserData({
+              displayName: displayName
+            }));
+          } else {
+            alert('Error saving preferences. Please check your internet connection and try again.');
+            console.log('Error saving preferences: ', error);
+          }
         });
     }
   }
