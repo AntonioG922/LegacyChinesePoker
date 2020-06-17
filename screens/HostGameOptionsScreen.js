@@ -37,7 +37,8 @@ export default function HostGameOptionsScreen({ navigation }) {
   const computerPossibleDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
 
   const scrollRef = useRef();
-  const advancedOptionsHeight = useRef(new Animated.Value(0)).current;
+  const advancedOptionsHeight = useRef(new Animated.Value(-160)).current;
+  const advancedOptionsHiderHeight = useRef(new Animated.Value(200)).current;
 
   useEffect(() => {
     setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
@@ -56,15 +57,20 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   useEffect(() => {
     const duration = 300;
-    const height = 160 + ((numberOfComputers - 1) * 33) - (numberOfComputers === (numberOfPlayers - 1) ? 33 : 0);
+    const height = -160 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 33 : 0);
     Animated.parallel([
       Animated.timing(advancedOptionsHeight, {
-        toValue: showAdvancedOptions ? height : 0,
+        toValue: showAdvancedOptions ? 0 : height,
+        duration: duration,
+        useNativeDriver: true
+      }),
+      Animated.timing(advancedOptionsHiderHeight, {
+        toValue: showAdvancedOptions ? 0 : 200,
         duration: duration
       })
     ]).start();
 
-    scrollRef.current.scrollTo({ y: showAdvancedOptions ? height : 0, animated: true });
+    scrollRef.current.scrollTo({ y: showAdvancedOptions ? -height : 0, animated: true });
   }, [showAdvancedOptions, numberOfComputers, numberOfPlayers]);
 
   async function gameExists(gameName) {
@@ -148,6 +154,8 @@ export default function HostGameOptionsScreen({ navigation }) {
             alert('Error uploading game to database. Please check your connection and try again.')
           });
       }
+    } else {
+      setErrorMessage('Please enter a Game Name');
     }
   }
 
@@ -176,7 +184,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={{ height: '100%' }} ref={scrollRef}>
+      <ScrollView style={{ height: '100%' }} scrollEnabled={showAdvancedOptions} ref={scrollRef}>
         <Loader loading={loading} message={'Creating Game'} />
         <TitledPage pageTitle={'Host Game'} navigation={navigation}>
           <View style={styles.form}>
@@ -243,7 +251,7 @@ export default function HostGameOptionsScreen({ navigation }) {
               </Button>
             </View>
 
-            <Animated.View style={[{ height: advancedOptionsHeight, overflow: 'hidden' }]}>
+            <View>
               <View style={styles.row}>
                 <View style={styles.optionText}>
                   <HeaderText style={styles.rowText} >Turn Length:</HeaderText>
@@ -304,12 +312,15 @@ export default function HostGameOptionsScreen({ navigation }) {
                 </View>
               </View>
 
-            </Animated.View>
+            </View>
 
-            <DividerLine />
           </View>
 
-          <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
+          <Animated.View style={{ transform: [{ translateY: advancedOptionsHeight }], backgroundColor: '#fafafa' }}>
+            <DividerLine />
+            <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
+            <Animated.View style={{ height: advancedOptionsHiderHeight }} />
+          </Animated.View>
         </TitledPage>
       </ScrollView>
     </View >
@@ -341,11 +352,11 @@ const styles = StyleSheet.create({
     fontSize: 15
   },
   optionText: {
-    flex: 3,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
   },
   optionButtons: {
-    flex: 2,
+    flex: 1,
   }
 });

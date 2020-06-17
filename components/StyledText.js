@@ -29,14 +29,7 @@ export function TextButton(props) {
 }
 
 export function ContainedButton(props) {
-  const [font, setFont] = useState(store.getState().globalFont);
-
-  useEffect(() => {
-    return store.subscribe(() => {
-      const storeFont = store.getState().globalFont;
-      setFont(storeFont);
-    })
-  }, []);
+  const font = store.getState().globalFont;
 
   return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.noShadow, styles.containedButtonText, { fontSize: 32, fontFamily: font }, props.labelStyle]} />;
 }
