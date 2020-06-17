@@ -81,7 +81,7 @@ export default function GameScreen({ route, navigation }) {
       }
       let playersPlayingAgain = gameData.playersPlayingAgain;
       Object.keys(gameData.displayNames).forEach(uid => {
-        if (computerPrefixUID.includes(uid.slice(0, 6))) {
+        if (computerPrefixUID.includes(uid.slice(0, 7))) {
           playersPlayingAgain[uid] = gameData.displayNames[uid];
         }
       });
