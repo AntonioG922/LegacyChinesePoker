@@ -98,11 +98,12 @@ export default function SettingsScreen({ navigation }) {
 
       <View style={styles.center}>
         <HeaderText style={styles.headerText}>Styled Text</HeaderText>
-        <FontAwesome5
-          name={styledText === 'gang-of-three' ? 'check-square' : 'square'}
-          style={[styles.beneathHeader, { fontSize: 35, color: 'rgb(96,100,109)' }]}
-          onPress={() => setStyledText(styledText === 'gang-of-three' ? 'System' : 'gang-of-three')}
-        />
+        <TouchableOpacity onPress={() => setStyledText(styledText === 'gang-of-three' ? 'System' : 'gang-of-three')}>
+          <FontAwesome5
+            name={styledText === 'gang-of-three' ? 'check-square' : 'square'}
+            style={[styles.beneathHeader, { fontSize: 35, color: 'rgb(96,100,109)' }]}
+          />
+        </TouchableOpacity>
       </View>
 
       <DividerLine />
