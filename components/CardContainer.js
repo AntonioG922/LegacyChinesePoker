@@ -17,6 +17,12 @@ export function UserCardContainer({ cards, place, currentHandType, errorMessage,
   const [selectingJoker, setSelectingJoker] = useState(false);
   const [jokerValue, setJokerValue] = useState(JOKER);
 
+  useEffect(() => {
+    if (place >= 0) {
+      setSelectedCards([]);
+    }
+  }, [place]);
+
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
       <Image source={avatarImage} style={[styles.avatar, { bottom: 60, right: -20 }, isCurrentPlayer && styles.currentPlayerAvatar]} />
@@ -135,6 +141,21 @@ export function FaceDownCardsContainer({ avatarImage, avatarStyling, displayName
       <HeaderText numberOfLines={1} style={[styles.displayName, displayNameStyling]}>{displayName}</HeaderText>
       {Array.from({ length: numberOfCards }, (v, i) => i).map(index =>
         <CardBack key={index} style={[{ borderColor: 'white', borderWidth: 3, position: 'absolute', left: `${(index / numberOfCards * 100)}%` }]} />)}
+    </View>
+  )
+}
+
+export function FaceUpCardContainer({ cards, avatarImage, avatarStyling, displayName, displayNameStyling, numberOfCards, style, isCurrentPlayer }) {
+  return (
+    <View style={style}>
+      {avatarImage && <Image source={avatarImage} style={[styles.avatar, isCurrentPlayer && styles.currentPlayerAvatar, avatarStyling]} />}
+      <HeaderText numberOfLines={1} style={[styles.displayName, displayNameStyling]}>{displayName}</HeaderText>
+      <View style={styles.cardContainer}>
+        {sortCards(cards).map((rank, index) => (
+          <Card key={rank} rank={rank} style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
+        ))}
+      </View>
+
     </View>
   )
 }

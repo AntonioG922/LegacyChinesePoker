@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity, Vibration } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity, Vibration, TouchableHighlight } from 'react-native';
 import firebase from 'firebase';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import store from '../redux/store';
@@ -7,20 +7,23 @@ import store from '../redux/store';
 import Loader from '../components/Loader';
 import {
   FaceDownCardsContainer,
+  FaceUpCardContainer,
   PlayedCardsContainer,
   UserCardContainer
 } from '../components/CardContainer';
 import {
   getAvatarImage,
   getHandType, getLowestCard,
-  getNextEmptyHandIndex,
+  getNextNonEmptyHandIndex,
   HAND_TYPES,
   isBetterHand, isLegalPlay,
-  dealCards, findStartingPlayer, GAME_TYPE_BY_NUMBER_OF_PLAYERS, GAME_TYPES
+  dealCards, findStartingPlayer, GAME_TYPE_BY_NUMBER_OF_PLAYERS, GAME_TYPES,
+  AI_DIFFICULTIES
 } from '../functions/HelperFunctions';
 import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
-import { HeaderText } from '../components/StyledText';
+import { HeaderText, DividerLine } from '../components/StyledText';
+import { getLowestPlayableCards } from '../functions/AIFunctions';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -28,29 +31,40 @@ export default function GameScreen({ route, navigation }) {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState(route.params);
   const [gameEnded, setGameEnded] = useState(false);
+  const [showPopUp, setShowPopUp] = useState(false);
   const [handsPlayed, setHandsPlayed] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [showDisplayNames, setShowDisplayNames] = useState(true);
+
   const user = store.getState().userData.user;
   const db = firebase.firestore();
-  const menuHeight = useRef(new Animated.Value(0)).current;
-  const menuWidth = useRef(new Animated.Value(0)).current;
-  const menuPadding = useRef(new Animated.Value(0)).current;
+  const isLocalGame = gameData.localGame;
+  const computerDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
+  const computerPrefixUID = computerDifficulties.map(difficulty => 'Bot' + difficulty.slice(0, 4));
+
+  const menuPosition = useRef(new Animated.Value(0)).current;
+  const screenShaderOpacity = useRef(new Animated.Value(0)).current;
+  const screenShaderZindex = useRef(new Animated.Value(-1)).current;
 
   useEffect(() => {
-    return db.collection('CustomGames').doc(gameData.gameName)
-      .onSnapshot((doc) => {
-        const docData = doc.data();
-        const leavingGame = docData === undefined || Boolean(docData.playersNotPlayingAgain[user.uid]);
+    if (!isLocalGame) {
+      return db.collection('CustomGames').doc(gameData.gameName)
+        .onSnapshot((doc) => {
+          const docData = doc.data();
+          const leavingGame = docData === undefined || Boolean(docData.playersNotPlayingAgain[user.uid]);
 
-        if (!leavingGame) {
-          setGameData(docData);
-          const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
-          if (isCurrentPlayer) {
-            Vibration.vibrate();
+          if (!leavingGame) {
+            if (docData.currentPlayerTurnIndex === docData.players[user.uid]) console.log(getLowestPlayableCards(docData.hands[docData.players[user.uid]].cards, docData.cardsPerPlayer, docData.currentHandType, docData.lastPlayed, true));
+            setGameData(docData);
+            const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
+            if (isCurrentPlayer) {
+              Vibration.vibrate();
+            }
           }
-        }
-      });
+        });
+    } else {
+      console.log('We local bitch: ', gameData)
+    }
   }, []);
 
   useEffect(() => {
@@ -62,12 +76,26 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (gameData.numberOfPlayers === gameData.places.length && Object.keys(gameData.playersPlayingAgain).length === 0) {
-      updateUserStats();
-      setTimeout(() => {
-        setGameEnded(true)
-      }, 2000);
+      if (!isLocalGame) {
+        updateUserStats();
+      }
+      let playersPlayingAgain = gameData.playersPlayingAgain;
+      Object.keys(gameData.displayNames).forEach(uid => {
+        if (computerPrefixUID.includes(uid.slice(0, 6))) {
+          playersPlayingAgain[uid] = gameData.displayNames[uid];
+        }
+      });
+      let updates = {
+        playersPlayingAgain: playersPlayingAgain
+      };
+      setGameData({ ...gameData, ...updates });
+      setGameEnded(true);
     }
   }, [gameData.places]);
+
+  useEffect(() => {
+    gameEnded ? setTimeout(() => { setShowPopUp(true) }, 2000) : setShowPopUp(false);
+  }, [gameEnded]);
 
   useEffect(() => {
     const playersPlayingAgainLength = Object.keys(gameData.playersPlayingAgain).length;
@@ -80,10 +108,10 @@ export default function GameScreen({ route, navigation }) {
       let playersTurnHistory = {};
       let displayNames = {};
       let playersLeftToJoin = gameData.numberOfPlayers;
-      Object.keys(gameData.playersPlayingAgain).map((key, index) => {
-        players[key] = index;
-        playersTurnHistory[key] = {};
-        displayNames[key] = gameData.playersPlayingAgain[key];
+      Object.keys(gameData.playersPlayingAgain).forEach((uid, index) => {
+        players[uid] = index;
+        playersTurnHistory[uid] = {};
+        displayNames[uid] = gameData.playersPlayingAgain[uid];
         playersLeftToJoin--;
       });
 
@@ -103,35 +131,59 @@ export default function GameScreen({ route, navigation }) {
         playersPlayingAgain: {}
       };
 
-      firebase.firestore().collection('CustomGames').doc(gameData.gameName).update(updates)
-        .then(() => {
-          setGameEnded(false);
-          setGameStarted(!playersLeftToJoin);
-          maybeSetGameStartTime();
-        })
-        .catch(() => {
-          alert('Error trying to play again. Please check your connection and try again.')
-        });
+      if (isLocalGame) {
+        setGameData({ ...gameData, ...updates });
+      } else {
+        firebase.firestore().collection('CustomGames').doc(gameData.gameName).update(updates)
+          .then(() => {
+            setGameStarted(!playersLeftToJoin);
+            maybeSetGameStartTime();
+          })
+          .catch(() => {
+            alert('Error trying to play again. Please check your connection and try again.')
+          });
+      }
     }
-  }, [gameData.playersPlayingAgain, gameData.players]);
+  }, [Object.keys(gameData.playersPlayingAgain).length, Object.keys(gameData.players).length]);
 
   useEffect(() => {
     const duration = 250;
     Animated.parallel([
-      Animated.timing(menuHeight, {
-        toValue: showMenu ? 150 : 0,
+      Animated.timing(menuPosition, {
+        toValue: showMenu ? 0 : -225,
         duration: duration
       }),
-      Animated.timing(menuWidth, {
-        toValue: showMenu ? 220 : 0,
+      Animated.timing(screenShaderOpacity, {
+        toValue: showMenu ? .5 : 0,
         duration: duration
       }),
-      Animated.timing(menuPadding, {
-        toValue: showMenu ? 15 : 0,
+      Animated.timing(screenShaderZindex, {
+        toValue: showMenu ? 3 : -1,
         duration: duration
       })
     ]).start();
   }, [showMenu]);
+
+  useEffect(() => {
+    const lastPlayerLeft = gameData.places.length === gameData.numberOfPlayers;
+    if (isLocalGame && !lastPlayerLeft) {
+      const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
+      const computerPlaysNext = computerPrefixUID.includes(currentPlayerUID.slice(0, 7));
+
+      if (computerPlaysNext) {
+        const AIDifficulty = currentPlayerUID.slice(3, 7);
+        const exclusive = AIDifficulty === 'Easy' ? false : true;
+        const computerSelectedCards = getLowestPlayableCards(gameData.hands[gameData.players[currentPlayerUID]].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, exclusive);
+        setTimeout(() => {
+          if (computerSelectedCards) {
+            playCards(computerSelectedCards);
+          } else {
+            pass();
+          }
+        }, gameData.places.find(uid => user.uid === uid) ? 500 : 1500);
+      }
+    }
+  }, [gameData.currentPlayerTurnIndex, gameData.currentHandType]);
 
   function updateUserStats() {
     const gameType = GAME_TYPE_BY_NUMBER_OF_PLAYERS[gameData.numberOfPlayers];
@@ -181,8 +233,8 @@ export default function GameScreen({ route, navigation }) {
     return false;
   }
 
-  function getNextEmptyHandIndexLocal() {
-    return getNextEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers;
+  function getNextNonEmptyHandIndexLocal() {
+    return getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers;
   }
 
   function everyonePassAfterWinner() {
@@ -195,17 +247,23 @@ export default function GameScreen({ route, navigation }) {
     if (gameData.hands[lastUIDToPlayTurnIndex].cards.length)
       return false;
 
-    const lastPlayTurnNum = Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop();
-    gameData.hands.forEach((hand, index) => {
+    const lastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop());
+    let index = 0;
+    for (let hand of gameData.hands) {
       if (hand.cards.length) {
         const remainingPlayerUID = Object.keys(gameData.players).find(key => gameData.players[key] === index);
-        const remainingPlayerLastPlayTurnNum = Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop();
+        const remainingPlayerLastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop());
         const remainingPlayerLastPlay = gameData.playersTurnHistory[remainingPlayerUID][remainingPlayerLastPlayTurnNum];
+        const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
 
-        if (remainingPlayerLastPlayTurnNum < lastPlayTurnNum || remainingPlayerLastPlay !== 'PASS' || remainingPlayerUID == user.uid)
+        if ((remainingPlayerLastPlayTurnNum < lastPlayTurnNum ||
+          (remainingPlayerLastPlayTurnNum > lastPlayTurnNum && remainingPlayerLastPlay !== 'PASS')) &&
+          remainingPlayerUID !== currentPlayerUID) {
           return false;
+        }
       }
-    });
+      index++;
+    };
 
     return true;
   }
@@ -214,10 +272,11 @@ export default function GameScreen({ route, navigation }) {
     setErrorMessage('');
     setErrorCards([]);
 
+    const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
     const playedHandType = getHandType(selectedCards);
     const everyonePassed = gameData.currentHandType === HAND_TYPES.START_OF_ROUND;
     const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
-    const currentHand = gameData.hands[gameData.players[user.uid]].cards;
+    const currentHand = gameData.hands[gameData.players[currentPlayerUID]].cards;
 
     if (playedHandType === HAND_TYPES.INVALID) {
       setErrorMessage('Invalid hand type');
@@ -239,53 +298,62 @@ export default function GameScreen({ route, navigation }) {
     hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
 
     let overallTurnHistory = gameData.overallTurnHistory;
+    let playersTurnHistory = gameData.playersTurnHistory;
     const turnsTaken = Object.keys(overallTurnHistory).length;
     overallTurnHistory[turnsTaken] = selectedCards;
-    let playersTurnHistory = gameData.playersTurnHistory;
-    playersTurnHistory[user.uid][turnsTaken] = selectedCards;
+    playersTurnHistory[currentPlayerUID][turnsTaken] = selectedCards;
 
     const handIsEmpty = hands[player].cards.length === 0;
+    let places = gameData.places;
+    let gamesWon = gameData.gamesWon;
+    let gamesPlayed = gameData.gamesPlayed;
 
-    const data = {
-      playedCards: firebase.firestore.FieldValue.arrayUnion(...selectedCards),
-      lastPlayed: selectedCards,
-      lastPlayerToPlay: { [user.uid]: user.displayName },
-      hands: hands,
-      // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      // players: {
-      //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
-      // },
-      currentPlayerTurnIndex: getNextEmptyHandIndexLocal(),
-      currentHandType: playedHandType,
-      playersTurnHistory: playersTurnHistory,
-      overallTurnHistory: overallTurnHistory
-    };
     if (handIsEmpty) {
-      data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+      places = isLocalGame ? [...places, currentPlayerUID] : firebase.firestore.FieldValue.arrayUnion(user.uid);
 
       if (!gameData.places.length) {
-        data[`gamesWon.${user.uid}`] = firebase.firestore.FieldValue.increment(1);
-        data['gamesPlayed'] = firebase.firestore.FieldValue.increment(1);
+        gamesWon[currentPlayerUID] = isLocalGame ? (gameData.gamesWon[currentPlayerUID] + 1) : firebase.firestore.FieldValue.increment(1);
+        gamesPlayed = isLocalGame ? (gameData.gamesPlayed + 1) : firebase.firestore.FieldValue.increment(1);
       }
 
       if (gameData.places.length === gameData.numberOfPlayers - 2) {
-        const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== user.uid && !gameData.places.includes(playerUid));
-        data['places'] = firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
+        const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== currentPlayerUID && !gameData.places.includes(playerUid));
+        places = isLocalGame ? [...gameData.places, currentPlayerUID, lastPlaceUID] : firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
       }
     }
+    console.log(gamesWon);
+
+    const data = {
+      playedCards: isLocalGame ? [...gameData.playedCards, ...selectedCards] : firebase.firestore.FieldValue.arrayUnion(...selectedCards),
+      lastPlayed: selectedCards,
+      lastPlayerToPlay: { [currentPlayerUID]: gameData.displayNames[currentPlayerUID] },
+      hands: hands,
+      currentPlayerTurnIndex: getNextNonEmptyHandIndexLocal(),
+      currentHandType: playedHandType,
+      playersTurnHistory: playersTurnHistory,
+      overallTurnHistory: overallTurnHistory,
+      places: places,
+      gamesWon: gamesWon,
+      gamesPlayed: gamesPlayed
+    };
 
     let updatedHandsPlayed = handsPlayed;
     updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + 1;
     setHandsPlayed(updatedHandsPlayed);
 
-    db.collection('CustomGames').doc(gameData.gameName).update(data);
+    if (isLocalGame) {
+      setGameData({ ...gameData, ...data });
+    } else {
+      db.collection('CustomGames').doc(gameData.gameName).update(data);
+    }
 
     return true;
   }
 
   function pass() {
     const isFirstPlayOfGame = gameData.currentHandType === HAND_TYPES.START_OF_GAME;
-    const currentHand = gameData.hands[gameData.players[user.uid]].cards;
+    const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
+    const currentHand = gameData.hands[gameData.players[currentPlayerUID]].cards;
 
     if (isFirstPlayOfGame) {
       setErrorMessage('Must start game with ');
@@ -293,34 +361,26 @@ export default function GameScreen({ route, navigation }) {
       return true;
     }
 
-    const nextPlayerDisplayName = gameData.displayNames[Object.keys(gameData.players).find(uid => { gameData.players[uid] === ((gameData.currentPlayerTurnIndex + 1) % gameData.numberOfPlayers) })]
-    const everyonePassed = nextPlayerDisplayName === gameData.lastPlayerToPlay[user.uid] || everyonePassAfterWinner();
-    if (everyonePassed) {
-      console.log('errybooty passed');
-    }
+    const nextPlayerStillInUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === getNextNonEmptyHandIndexLocal());
+    const everyonePassed = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0] || everyonePassAfterWinner();
 
     let overallTurnHistory = gameData.overallTurnHistory;
     const turnsTaken = Object.keys(overallTurnHistory).length;
     overallTurnHistory[turnsTaken] = 'PASS';
     let playersTurnHistory = gameData.playersTurnHistory;
-    playersTurnHistory[user.uid][turnsTaken] = 'PASS';
-    //REMOVE FOR PROD> ALLOWS TESTER TO PASS
-    /* if (gameData.lastPlayerToPlay[user.uid] === user.displayName) {
-      setErrorMessage('Must start a new hand');
-      setErrorCards([]);
-      return true;
-    } */
-    db.collection('CustomGames').doc(gameData.gameName).update({
+    playersTurnHistory[currentPlayerUID][turnsTaken] = 'PASS';
+    const update = {
       currentHandType: everyonePassed ? HAND_TYPES.START_OF_ROUND : gameData.currentHandType,
-      currentPlayerTurnIndex: getNextEmptyHandIndexLocal(),
+      currentPlayerTurnIndex: getNextNonEmptyHandIndexLocal(),
       playersTurnHistory: playersTurnHistory,
       overallTurnHistory: overallTurnHistory
-      // REMOVE FOR PROD. Allows tester to play every hand in a game.
-      // players: {
-      //   [user.uid]: getNextEmptyHandIndexLocal() % (gameData.numberOfPlayers)
-      // },
+    };
 
-    });
+    if (isLocalGame) {
+      setGameData({ ...gameData, ...update });
+    } else {
+      db.collection('CustomGames').doc(gameData.gameName).update(update);
+    }
 
     setErrorMessage('');
     setErrorCards([]);
@@ -346,45 +406,56 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function playAgain() {
+    let playersPlayingAgain = gameData.playersPlayingAgain;
+    playersPlayingAgain[user.uid] = user.displayName;
     let updates = {};
-    updates[`playersPlayingAgain.${user.uid}`] = user.displayName;
+    isLocalGame ? updates = { playersPlayingAgain: playersPlayingAgain } : updates[`playersPlayingAgain.${user.uid}`] = user.displayName;
 
-    db.collection('CustomGames').doc(gameData.gameName).update(updates)
-      .then(() => {
-        setGameEnded(false);
-        setGameStarted(false);
-      })
-      .catch(() => {
-        alert('Error trying to play again. Please check your connection and try again.')
-      });
+    if (isLocalGame) {
+      setGameEnded(false);
+      setGameData({ ...gameData, ...updates });
+    } else {
+      db.collection('CustomGames').doc(gameData.gameName).update(updates)
+        .then(() => {
+          setGameEnded(false);
+          setGameStarted(false);
+        })
+        .catch(() => {
+          alert('Error trying to play again. Please check your internet connection and try again.')
+        });
+    }
   }
 
   function dontPlayAgain() {
     setGameEnded(false);
-    if (Object.keys(gameData.players).length === 1/*Change to 1 to delete*/) {
-      db.collection('CustomGames').doc(gameData.gameName).delete()
-        .then(() => {
-          console.log('Game successfully deleted');
-        })
-        .catch((error) => {
-          alert('Error exiting game. Please check your connection and try again.');
-          console.log('Error trying to delete game: ', error);
-        })
+    if (isLocalGame) {
       navigation.goBack();
     } else {
-      const update = {};
-      update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
-      update[`playersNotPlayingAgain.${user.uid}`] = user.displayName;
+      if (Object.keys(gameData.players).length === 1/*Change to 1 to delete*/) {
+        db.collection('CustomGames').doc(gameData.gameName).delete()
+          .then(() => {
+            console.log('Game successfully deleted');
+          })
+          .catch((error) => {
+            alert('Error exiting game. Please check your connection and try again.');
+            console.log('Error trying to delete game: ', error);
+          })
+        navigation.goBack();
+      } else {
+        const update = {};
+        update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
+        update[`playersNotPlayingAgain.${user.uid}`] = user.displayName;
 
-      db.collection('CustomGames').doc(gameData.gameName).update(update)
-        .then(() => {
-          console.log('Successfully exited game');
-        })
-        .catch((error) => {
-          alert('Error exiting game. Please check your connection and try again.');
-          console.log('Error trying to exit game: ', error);
-        });
-      navigation.goBack();
+        db.collection('CustomGames').doc(gameData.gameName).update(update)
+          .then(() => {
+            console.log('Successfully exited game');
+          })
+          .catch((error) => {
+            alert('Error exiting game. Please check your connection and try again.');
+            console.log('Error trying to exit game: ', error);
+          });
+        navigation.goBack();
+      }
     }
   }
 
@@ -424,22 +495,21 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function Menu() {
-
     const styles = StyleSheet.create({
-      menuContainer: {
-        alignItems: 'flex-end',
-        position: 'absolute',
-        top: 30,
-        right: 20
-      },
       menu: {
         backgroundColor: '#fafafa',
-        borderRadius: 10,
-        marginRight: 10,
-        overflow: 'hidden'
+        position: 'absolute',
+        height: '100%',
+        width: 225,
+        padding: 20,
+        zIndex: 4
+      },
+      mainContent: {
+        flex: 1,
+        justifyContent: 'center',
+        marginTop: 50,
       },
       row: {
-        flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -454,10 +524,9 @@ export default function GameScreen({ route, navigation }) {
     });
 
     return (
-      <SafeAreaView style={styles.menuContainer}>
-        <FontAwesome5 name={'bars'} style={{ fontSize: 30 }} onPress={() => setShowMenu(!showMenu)} />
-        <Animated.View style={[styles.menu, { height: menuHeight, width: menuWidth, padding: menuPadding }]}>
+      <Animated.View style={[styles.menu, { right: menuPosition }]}>
 
+        <View style={styles.mainContent}>
           <TouchableOpacity style={styles.row} onPress={() => setShowDisplayNames(!showDisplayNames)}>
             <HeaderText style={[styles.text]} >Display Names</HeaderText>
             <HeaderText style={styles.iconContainer}>
@@ -465,15 +534,34 @@ export default function GameScreen({ route, navigation }) {
             </HeaderText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
-            <HeaderText style={[styles.text]} >Exit Game</HeaderText>
+          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HowToPlay')}>
+            <HeaderText style={[styles.text]} >How To Play</HeaderText>
             <HeaderText style={styles.iconContainer}>
-              <MaterialCommunityIcons name={'logout'} style={styles.text} />
+              <FontAwesome5 name={'question'} style={styles.text} />
             </HeaderText>
           </TouchableOpacity>
+        </View>
 
-        </Animated.View>
-      </SafeAreaView>
+        <DividerLine width={140} />
+
+        <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
+          <HeaderText style={[styles.text]} >Exit Game</HeaderText>
+          <HeaderText style={styles.iconContainer}>
+            <MaterialCommunityIcons name={'logout'} style={styles.text} />
+          </HeaderText>
+        </TouchableOpacity>
+
+      </Animated.View>
+    )
+  }
+
+  function ScreenShader() {
+    return (
+      <Animated.View style={{ height: '100%', width: '100%', position: 'absolute', backgroundColor: 'black', opacity: screenShaderOpacity, zIndex: screenShaderZindex }} >
+        <TouchableHighlight style={{ height: '100%', width: '100%' }} onPress={() => setShowMenu(false)} >
+          <View />
+        </TouchableHighlight>
+      </Animated.View>
     )
   }
 
@@ -484,7 +572,7 @@ export default function GameScreen({ route, navigation }) {
         message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
         exitAction={loaderExitFunction}
       />
-      <PopUpMessage showPopUp={gameEnded} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+      <PopUpMessage showPopUp={showPopUp} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
         {gameData.places.map((player, index) => {
           const displayName = gameData.displayNames[player];
           const currentUser = player === user.uid;
@@ -501,7 +589,8 @@ export default function GameScreen({ route, navigation }) {
           )
         })}
 
-        <Text style={{ textAlign: 'center', fontSize: 30, marginTop: 50, fontFamily: 'gang-of-three', }}>Play again?</Text>
+        <DividerLine style={{ marginVertical: 25 }} />
+        <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: 'gang-of-three', }}>Play again?</Text>
       </PopUpMessage>
 
       <PlayedCardsContainer
@@ -518,6 +607,7 @@ export default function GameScreen({ route, navigation }) {
       {gameStarted && <View style={styles.container}>
         <UserCardContainer cards={gameData.hands[gameData.players[user.uid]].cards}
           place={gameData.places.indexOf(user.uid)}
+          currentHandType={gameData.currentHandType}
           errorMessage={errorMessage}
           errorCards={errorCards}
           isCurrentPlayer={gameData.players[user.uid] === gameData.currentPlayerTurnIndex}
@@ -538,9 +628,23 @@ export default function GameScreen({ route, navigation }) {
             avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
             avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
             isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+
+          /* <FaceUpCardContainer key={playerIndex}
+          cards={gameData.hands[playerIndex].cards}
+          style={[styles.opposingPlayerHand, getStyle(index + 2), { width: '60%' }]}
+          displayName={displayName}
+          displayNameStyling={{ transform: [{ rotateZ: getDisplayNameRotation(index) }] }}
+          avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
+          avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
+          isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} /> */
         })}
       </View>}
+
       <Menu />
+      <ScreenShader />
+      <SafeAreaView style={styles.menuContainer}>
+        <FontAwesome5 name={'bars'} style={{ fontSize: 30 }} onPress={() => setShowMenu(!showMenu)} />
+      </SafeAreaView>
     </ImageBackground>
   )
 }
@@ -599,6 +703,12 @@ const styles = StyleSheet.create({
     transform: [
       { rotateZ: '-90deg' },
     ],
+  },
+  menuContainer: {
+    position: 'absolute',
+    top: 30,
+    right: 20,
+    zIndex: 5
   },
 
 });

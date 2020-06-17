@@ -1,22 +1,22 @@
-import {LayoutAnimation} from 'react-native';
+const { LayoutAnimation } = require('react-native');
 
 const NUMBER_OF_CARDS = 52;
-export const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
-export const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
-export const JOKER = NUMBER_OF_CARDS + 1;
-export const SUITS = {
+const STANDARD_DECK = Array.from({ length: NUMBER_OF_CARDS }, (v, i) => i + 1);
+const JOKER_DECK = Array.from({ length: NUMBER_OF_CARDS + 1 }, (v, i) => i + 1);
+const JOKER = NUMBER_OF_CARDS + 1;
+const SUITS = {
   CLUB: 'CLUB',
   DIAMOND: 'DIAMOND',
   HEART: 'HEART',
   SPADE: 'SPADE',
 };
-export const SUIT_TO_COLOR_MAP = {
+const SUIT_TO_COLOR_MAP = {
   CLUB: 'black',
   DIAMOND: 'red',
   HEART: 'red',
   SPADE: 'black',
 };
-export const RANKS = {
+const RANKS = {
   THREE: '3',
   FOUR: '4',
   FIVE: '5',
@@ -31,9 +31,10 @@ export const RANKS = {
   ACE: 'A',
   TWO: '2',
 };
-export const HAND_TYPES = {
+const HAND_TYPES = {
   INVALID: 'INVALID', // Should never be allowed to be played
   START_OF_GAME: 'START OF GAME',
+  START_OF_ROUND: 'START OF ROUND',
   SINGLE: 'SINGLE',
   PAIR: 'PAIR',
   THREE_OF_A_KIND: 'THREE OF A KIND',
@@ -43,7 +44,7 @@ export const HAND_TYPES = {
   UNION: 'UNION',
   DRAGON: 'DRAGON',
 };
-export const AVATARS = {
+const AVATARS = {
   DOG: 'DOG',
   DRAGON: 'DRAGON',
   GOAT: 'GOAT',
@@ -71,28 +72,32 @@ const AVATAR_IMAGES = {
   SNAKE: require('../assets/images/avatars/snake.png'),
   TIGER: require('../assets/images/avatars/tiger.png'),
 };
-export const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
-export const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
+const ORDERED_SUITS = [SUITS.CLUB, SUITS.DIAMOND, SUITS.HEART, SUITS.SPADE];
+const ORDERED_RANKS = [RANKS.THREE, RANKS.FOUR, RANKS.FIVE, RANKS.SIX, RANKS.SEVEN, RANKS.EIGHT, RANKS.NINE, RANKS.TEN, RANKS.JACK, RANKS.QUEEN, RANKS.KING, RANKS.ACE, RANKS.TWO];
 const AVATAR_LIST = [AVATARS.DOG, AVATARS.DRAGON, AVATARS.GOAT, AVATARS.HORSE, AVATARS.MONKEY, AVATARS.OX, AVATARS.PIG, AVATARS.RABBIT, AVATARS.RAT, AVATARS.ROOSTER, AVATARS.SNAKE, AVATARS.TIGER];
-export const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
-export const MIN_NUMBER_PLAYERS = 2;
-export const MAX_NUMBER_PLAYERS = 5;
-export const GAME_TYPES = {
+const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
+const MIN_NUMBER_PLAYERS = 2;
+const MAX_NUMBER_PLAYERS = 4;
+const GAME_TYPES = {
   ALL_GAMES: 'ALL_GAMES',
   TWO_PLAYER: 'TWO_PLAYER',
   THREE_PLAYER: 'THREE_PLAYER',
   FOUR_PLAYER: 'FOUR_PLAYER',
   FIVE_PLAYER: 'FIVE_PLAYER',
 };
-export const GAME_TYPE_BY_NUMBER_OF_PLAYERS = {
+const GAME_TYPE_BY_NUMBER_OF_PLAYERS = {
   All: GAME_TYPES.ALL_GAMES,
   2: GAME_TYPES.TWO_PLAYER,
   3: GAME_TYPES.THREE_PLAYER,
   4: GAME_TYPES.FOUR_PLAYER,
   5: GAME_TYPES.FIVE_PLAYER,
 };
+const AI_DIFFICULTIES = {
+  EASY: 'Easy',
+  MEDIUM: 'Medium'
+}
 
-export function getRandomAvatars(numAvatars) {
+function getRandomAvatars(numAvatars) {
   let avatars = [];
 
   Array.from({ length: numAvatars }).map(() => {
@@ -106,11 +111,11 @@ export function getRandomAvatars(numAvatars) {
   return avatars.map((avatar) => AVATAR_LIST[avatar]);
 }
 
-export function getAvatarImage(avatar) {
+function getAvatarImage(avatar) {
   return AVATAR_IMAGES[avatar];
 }
 
-export function getCardInfo(rank) {
+function getCardInfo(rank) {
   let cardInfo = { suit: '', number: '', color: 'black' };
 
   if (rank === 53)
@@ -123,11 +128,11 @@ export function getCardInfo(rank) {
   return cardInfo;
 }
 
-export function getRank(rank, suit) {
+function getRank(rank, suit) {
   return ORDERED_RANKS.indexOf(rank) * 4 + ORDERED_SUITS.indexOf(suit) + 1;
 }
 
-export function getHandType(cardRanks) {
+function getHandType(cardRanks) {
   const cards = cardRanks.sort((a, b) => a - b).map((rank) => getCardInfo(rank));
 
   switch (cards.length) {
@@ -187,8 +192,8 @@ export function getHandType(cardRanks) {
   }
 }
 
-export function isLegalPlay(playedHandType, currentHandType) {
-  if (currentHandType === HAND_TYPES.START_OF_GAME)
+function isLegalPlay(playedHandType, currentHandType) {
+  if (currentHandType === HAND_TYPES.START_OF_GAME || currentHandType === HAND_TYPES.START_OF_ROUND)
     return true;
 
   switch (playedHandType) {
@@ -209,7 +214,7 @@ export function isLegalPlay(playedHandType, currentHandType) {
  * @param lastPlayedHand
  * @return {boolean}
  */
-export function isBetterHand(attemptedPlay, lastPlayedHand) {
+function isBetterHand(attemptedPlay, lastPlayedHand) {
   if (getHandType(attemptedPlay) === HAND_TYPES.UNION && getHandType(lastPlayedHand) !== HAND_TYPES.UNION)
     return true;
 
@@ -224,6 +229,7 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
     case HAND_TYPES.FULL_HOUSE:
       return lastPlayedHand.length === 0 ? true : attemptedPlay.sort((a, b) => a - b)[2] > lastPlayedHand.sort((a, b) => a - b)[2];
     case HAND_TYPES.START_OF_GAME:
+    case HAND_TYPES.START_OF_ROUND:
     case HAND_TYPES.DRAGON:
       return true;
     default:
@@ -231,7 +237,7 @@ export function isBetterHand(attemptedPlay, lastPlayedHand) {
   }
 }
 
-export function getNextEmptyHandIndex(hands, currentPlayerTurnIndex, numberOfPlayers) {
+function getNextNonEmptyHandIndex(hands, currentPlayerTurnIndex, numberOfPlayers) {
   let currentIndex = currentPlayerTurnIndex % numberOfPlayers;
   for (i = 0; i < numberOfPlayers; i++) {
     currentIndex = (currentIndex + 1) % numberOfPlayers;
@@ -243,7 +249,7 @@ export function getNextEmptyHandIndex(hands, currentPlayerTurnIndex, numberOfPla
   return currentIndex;
 }
 
-export function sortCards(cards) {
+function sortCards(cards) {
   return cards.sort((a, b) => a - b);
 }
 
@@ -251,17 +257,17 @@ function getHighestCard(cards) {
   return Math.max(...[].concat(...cards));
 }
 
-export function getLowestCard(cards) {
+function getLowestCard(cards) {
   return Math.min(...[].concat(...cards));
 }
 
-export function findStartingPlayer(hands) {
+function findStartingPlayer(hands) {
   const lowestCard = getLowestCard(hands.map((hand) => hand.cards));
 
   return hands.findIndex((hand) => hand.cards.includes(lowestCard));
 }
 
-export function dealCards(useJoker, numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers) {
+function dealCards(useJoker, numberOfPlayers = 4, numberOfCards = NUMBER_OF_CARDS / numberOfPlayers) {
   const avatars = getRandomAvatars(numberOfPlayers);
   const deck = shuffle(useJoker ? JOKER_DECK : STANDARD_DECK);
 
@@ -284,7 +290,7 @@ function shuffle(arr) {
   return shuffledCopy;
 }
 
-export function releaseTheDragon() {
+function releaseTheDragon() {
   let dragon = [];
   for (let i = 1; i < NUMBER_OF_CARDS; i += 4) {
     const tempNum = i + Math.floor(Math.random() * 4);
@@ -293,11 +299,11 @@ export function releaseTheDragon() {
   return dragon;
 }
 
-export function getRandomCard() {
+function getRandomCard() {
   return [Math.floor(Math.random() * 52 + 1)];
 }
 
-export function getPair() {
+function getPair() {
   const pairNumber = Math.floor(Math.random() * 13 + 1) * 4;
   let nums = [0, 1, 2, 3];
   let pair = [];
@@ -308,7 +314,7 @@ export function getPair() {
   return pair;
 }
 
-export function getThreeOfAKind() {
+function getThreeOfAKind() {
   const thriceNumber = Math.floor(Math.random() * 13 + 1) * 4;
   let nums = [0, 1, 2, 3];
   let thrice = [];
@@ -319,12 +325,12 @@ export function getThreeOfAKind() {
   return thrice;
 }
 
-export function getUnion() {
+function getUnion() {
   const unionNumber = Math.floor(Math.random() * 13 + 1) * 4;
   return [unionNumber - 3, unionNumber - 2, unionNumber - 1, unionNumber];
 }
 
-export function getFullHouse() {
+function getFullHouse() {
   const pair = getPair();
   let thrice = getThreeOfAKind();
   while (Math.ceil((pair[0] / 4) - 1) === Math.ceil((thrice[0] / 4)) - 1) {
@@ -333,7 +339,7 @@ export function getFullHouse() {
   return pair.concat(thrice);
 }
 
-export function getStraight() {
+function getStraight() {
   let lowCard = Math.floor(Math.random() * 9 + 1) * 4;
   let nextCard = lowCard + 4;
   lowCard = lowCard - Math.floor(Math.random() * 4);
@@ -346,22 +352,31 @@ export function getStraight() {
   return straight;
 }
 
-export function getStraightFlush() {
+function getStraightFlush() {
   let lowCard = Math.floor(Math.random() * 9 + 1) * 4;
   lowCard = lowCard - Math.floor(Math.random() * 4);
   return [lowCard, lowCard + 4, lowCard + 8, lowCard + 12, lowCard + 16];
 }
 
-export function secondsToTime(sec_num) {
-  let hours   = Math.floor(sec_num / 3600);
+function secondsToTime(sec_num) {
+  let hours = Math.floor(sec_num / 3600);
   let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
   let seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-  if (minutes < 10 && hours > 0) {minutes = "0"+minutes;}
-  if (seconds < 10 && minutes > 0) {seconds = "0"+seconds;}
+  if (minutes < 10 && hours > 0) { minutes = "0" + minutes; }
+  if (seconds < 10 && minutes > 0) { seconds = "0" + seconds; }
   return (hours ? hours + ':' : '') + (minutes ? minutes + ':' : '') + seconds;
 }
 
-export function animateNextLayout() {
+function animateNextLayout() {
   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 }
+
+
+module.exports = {
+  STANDARD_DECK, JOKER_DECK, JOKER, SUITS, SUIT_TO_COLOR_MAP, RANKS, HAND_TYPES, AVATARS, ORDERED_SUITS, ORDERED_RANKS,
+  PLACE_SUFFIX, MIN_NUMBER_PLAYERS, MAX_NUMBER_PLAYERS, GAME_TYPES, GAME_TYPE_BY_NUMBER_OF_PLAYERS, AI_DIFFICULTIES, getRandomAvatars,
+  getAvatarImage, getCardInfo, getHandType, getRank, isLegalPlay, isBetterHand, getNextNonEmptyHandIndex, sortCards, getLowestCard,
+  findStartingPlayer, dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind, getUnion, getFullHouse, getStraight,
+  getStraightFlush, secondsToTime, animateNextLayout
+};

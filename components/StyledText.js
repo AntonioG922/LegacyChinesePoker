@@ -131,6 +131,12 @@ export function Divider({ subtitle, style }) {
   );
 }
 
+export function DividerLine({ width, color, style }) {
+  return (
+    <View style={[{ width: width || 250, height: 1, backgroundColor: color || 'grey', marginVertical: 15, alignSelf: 'center' }, style]} />
+  )
+}
+
 const styles = StyleSheet.create({
   textInput: {
     backgroundColor: '#fbfbfb',

@@ -10,7 +10,7 @@
     "version": "1.0.0",
     "scheme": "chinesepoker",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/dragon.png",
     "splash": {
       "image": "./assets/images/dragon_1350x2400.png",
       "resizeMode": "contain",
@@ -29,7 +29,9 @@
     "web": {
       "build": {
         "babel": {
-          "include": ["static-container"]
+          "include": [
+            "static-container"
+          ]
         }
       }
     }
