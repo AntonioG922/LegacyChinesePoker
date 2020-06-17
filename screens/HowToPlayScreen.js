@@ -70,6 +70,7 @@ export default function HowToPlayScreen({ navigation }) {
 
 function HowToPlaySection({ pageTitle, sectionText, children, bottomSpacer = true }) {
   const windowWidth = useWindowDimensions().width;
+  const font = store.getState().globalFont;
 
   return (
     <View style={[sectionStyles.container, { width: windowWidth }]}>
@@ -78,9 +79,9 @@ function HowToPlaySection({ pageTitle, sectionText, children, bottomSpacer = tru
         <HeaderText style={{ fontSize: 55 }}>{pageTitle}</HeaderText>
       </View>
       {Boolean(sectionText) && <View style={sectionStyles.sectionTextContainer}>
-        <Text style={sectionStyles.sectionText}>{sectionText}</Text>
+        <Text style={[sectionStyles.sectionText, { fontFamily: font }]}>{sectionText}</Text>
       </View>}
-      <View style={[sectionStyles.children, { flex: sectionText ? (bottomSpacer ? 4 : 5) : (bottomSpacer ? 6 : 7) }]}>
+      <View style={[sectionStyles.children, { flex: sectionText ? (bottomSpacer ? 4 : 5) : (bottomSpacer ? 6 : 7), fontFamily: font }]}>
         {children}
       </View>
       {bottomSpacer && <View style={sectionStyles.spacer} />}
@@ -285,7 +286,6 @@ const sectionStyles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionText: {
-    fontFamily: store.getState().globalFont,
     fontSize: 22,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center'
@@ -311,7 +311,6 @@ const pageStyles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionText: {
-    fontFamily: store.getState().globalFont,
     fontSize: 16,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center',
