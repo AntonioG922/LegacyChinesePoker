@@ -1,7 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, View, StyleSheet, Text, TouchableHighlight } from 'react-native';
+import store from '../redux/store';
 
 export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confirmAction, confirmMessage, children }) {
+  const [font, setFont] = useState(store.getState().globalFont);
+
+  useEffect(() => {
+    return store.subscribe(() => {
+      const storeFont = store.getState().globalFont;
+      setFont(storeFont);
+    })
+  }, []);
+
+  const styles = StyleSheet.create({
+    modalBackground: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#00000040'
+    },
+    messageContainer: {
+      borderRadius: 5,
+      backgroundColor: '#fff',
+    },
+    displayMessage: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 100,
+      minWidth: 275,
+      padding: 25
+    },
+    buttons: {
+      flexDirection: 'row'
+    },
+    button: {
+      flex: 1,
+      alignItems: 'center',
+      padding: 15
+    },
+    exitButton: {
+      backgroundColor: 'rgb(217, 56, 27)',
+      borderBottomLeftRadius: 5
+    },
+    confirmButton: {
+      backgroundColor: 'rgb(80, 189, 68)',
+      borderBottomRightRadius: 5
+    },
+    buttonText: {
+      fontFamily: font,
+      fontSize: 20,
+      color: 'white',
+      fontWeight: 'bold'
+    }
+  })
+
   return (
     <Modal
       animationType={'slide'}
@@ -27,45 +79,3 @@ export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confi
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#00000040'
-  },
-  messageContainer: {
-    borderRadius: 5,
-    backgroundColor: '#fff',
-  },
-  displayMessage: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 100,
-    minWidth: 275,
-    padding: 25
-  },
-  buttons: {
-    flexDirection: 'row'
-  },
-  button: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 15
-  },
-  exitButton: {
-    backgroundColor: 'rgb(217, 56, 27)',
-    borderBottomLeftRadius: 5
-  },
-  confirmButton: {
-    backgroundColor: 'rgb(80, 189, 68)',
-    borderBottomRightRadius: 5
-  },
-  buttonText: {
-    fontFamily: 'gang-of-three',
-    fontSize: 20,
-    color: 'white',
-    fontWeight: 'bold'
-  }
-})

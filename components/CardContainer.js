@@ -11,6 +11,7 @@ import {
   ORDERED_RANKS, ORDERED_SUITS, PLACE_SUFFIX,
   sortCards, SUITS, HAND_TYPES
 } from '../functions/HelperFunctions';
+import store from '../redux/store';
 
 export function UserCardContainer({ cards, place, currentHandType, errorMessage, errorCards, isCurrentPlayer, avatarImage, style, playCards, pass }) {
   const [selectedCards, setSelectedCards] = useState([]);
@@ -216,7 +217,7 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
         countdownNum: {
           position: 'absolute',
           fontSize: 100,
-          fontFamily: 'gang-of-three',
+          fontFamily: store.getState().globalFont,
           color: 'rgb(217, 56, 27)',
           textShadowColor: 'black',
           textShadowRadius: 2,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import store from '../redux/store';
 
 export default function TrophyPlaceDisplay({ place, displayName, currentUser, gamesWon, playersPlayingAgain, playersNotPlayingAgain }) {
   const PLACE_SUFFIX = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th'];
@@ -43,7 +44,7 @@ export default function TrophyPlaceDisplay({ place, displayName, currentUser, ga
       marginLeft: 10
     },
     text: {
-      fontFamily: 'gang-of-three',
+      fontFamily: store.getState().globalFont,
       color: currentUser ? 'rgb(217, 56, 27)' : null
     },
     playingAgainIcon: {

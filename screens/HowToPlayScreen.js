@@ -3,7 +3,10 @@ import { StyleSheet, View, Text, ScrollView, useWindowDimensions } from 'react-n
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 import { PlainCardContainer } from '../components/CardContainer';
-import { dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind, getUnion, getStraight, getStraightFlush, getFullHouse, SUITS } from '../functions/HelperFunctions';
+import {
+  dealCards, releaseTheDragon, getRandomCard, getPair, getThreeOfAKind,
+  getUnion, getStraight, getStraightFlush, getFullHouse, SUITS
+} from '../functions/HelperFunctions';
 import { Suit } from '../components/Card';
 import { HeaderText } from '../components/StyledText';
 import NavBar from '../components/NavBar';
@@ -282,7 +285,7 @@ const sectionStyles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionText: {
-    fontFamily: 'gang-of-three',
+    fontFamily: store.getState().globalFont,
     fontSize: 22,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center'
@@ -308,7 +311,7 @@ const pageStyles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionText: {
-    fontFamily: 'gang-of-three',
+    fontFamily: store.getState().globalFont,
     fontSize: 16,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center',
@@ -321,7 +324,7 @@ const pageStyles = StyleSheet.create({
     ]
   },
   iconText: {
-    fontFamily: 'gang-of-three',
+    fontFamily: store.getState().globalFont,
     fontSize: 22,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center'

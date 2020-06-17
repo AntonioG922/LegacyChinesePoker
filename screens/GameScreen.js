@@ -590,7 +590,7 @@ export default function GameScreen({ route, navigation }) {
         })}
 
         <DividerLine style={{ marginVertical: 25 }} />
-        <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: 'gang-of-three', }}>Play again?</Text>
+        <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: store.getState().globalFont, }}>Play again?</Text>
       </PopUpMessage>
 
       <PlayedCardsContainer

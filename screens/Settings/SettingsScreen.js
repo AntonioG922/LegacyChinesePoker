@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import firebase from 'firebase';
-import store, { setUserData, updateUserData } from '../../redux/store';
+import store, { updateUserData, toggleStyledText, setGlobalFont } from '../../redux/store';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { HeaderText, OutlineTextInput, TextButton } from '../../components/StyledText';
+import { HeaderText, OutlineTextInput, DividerLine } from '../../components/StyledText';
 import TitledPage from '../../components/TitledPage';
 
 export default function SettingsScreen({ navigation }) {
   const user = store.getState().userData.user;
   const [displayName, setDisplayName] = useState(user.displayName);
+  const [styledText, setStyledText] = useState(store.getState().globalFont);
+
+  useEffect(() => {
+    store.dispatch(setGlobalFont(styledText));
+  }, [styledText]);
 
   function saveSettings() {
     if (displayName && displayName !== store.getState().userData.user.displayName) {
@@ -27,15 +32,34 @@ export default function SettingsScreen({ navigation }) {
     }
   }
 
-  function signOut() {
-    firebase.auth().signOut().then(() => {
-      console.log('Sign out successful!');
-    }).catch(function (error) {
-      alert(error);
-    });
+  function SettingsLink({ icon, text, linkScreen }) {
+    const styles = StyleSheet.create({
+      container: {
+        alignItems: 'center',
+        marginVertical: 10
+      },
+      row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 20
+      },
+      text: {
+        fontSize: 25
+      }
+    })
+
+    return (
+      <TouchableOpacity style={styles.container} onPress={() => navigation.navigate(linkScreen)}>
+        <HeaderText style={styles.text} >{text}</HeaderText>
+        <View style={styles.row}>
+          <FontAwesome5 name={'chevron-right'} style={[styles.text, { color: 'rgb(96,100,109)' }]} />
+        </View>
+      </TouchableOpacity>
+    )
   }
 
-  function SettingsLink({ icon, text, linkScreen }) {
+  function SettingsLink2({ icon, text, linkScreen }) {
     const styles = StyleSheet.create({
       container: {
         flexDirection: 'row',
@@ -44,7 +68,7 @@ export default function SettingsScreen({ navigation }) {
         marginVertical: 10
       },
       text: {
-        fontSize: 20
+        fontSize: 25
       }
     })
 
@@ -60,40 +84,40 @@ export default function SettingsScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <TitledPage
-        pageTitle='Settings'
-        containerStyle={{ height: '100%' }}
-        contentContainerStyle={{ height: '75%', justifyContent: 'space-between' }}
-        navigation={navigation}
-        exitFunction={saveSettings}
-      >
-        <View style={styles.inputFields} >
-          <View style={styles.row}>
-            <HeaderText style={styles.headerText}>Display Name: </HeaderText>
-            <OutlineTextInput maxLength={12} style={styles.input} value={displayName} placeholder={user.displayName} onChangeText={text => setDisplayName(text)} />
-          </View>
-        </View>
+    <TitledPage
+      pageTitle='Settings'
+      contentContainerStyle={{ height: '75%', justifyContent: 'space-between' }}
+      navigation={navigation}
+      exitFunction={saveSettings}
+    >
+      <View style={styles.center} >
+        <HeaderText style={styles.headerText}>Display Name</HeaderText>
+        <OutlineTextInput maxLength={12} style={[styles.input, styles.beneathHeader]} value={displayName} placeholder={user.displayName} onChangeText={text => setDisplayName(text)} />
+      </View>
 
-        <View style={styles.links}>
-          <SettingsLink icon={'link'} text={'Link Account'} linkScreen={'LinkAccount'} />
-        </View>
 
-        <View style={[styles.row, { justifyContent: 'center', marginVertical: 0 }]}>
-        </View>
-      </TitledPage>
-    </View>
+      <View style={styles.center}>
+        <HeaderText style={styles.headerText}>Styled Text</HeaderText>
+        <FontAwesome5
+          name={styledText === 'gang-of-three' ? 'check-square' : 'square'}
+          style={[styles.beneathHeader, { fontSize: 35, color: 'rgb(96,100,109)' }]}
+          onPress={() => setStyledText(styledText === 'gang-of-three' ? 'System' : 'gang-of-three')}
+        />
+      </View>
+
+      <DividerLine />
+
+      <View style={styles.links}>
+        <SettingsLink icon={'link'} text={'Link Account'} linkScreen={'LinkAccount'} />
+      </View>
+
+      <View style={[styles.row, { justifyContent: 'center', marginVertical: 0 }]}>
+      </View>
+    </TitledPage>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: '100%',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fafafa'
-  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -109,7 +133,12 @@ const styles = StyleSheet.create({
   input: {
     width: 200
   },
-  subText: {
-    fontSize: 10
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20
   },
+  beneathHeader: {
+    marginTop: 15
+  }
 })

@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Platform, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { PLACE_SUFFIX } from '../functions/HelperFunctions';
+import store from '../redux/store';
 
 export function HeaderText(props) {
-  return <Text {...props} style={[styles.styledText, props.center && styles.centerText, props.fontSize && { fontSize: props.fontSize }, props.style]} />;
+  const [font, setFont] = useState(store.getState().globalFont);
+
+  useEffect(() => {
+    return store.subscribe(() => {
+      const storeFont = store.getState().globalFont;
+      setFont(storeFont);
+    })
+  }, []);
+
+  return <Text {...props} style={[styles.styledText, props.center && styles.centerText, props.fontSize && { fontSize: props.fontSize }, { fontFamily: font }, props.style]} />;
 }
 
 export function PageTitle(props) {
@@ -19,7 +29,16 @@ export function TextButton(props) {
 }
 
 export function ContainedButton(props) {
-  return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.noShadow, styles.containedButtonText, { fontSize: 32 }, props.labelStyle]} />;
+  const [font, setFont] = useState(store.getState().globalFont);
+
+  useEffect(() => {
+    return store.subscribe(() => {
+      const storeFont = store.getState().globalFont;
+      setFont(storeFont);
+    })
+  }, []);
+
+  return <Button {...props} mode='contained' labelStyle={[styles.styledText, styles.noShadow, styles.containedButtonText, { fontSize: 32, fontFamily: font }, props.labelStyle]} />;
 }
 
 export function FlatTextInput(props) {
@@ -142,7 +161,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fbfbfb',
   },
   styledText: {
-    fontFamily: 'gang-of-three',
     color: 'rgb(217, 56, 27)',
   },
   centerText: {
