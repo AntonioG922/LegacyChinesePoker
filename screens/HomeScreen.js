@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   menuOptionContainer: {
     alignItems: 'center',
