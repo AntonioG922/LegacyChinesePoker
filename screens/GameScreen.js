@@ -35,6 +35,7 @@ export default function GameScreen({ route, navigation }) {
   const [handsPlayed, setHandsPlayed] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [showDisplayNames, setShowDisplayNames] = useState(true);
+  const [vibrateOnTurn, setVibrateOnTurn] = useState(true);
 
   const user = store.getState().userData.user;
   const db = firebase.firestore();
@@ -54,18 +55,21 @@ export default function GameScreen({ route, navigation }) {
           const leavingGame = docData === undefined || Boolean(docData.playersNotPlayingAgain[user.uid]);
 
           if (!leavingGame) {
-            if (docData.currentPlayerTurnIndex === docData.players[user.uid]) console.log(getLowestPlayableCards(docData.hands[docData.players[user.uid]].cards, docData.cardsPerPlayer, docData.currentHandType, docData.lastPlayed, true));
+            // if (docData.currentPlayerTurnIndex === docData.players[user.uid]) console.log(getLowestPlayableCards(docData.hands[docData.players[user.uid]].cards, docData.cardsPerPlayer, docData.currentHandType, docData.lastPlayed, true));
             setGameData(docData);
-            const isCurrentPlayer = docData.players[user.uid] === docData.currentPlayerTurnIndex;
-            if (isCurrentPlayer) {
-              Vibration.vibrate();
-            }
           }
         });
     } else {
       console.log('We local bitch: ', gameData)
     }
   }, []);
+
+  useEffect(() => {
+    const isCurrentPlayer = gameData.players[user.uid] === gameData.currentPlayerTurnIndex;
+    if (isCurrentPlayer && vibrateOnTurn) {
+      Vibration.vibrate();
+    }
+  }, [gameData.currentPlayerTurnIndex])
 
   useEffect(() => {
     if ((!gameStarted) && gameData.playersLeftToJoin === 0 && Object.keys(gameData.playersPlayingAgain).length === 0) {
@@ -321,7 +325,6 @@ export default function GameScreen({ route, navigation }) {
         places = isLocalGame ? [...gameData.places, currentPlayerUID, lastPlaceUID] : firebase.firestore.FieldValue.arrayUnion(user.uid, lastPlaceUID);
       }
     }
-    console.log(gamesWon);
 
     const data = {
       playedCards: isLocalGame ? [...gameData.playedCards, ...selectedCards] : firebase.firestore.FieldValue.arrayUnion(...selectedCards),
@@ -527,10 +530,17 @@ export default function GameScreen({ route, navigation }) {
       <Animated.View style={[styles.menu, { right: menuPosition }]}>
 
         <View style={styles.mainContent}>
+          <TouchableOpacity style={styles.row} onPress={() => setVibrateOnTurn(!vibrateOnTurn)}>
+            <HeaderText style={[styles.text]} >Vibrate</HeaderText>
+            <HeaderText style={styles.iconContainer}>
+              <FontAwesome5 name={vibrateOnTurn ? 'check' : 'times'} style={[styles.text, { color: vibrateOnTurn ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
+            </HeaderText>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.row} onPress={() => setShowDisplayNames(!showDisplayNames)}>
             <HeaderText style={[styles.text]} >Display Names</HeaderText>
             <HeaderText style={styles.iconContainer}>
-              <FontAwesome5 name={showDisplayNames ? 'check-square' : 'square'} style={styles.text} />
+              <FontAwesome5 name={showDisplayNames ? 'check' : 'times'} style={[styles.text, { color: showDisplayNames ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
             </HeaderText>
           </TouchableOpacity>
 
