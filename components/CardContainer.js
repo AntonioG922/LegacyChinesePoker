@@ -162,56 +162,77 @@ export function FaceUpCardContainer({ cards, avatarImage, avatarStyling, display
 }
 
 export function PlayedCardsContainer({ cards, avatarImage, currentHandType, lastPlayedCards, lastPlayerToPlay, style, turnLength, gameInProgress, pass, isCurrentPlayer }) {
+  const [strokePercentLeft, setStrokePercentLeft] = useState(new Animated.Value(0));
+  const [countdownNum, setCountdownNum] = useState(5);
+  let reducingNum = countdownNum;
+
   lastPlayedCards = Array.isArray(lastPlayedCards) ? lastPlayedCards : [];
   cards = Array.isArray(cards) ? cards : [];
   const showTimer = gameInProgress && lastPlayerToPlay && isCurrentPlayer;
+  const time = turnLength * 1000;
+  const delay = 1000;
 
-  function Timer({ height, width, time, delay, borderWidth, color }) {
-    function CountdownNum() {
-      const [countdownNum, setCountdownNum] = useState(5);
-      let reducingNum = 5;
+  useEffect(() => {
+    if (isCurrentPlayer) {
+      Animated.timing(strokePercentLeft, {
+        toValue: 1,
+        duration: time,
+        delay: delay,
+        useNativeDriver: true
+      }).start();
 
-      let fadeAnim = useRef(new Animated.Value(0)).current;
-      let yPosAnim = useRef(new Animated.Value(-75)).current;
-      const AnimatedText = Animated.createAnimatedComponent(Text);
-
-      useEffect(() => {
-        let interval;
-        const intervalDelay = 1000;
-        let timeout = setTimeout(() => {
-          interval = setInterval(() => {
-            Animated.sequence([
-              Animated.parallel([
-                Animated.timing(fadeAnim, {
-                  toValue: 1,
-                  duration: 400
-                }),
-                Animated.timing(yPosAnim, {
-                  toValue: -35,
-                  duration: 400
-                })
-              ]),
+      let interval;
+      const intervalDelay = 1050;
+      let timeout = setTimeout(() => {
+        interval = setInterval(() => {
+          Animated.sequence([
+            Animated.parallel([
               Animated.timing(fadeAnim, {
-                toValue: 0,
-                duration: 325,
-                delay: 175
+                toValue: 1,
+                duration: 375,
+                useNativeDriver: true
               }),
-              Animated.timing(yPosAnim, {
-                toValue: -75,
-                duration: 75
+              Animated.timing(countdownNumY, {
+                toValue: -35,
+                duration: 375,
+                useNativeDriver: true
               })
-            ]).start();
+            ]),
+            Animated.timing(fadeAnim, {
+              toValue: 0,
+              duration: 300,
+              delay: 175,
+              useNativeDriver: true
+            }),
+            Animated.timing(countdownNumY, {
+              toValue: -75,
+              duration: 0,
+              useNativeDriver: true
+            })
+          ]).start();
 
-            setCountdownNum(reducingNum);
-            reducingNum--;
-            if (reducingNum === -1) {
-              clearInterval(interval);
-              pass();
-            }
-          }, intervalDelay);
-        }, time + delay - intervalDelay - countdownNum * 1000);
-        return () => { clearTimeout(timeout), clearInterval(interval) };
-      }, []);
+          setCountdownNum(reducingNum);
+          reducingNum--;
+          if (reducingNum === -1) {
+            clearInterval(interval);
+            pass();
+          }
+        }, intervalDelay);
+      }, time + delay - intervalDelay * (countdownNum + 1));
+      return () => { clearTimeout(timeout), clearInterval(interval) };
+    } else {
+      setStrokePercentLeft(new Animated.Value(0));
+      setCountdownNum(5);
+    }
+  }, [isCurrentPlayer])
+
+  let fadeAnim = useRef(new Animated.Value(0)).current;
+  let countdownNumY = useRef(new Animated.Value(-75)).current;
+  const AnimatedText = Animated.createAnimatedComponent(Text);
+
+
+  function Timer({ height, width, borderWidth, color }) {
+    function CountdownNum() {
 
       const styles = StyleSheet.create({
         countdownNum: {
@@ -220,13 +241,13 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
           fontFamily: store.getState().globalFont,
           color: 'rgb(217, 56, 27)',
           textShadowColor: 'black',
-          textShadowRadius: 2,
-          textShadowOffset: { width: 10, height: 10 }
+          textShadowRadius: 3,
+          textShadowOffset: { width: 2, height: 2 }
         }
       })
 
       return (
-        <AnimatedText style={[styles.countdownNum, { top: yPosAnim, opacity: fadeAnim }]}>{countdownNum}</AnimatedText>
+        <AnimatedText style={[styles.countdownNum, { transform: [{ translateY: countdownNumY }], opacity: fadeAnim }]}>{countdownNum}</AnimatedText>
       )
     }
 
@@ -251,22 +272,13 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
       A ${r} ${r} 0 1 0 ${x2} ${y2}
       L ${width / 2} ${0 + strokeWidth / 2}
     `;
-
     const circumference = r * A;
-    const strokePercentLeft = new Animated.Value(0);
     const length = (width - (2 * r + strokeWidth)) * 2 + (circumference * 2);
 
     let strokeDashoffset = strokePercentLeft.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, length],
-      easing: Easing.linear
+      outputRange: [0, length]
     });
-
-    Animated.timing(strokePercentLeft, {
-      toValue: 1,
-      duration: time,
-      delay: delay
-    }).start();
 
     const styles = StyleSheet.create({
       container: {
