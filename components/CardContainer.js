@@ -311,7 +311,7 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
             lastPlayedCards.map((card) =>
               <SuitAndRank key={card} cardNumber={card} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />
             )}
-          {showTimer && <Timer height={46} width={252} time={turnLength * 1000} delay={1000} color={'rgb(217, 56, 27)'} borderWidth={3} />}
+          {showTimer && turnLength && <Timer height={46} width={252} time={turnLength * 1000} delay={1000} color={'rgb(217, 56, 27)'} borderWidth={3} />}
         </View>
       </View>
       {cards.map((rank) => {

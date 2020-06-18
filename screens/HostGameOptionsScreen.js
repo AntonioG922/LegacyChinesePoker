@@ -25,11 +25,12 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [numberOfPlayers, setNumberOfPlayers] = useState(4);
   const [cardsPerPlayer, setCardsPerPlayer] = useState(13);
-  const [useJoker, setUseJoker] = useState(true);
+  const [useJoker, setUseJoker] = useState(false);
   const [loading, setLoading] = useState(false);
   const user = store.getState().userData.user;
   const [maxCardsAllowed, setMaxCardsAllowed] = useState(13);
   const [turnLength, setTurnLength] = useState(30);
+  const [lastTurnLength, setLastTurnLength] = useState(30);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [numberOfComputers, setNumberOfComputers] = useState(0);
   const [computerDifficulties, setComputerDifficulties] = useState([]);
@@ -37,8 +38,8 @@ export default function HostGameOptionsScreen({ navigation }) {
   const computerPossibleDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
 
   const scrollRef = useRef();
-  const advancedOptionsHeight = useRef(new Animated.Value(-160)).current;
-  const advancedOptionsHiderHeight = useRef(new Animated.Value(200)).current;
+  const advancedOptionsHeight = useRef(new Animated.Value(-200)).current;
+  const advancedOptionsHiderHeight = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
     setMaxCardsAllowed(useJoker ? Math.floor(JOKER_DECK.length / numberOfPlayers) : Math.floor(STANDARD_DECK.length / numberOfPlayers));
@@ -57,7 +58,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   useEffect(() => {
     const duration = 300;
-    const height = -160 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 33 : 0);
+    const height = -200 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 33 : 0);
     Animated.parallel([
       Animated.timing(advancedOptionsHeight, {
         toValue: showAdvancedOptions ? 0 : height,
@@ -65,7 +66,7 @@ export default function HostGameOptionsScreen({ navigation }) {
         useNativeDriver: true
       }),
       Animated.timing(advancedOptionsHiderHeight, {
-        toValue: showAdvancedOptions ? 0 : 200,
+        toValue: showAdvancedOptions ? 0 : 300,
         duration: duration
       })
     ]).start();
@@ -195,7 +196,7 @@ export default function HostGameOptionsScreen({ navigation }) {
               <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
             </View>
 
-            <View style={styles.row}>
+            <View style={[styles.row, { marginTop: 25 }]}>
               <View style={styles.optionText}>
                 <HeaderText style={styles.rowText} >Players:</HeaderText>
               </View>
@@ -217,7 +218,7 @@ export default function HostGameOptionsScreen({ navigation }) {
               </View>
             </View>
 
-            <View style={styles.row}>
+            <View style={[styles.row, { marginBottom: 25 }]}>
               <View style={styles.optionText}>
                 <HeaderText style={styles.rowText} >Cards / Player:</HeaderText>
               </View>
@@ -232,16 +233,6 @@ export default function HostGameOptionsScreen({ navigation }) {
               </View>
             </View>
 
-            <View style={styles.row}>
-              <View style={styles.optionText}>
-                <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
-              </View>
-
-              <TouchableOpacity style={[styles.row, styles.optionButtons, { marginVertical: 0 }]} onPress={() => setUseJoker(!useJoker)} >
-                <Checkbox color={'rgb(217, 56, 27)'} status={useJoker ? 'checked' : 'unchecked'} />
-              </TouchableOpacity>
-            </View>
-
             <DividerLine />
 
             <View style={styles.row}>
@@ -254,18 +245,37 @@ export default function HostGameOptionsScreen({ navigation }) {
             <View>
               <View style={styles.row}>
                 <View style={styles.optionText}>
-                  <HeaderText style={styles.rowText} >Turn Length:</HeaderText>
+                  <HeaderText style={styles.rowText} >Use Joker:</HeaderText>
+                </View>
+
+                <TouchableOpacity style={[styles.row, styles.optionButtons, { marginVertical: 0 }]} onPress={() => setUseJoker(!useJoker)} >
+                  <FontAwesome5
+                    name={useJoker ? 'check' : 'times'}
+                    style={{ fontSize: 25, color: useJoker ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.optionText}>
+                  <TouchableOpacity onPress={() => setTurnLength(turnLength ? false : lastTurnLength)} >
+                    <HeaderText style={styles.rowText} >Turn Length:</HeaderText>
+                  </TouchableOpacity>
                 </View>
 
                 <View style={[styles.row, styles.optionButtons, { marginVertical: 0 }]}>
-                  <Button disabled={turnLength <= 5} onPress={() => setTurnLength(turnLength - 5)}>
+                  <Button
+                    disabled={turnLength <= 5 && Boolean(turnLength)}
+                    onPress={() => { const length = turnLength ? turnLength - 5 : 60; setTurnLength(length); setLastTurnLength(length) }}>
                     <FontAwesome5 name={'chevron-down'} style={[styles.rowText, { paddingHorizontal: 0 }]} />
                   </Button>
 
-                  <HeaderText style={styles.rowText} >{turnLength}<HeaderText style={{ fontSize: 15 }}> s</HeaderText></HeaderText>
+                  <HeaderText style={styles.rowText} >{turnLength ? turnLength : 'Off'}
+                    <HeaderText style={{ fontSize: 15 }}>{turnLength ? ' s' : ''}</HeaderText>
+                  </HeaderText>
 
-                  <Button disabled={turnLength >= 60}
-                    onPress={() => setTurnLength(turnLength + 5)}>
+                  <Button disabled={!turnLength}
+                    onPress={() => { const length = turnLength === 60 ? false : turnLength + 5; setTurnLength(length); setLastTurnLength(length ? length : 30) }}>
                     <FontAwesome5 name={'chevron-up'} style={[styles.rowText, { bottom: 0 }]} />
                   </Button>
                 </View>
