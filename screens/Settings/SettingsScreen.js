@@ -106,8 +106,8 @@ export default function SettingsScreen({ navigation }) {
         <HeaderText style={styles.headerText}>Styled Text</HeaderText>
         <TouchableOpacity onPress={() => setStyledText(styledText === 'gang-of-three' ? 'System' : 'gang-of-three')}>
           <FontAwesome5
-            name={styledText === 'gang-of-three' ? 'check-square' : 'square'}
-            style={[styles.beneathHeader, { fontSize: 35, color: 'rgb(96,100,109)' }]}
+            name={styledText === 'gang-of-three' ? 'check' : 'times'}
+            style={[styles.beneathHeader, { fontSize: 35, color: styledText === 'gang-of-three' ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]}
           />
         </TouchableOpacity>
       </View>
