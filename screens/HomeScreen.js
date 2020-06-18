@@ -12,7 +12,10 @@ export default function HomeScreen({ navigation }) {
           source={require('../assets/images/dragon.png')}
           style={styles.headerImage}
         >
-          <HeaderText style={styles.title}>Chinese Poker</HeaderText>
+          <HeaderText style={styles.title} >Chinese Poker</HeaderText>
+          <HeaderText style={[styles.title, styles.title2]}>Chinese Poker</HeaderText>
+          <HeaderText style={[styles.title, styles.title3]}>Chinese Poker</HeaderText>
+          <HeaderText style={[styles.title, styles.title4]}>Chinese Poker</HeaderText>
         </ImageBackground>
       </View>
 
@@ -28,7 +31,6 @@ export default function HomeScreen({ navigation }) {
           <FontAwesome5 name={'cog'} style={{ color: 'rgb(96,100,109)', fontSize: 30 }} />
         </TouchableOpacity>
       </SafeAreaView>
-
     </View>
   );
 }
@@ -56,7 +58,29 @@ const styles = StyleSheet.create({
     fontSize: 65,
     color: 'rgb(96,100,109)',
     lineHeight: 65,
+    position: 'absolute',
     textAlign: 'center',
+    textShadowColor: '#fafafa',
+    textShadowOffset: ({ width: 2, height: 2 }),
+    textShadowRadius: 0
+  },
+  title2: {
+    position: 'absolute',
+    textShadowColor: '#fafafa',
+    textShadowOffset: ({ width: -2, height: 2 }),
+    textShadowRadius: 0
+  },
+  title3: {
+    position: 'absolute',
+    textShadowColor: '#fafafa',
+    textShadowOffset: ({ width: 2, height: -2 }),
+    textShadowRadius: 0
+  },
+  title4: {
+    position: 'absolute',
+    textShadowColor: '#fafafa',
+    textShadowOffset: ({ width: -2, height: -2 }),
+    textShadowRadius: 0
   },
   logoutIconContainer: {
     position: 'absolute',
