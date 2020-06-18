@@ -90,19 +90,21 @@ function HowToPlaySection({ pageTitle, sectionText, children, bottomSpacer = tru
 }
 
 function MainPage() {
+  const font = store.getState().globalFont;
+
   return (
     <HowToPlaySection
       pageTitle={'How To Play'}
       sectionText={'Swipe to navigate'}
     >
-      <Text style={[pageStyles.iconText, { fontSize: 25 }]}>Standard Game:</Text>
+      <Text style={[pageStyles.iconText, { fontSize: 25, fontFamily: font }]}>Standard Game:</Text>
       <View style={{ textAlign: 'center', alignItems: 'center' }}>
         <FontAwesome name='group' size={50} style={{ marginBottom: 10 }} />
-        <Text style={pageStyles.iconText}>4 Players</Text>
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>4 Players</Text>
       </View>
       <View style={{ textAlign: 'center', alignItems: 'center' }}>
         <MaterialCommunityIcons name='cards' size={50} style={{ marginBottom: 10 }} />
-        <Text style={pageStyles.iconText}>13 Cards Each</Text>
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>13 Cards Each</Text>
       </View>
     </HowToPlaySection>
   )
@@ -121,12 +123,13 @@ function Objective() {
 
 function Rounds({ scrollToX }) {
   const windowWidth = useWindowDimensions().width;
+  const font = store.getState().globalFont;
 
   return (
     <HowToPlaySection
       pageTitle={'Rounds'}
     >
-      <Text style={pageStyles.iconText}>Play takes place in rounds{'\n\n'}A round starts with a player
+      <Text style={[pageStyles.iconText, { fontFamily: font }]}>Play takes place in rounds{'\n\n'}A round starts with a player
            playing a playable hand type (see <Text style={{ textDecorationLine: 'underline' }}
           onPress={() => { scrollToX(windowWidth * 3) }}>"Hand Types"</Text>)
            {'\n\n'}Play continues clockwise and the next player must either play higher cards of the same hand type or pass
@@ -140,6 +143,7 @@ function Rounds({ scrollToX }) {
 
 function HandTypes({ scrollToX }) {
   const windowWidth = useWindowDimensions().width;
+  const font = store.getState().globalFont;
 
   return (
     <HowToPlaySection
@@ -149,36 +153,36 @@ function HandTypes({ scrollToX }) {
       <View style={pageStyles.handTypeRow}>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getRandomCard()} style={{ left: 0 }} />
-          <Text style={[pageStyles.iconText, { top: 55 }]}>Single</Text>
+          <Text style={[pageStyles.iconText, { top: 55, fontFamily: font }]}>Single</Text>
         </View>
         <View style={[pageStyles.handType, { left: 12 }]}>
           <PlainCardContainer cards={getPair()} style={{ left: 0, width: 35 }} />
-          <Text style={[pageStyles.iconText, { top: 55 }]}>Pair</Text>
+          <Text style={[pageStyles.iconText, { top: 55, fontFamily: font }]}>Pair</Text>
         </View>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getThreeOfAKind()} style={{ left: 0, width: 60 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1 }]}>Three of a Kind</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Three of a Kind</Text>
         </View>
       </View>
       <View style={[pageStyles.handTypeRow, { justifyContent: 'space-around' }]}>
         <View style={[pageStyles.handType, { left: -25 }]}>
           <PlainCardContainer cards={getUnion()} style={{ left: 0, width: 80 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1 }]}>Four of a Kind{'\n'}(See
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Four of a Kind{'\n'}(See
               <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 5) }}>"Unions"</Text>)</Text>
         </View>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getFullHouse()} style={{ left: 0, width: 100 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1 }]}>Full House</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Full House</Text>
         </View>
       </View>
       <View style={[pageStyles.handTypeRow, { justifyContent: 'space-around' }]}>
         <View style={[pageStyles.handType, { left: 10 }]}>
           <PlainCardContainer cards={getStraight()} style={{ left: 0, width: 100 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1 }]}>Straight</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Straight</Text>
         </View>
         <View style={[pageStyles.handType, { left: 20 }]}>
           <PlainCardContainer cards={getStraightFlush()} style={{ left: 0, width: 100 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1 }]}>Straight Flush</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Straight Flush</Text>
         </View>
       </View>
     </HowToPlaySection>
@@ -187,6 +191,7 @@ function HandTypes({ scrollToX }) {
 
 function CardRanks() {
   const cardRankPair = getPair();
+  const font = store.getState().globalFont;
 
   return (
     <HowToPlaySection
@@ -194,13 +199,13 @@ function CardRanks() {
       bottomSpacer={false}
     >
       <View>
-        <Text style={pageStyles.iconText}>Cards are ranked in the following order from{'\n'}lowest(3) to highest(2)</Text>
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>Cards are ranked in the following order from{'\n'}lowest(3) to highest(2)</Text>
       </View>
       <View style={{ marginVertical: 50 }}>
         <PlainCardContainer cards={releaseTheDragon()} style={{ width: '80%' }} />
       </View>
       <View>
-        <Text style={pageStyles.iconText}>Suits also matter. Suits are ranked alphabetically</Text>
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>Suits also matter. Suits are ranked alphabetically</Text>
       </View>
       <View style={pageStyles.suitIcons} >
         <Suit suit={SUITS.CLUB} size={60} />
@@ -223,16 +228,18 @@ function CardRanks() {
 }
 
 function Unions() {
+  const font = store.getState().globalFont;
+
   return (
     <HowToPlaySection
       pageTitle={'Unions'}
     >
       <View>
-        <Text style={pageStyles.iconText}>Unions are a Four of a Kind{'\n\n'}Unions are unique in that they
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>Unions are a Four of a Kind{'\n\n'}Unions are unique in that they
             can be played on any hand type and beat anything except for a higher union</Text>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
-        <Text style={pageStyles.iconText}>Any{'\n'}hand{'\n'}type</Text>
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>Any{'\n'}hand{'\n'}type</Text>
         <MaterialCommunityIcons name='less-than' style={[pageStyles.iconText, { left: -25 }]} />
         <PlainCardContainer cards={getUnion()} style={{ left: 0, width: 120 }} />
       </View>
@@ -241,12 +248,14 @@ function Unions() {
 }
 
 function Dragons() {
+  const font = store.getState().globalFont;
+
   return (
     <HowToPlaySection
       pageTitle={'Dragons'}
     >
       <View>
-        <Text style={pageStyles.iconText}>A Dragon is a 13 card straight{'\n\n'}If youre dealt a dragon
+        <Text style={[pageStyles.iconText, { fontFamily: font }]}>A Dragon is a 13 card straight{'\n\n'}If youre dealt a dragon
             you can immediately play your cards and win the game{'\n\n'}You can only play a dragon in a
             game with exactly 13 cards dealt</Text>
       </View>
@@ -323,7 +332,6 @@ const pageStyles = StyleSheet.create({
     ]
   },
   iconText: {
-    fontFamily: store.getState().globalFont,
     fontSize: 22,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center'
