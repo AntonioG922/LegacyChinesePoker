@@ -173,7 +173,7 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
   const delay = 1000;
 
   useEffect(() => {
-    if (isCurrentPlayer) {
+    if (isCurrentPlayer && turnLength) {
       Animated.timing(strokePercentLeft, {
         toValue: 1,
         duration: time,
