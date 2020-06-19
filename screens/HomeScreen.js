@@ -33,7 +33,7 @@ export default function HomeScreen({ navigation }) {
     firebase.firestore().collection('PlayNowGames').where('playersLeftToJoin', '>', 0).limit(1).get()
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
-          let hands = dealCards(false, 2, 1);
+          let hands = dealCards(false, 4, 13);
           hands.forEach(array => sortCards(array.cards));
 
           let randUID = generateUID();
@@ -41,12 +41,12 @@ export default function HomeScreen({ navigation }) {
           const gameData = {
             gameName: randUID,
             password: '',
-            numberOfPlayers: 2,
+            numberOfPlayers: 4,
             numberOfComputers: 0,
             useJoker: false,
-            cardsPerPlayer: 1,
+            cardsPerPlayer: 13,
             players: { [user.uid]: 0 },
-            playersLeftToJoin: 1,
+            playersLeftToJoin: 3,
             hands: hands,
             lastPlayed: [],
             lastPlayerToPlay: {},
@@ -62,7 +62,8 @@ export default function HomeScreen({ navigation }) {
             gamesPlayed: 0,
             gamesWon: { [user.uid]: 0 },
             turnLength: 30,
-            localGame: false
+            localGame: false,
+            gameStartTime: Date.now()
           };
 
           firebase.firestore().collection('PlayNowGames').doc(randUID).set(gameData)
@@ -108,7 +109,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Loader loading={loading} message={'Joining Game'} />
+      <Loader loading={loading} message={'Joining Game'} style={{ top: 0 }} />
       <View style={styles.headerContainer}>
         <ImageBackground
           source={require('../assets/images/dragon.png')}
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-evenly',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fafafa'
   },
   headerContainer: {
     alignItems: 'center',

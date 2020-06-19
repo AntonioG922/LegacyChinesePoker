@@ -88,7 +88,7 @@ export default function GameScreen({ route, navigation }) {
   }, [gameData.currentPlayerTurnIndex])
 
   useEffect(() => {
-    if ((!gameStarted) && gameData.playersLeftToJoin === 0 && Object.keys(gameData.playersPlayingAgain).length === 0) {
+    if ((!gameStarted) && gameData.playersLeftToJoin <= 0 && Object.keys(gameData.playersPlayingAgain).length === 0) {
       setGameStarted(true);
       maybeSetGameStartTime();
     }
@@ -690,7 +690,7 @@ export default function GameScreen({ route, navigation }) {
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
 
       <Loader loading={!gameStarted}
-        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+        message={leavingGame ? 'Exiting Game' : `Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
         exitAction={leavingGame ? (() => { }) : loaderExitFunction}
       />
       <PopUpMessage showPopUp={showPopUp} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
