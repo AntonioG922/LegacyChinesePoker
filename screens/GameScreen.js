@@ -46,6 +46,20 @@ export default function GameScreen({ route, navigation }) {
   const menuPosition = useRef(new Animated.Value(0)).current;
   const screenShaderOpacity = useRef(new Animated.Value(0)).current;
   const screenShaderZindex = useRef(new Animated.Value(-1)).current;
+  const hamButtonOpacity = useRef(new Animated.Value(1)).current;
+  const hamButtonRotation = useRef(new Animated.Value(0)).current;
+  const hamButtonY1 = useRef(new Animated.Value(0)).current;
+  const hamButtonY2 = useRef(new Animated.Value(0)).current;
+  const hamButtonWidth = useRef(new Animated.Value(26)).current;
+
+  let hamButtonRotationDeg1 = hamButtonRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '45deg']
+  });
+  let hamButtonRotationDeg2 = hamButtonRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '-45deg']
+  });
 
   useEffect(() => {
     if (!isLocalGame) {
@@ -163,6 +177,27 @@ export default function GameScreen({ route, navigation }) {
       }),
       Animated.timing(screenShaderZindex, {
         toValue: showMenu ? 3 : -1,
+        duration: duration
+      }),
+      //hamburger button
+      Animated.timing(hamButtonOpacity, {
+        toValue: showMenu ? 0 : 1,
+        duration: duration
+      }),
+      Animated.timing(hamButtonRotation, {
+        toValue: showMenu ? 1 : 0,
+        duration: duration
+      }),
+      Animated.timing(hamButtonY1, {
+        toValue: showMenu ? 7.3 : 0,
+        duration: duration
+      }),
+      Animated.timing(hamButtonY2, {
+        toValue: showMenu ? -7.3 : 0,
+        duration: duration
+      }),
+      Animated.timing(hamButtonWidth, {
+        toValue: showMenu ? 0 : 26,
         duration: duration
       })
     ]).start();
@@ -653,7 +688,14 @@ export default function GameScreen({ route, navigation }) {
       <Menu />
       <ScreenShader />
       <SafeAreaView style={styles.menuContainer}>
-        <FontAwesome5 name={'bars'} style={{ fontSize: 30 }} onPress={() => setShowMenu(!showMenu)} />
+        <TouchableOpacity onPress={() => { setShowMenu(!showMenu) }}>
+          <View style={{ justifyContent: 'center', alignItems: 'center', width: 50, height: 50 }}>
+            <Animated.View style={[styles.hamburgerButton, { opacity: hamButtonOpacity, width: hamButtonWidth, transform: [{ translateY: hamButtonY1 }] }]} />
+            <Animated.View style={[styles.hamburgerButton, { transform: [{ rotateZ: hamButtonRotationDeg1 }] }]} />
+            <Animated.View style={[styles.hamburgerButton, { transform: [{ rotateZ: hamButtonRotationDeg2 }], position: 'absolute' }]} />
+            <Animated.View style={[styles.hamburgerButton, { opacity: hamButtonOpacity, width: hamButtonWidth, transform: [{ translateY: hamButtonY2 }] }]} />
+          </View>
+        </TouchableOpacity>
       </SafeAreaView>
     </ImageBackground>
   )
@@ -716,9 +758,15 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: 'absolute',
-    top: 30,
-    right: 20,
+    top: 0,
+    right: 5,
     zIndex: 5
   },
-
+  hamburgerButton: {
+    backgroundColor: 'black',
+    height: 4.5,
+    width: 26,
+    borderRadius: 4,
+    marginVertical: 2.8
+  }
 });
