@@ -131,6 +131,7 @@ export default function GameScreen({ route, navigation }) {
       let gamesWon = gameData.gamesWon;
       Object.keys(gameData.playersPlayingAgain).forEach((uid, index) => {
         players[uid] = index;
+        hands[index].avatar = gameData.hands[gameData.players[uid]].avatar;
         playersTurnHistory[uid] = {};
         displayNames[uid] = gameData.playersPlayingAgain[uid];
         gamesWon[uid] = gameData.gamesWon[uid];
