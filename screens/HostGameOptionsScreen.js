@@ -192,7 +192,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
             <View style={{ paddingHorizontal: 30 }}>
               <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
-              <FlatTextInput label={'Game Name'} onChangeText={text => setGameName(text)} />
+              <FlatTextInput label={'Game Name'} maxLength={16} onChangeText={text => setGameName(text)} />
               <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
             </View>
 

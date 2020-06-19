@@ -37,6 +37,7 @@ export default function GameScreen({ route, navigation }) {
   const [showDisplayNames, setShowDisplayNames] = useState(true);
   const [vibrateOnTurn, setVibrateOnTurn] = useState(true);
 
+  const gameLobby = gameData.gameName.length > 20 ? 'PlayNowGames' : 'CustomGames';
   const user = store.getState().userData.user;
   const db = firebase.firestore();
   const isLocalGame = gameData.localGame;
@@ -63,10 +64,10 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (!isLocalGame) {
-      return db.collection('CustomGames').doc(gameData.gameName)
+      return db.collection(gameLobby).doc(gameData.gameName)
         .onSnapshot((doc) => {
           const docData = doc.data();
-          const leavingGame = docData === undefined || Boolean(docData.playersNotPlayingAgain[user.uid]);
+          const leavingGame = docData === undefined || !Object.keys(docData.players).includes(user.uid);
 
           if (!leavingGame) {
             // if (docData.currentPlayerTurnIndex === docData.players[user.uid]) console.log(getLowestPlayableCards(docData.hands[docData.players[user.uid]].cards, docData.cardsPerPlayer, docData.currentHandType, docData.lastPlayed, true));
@@ -126,10 +127,12 @@ export default function GameScreen({ route, navigation }) {
       let playersTurnHistory = {};
       let displayNames = {};
       let playersLeftToJoin = gameData.numberOfPlayers;
+      let gamesWon = gameData.gamesWon;
       Object.keys(gameData.playersPlayingAgain).forEach((uid, index) => {
         players[uid] = index;
         playersTurnHistory[uid] = {};
         displayNames[uid] = gameData.playersPlayingAgain[uid];
+        gamesWon[uid] = gameData.gamesWon[uid];
         playersLeftToJoin--;
       });
 
@@ -146,13 +149,15 @@ export default function GameScreen({ route, navigation }) {
         playersTurnHistory: playersTurnHistory,
         overallTurnHistory: {},
         displayNames: displayNames,
-        playersPlayingAgain: {}
+        playersPlayingAgain: {},
+        playersNotPlayingAgain: {},
+        gamesWon: gamesWon
       };
 
       if (isLocalGame) {
         setGameData({ ...gameData, ...updates });
       } else {
-        firebase.firestore().collection('CustomGames').doc(gameData.gameName).update(updates)
+        db.collection(gameLobby).doc(gameData.gameName).update(updates)
           .then(() => {
             setGameStarted(!playersLeftToJoin);
             maybeSetGameStartTime();
@@ -264,7 +269,7 @@ export default function GameScreen({ route, navigation }) {
     const isLastPlayer = Object.keys(gameData.players).find(key => gameData.players[key] === gameData.numberOfPlayers - 1) === user.uid;
 
     if (isLastPlayer) {
-      db.collection('CustomGames').doc(gameData.gameName).update({
+      db.collection(gameLobby).doc(gameData.gameName).update({
         gameStartTime: Date.now()
       }).then(() => true);
     }
@@ -382,7 +387,7 @@ export default function GameScreen({ route, navigation }) {
     if (isLocalGame) {
       setGameData({ ...gameData, ...data });
     } else {
-      db.collection('CustomGames').doc(gameData.gameName).update(data);
+      db.collection(gameLobby).doc(gameData.gameName).update(data);
     }
 
     return true;
@@ -417,7 +422,7 @@ export default function GameScreen({ route, navigation }) {
     if (isLocalGame) {
       setGameData({ ...gameData, ...update });
     } else {
-      db.collection('CustomGames').doc(gameData.gameName).update(update);
+      db.collection(gameLobby).doc(gameData.gameName).update(update);
     }
 
     setErrorMessage('');
@@ -453,7 +458,7 @@ export default function GameScreen({ route, navigation }) {
       setGameEnded(false);
       setGameData({ ...gameData, ...updates });
     } else {
-      db.collection('CustomGames').doc(gameData.gameName).update(updates)
+      db.collection(gameLobby).doc(gameData.gameName).update(updates)
         .then(() => {
           setGameEnded(false);
           setGameStarted(false);
@@ -469,8 +474,8 @@ export default function GameScreen({ route, navigation }) {
     if (isLocalGame) {
       navigation.goBack();
     } else {
-      if (Object.keys(gameData.players).length === 1/*Change to 1 to delete*/) {
-        db.collection('CustomGames').doc(gameData.gameName).delete()
+      if (Object.keys(gameData.players).length === 1) {
+        db.collection(gameLobby).doc(gameData.gameName).delete()
           .then(() => {
             console.log('Game successfully deleted');
           })
@@ -484,7 +489,7 @@ export default function GameScreen({ route, navigation }) {
         update[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
         update[`playersNotPlayingAgain.${user.uid}`] = user.displayName;
 
-        db.collection('CustomGames').doc(gameData.gameName).update(update)
+        db.collection(gameLobby).doc(gameData.gameName).update(update)
           .then(() => {
             console.log('Successfully exited game');
           })
@@ -502,8 +507,11 @@ export default function GameScreen({ route, navigation }) {
       let updates = {};
       updates[`players.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates[`playersPlayingAgain.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`playersTurnHistory.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`gamesWon.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`displayNames.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
-      db.collection('CustomGames').doc(gameData.gameName).update(updates)
+      db.collection(gameLobby).doc(gameData.gameName).update(updates)
         .then(() => {
           navigation.goBack();
         });
@@ -614,7 +622,7 @@ export default function GameScreen({ route, navigation }) {
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
 
       <Loader loading={!gameStarted}
-        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+        message={`Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
         exitAction={loaderExitFunction}
       />
       <PopUpMessage showPopUp={showPopUp} exitAction={dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >

@@ -59,6 +59,7 @@ export default function JoinGameMenuScreen({ navigation }) {
       .catch(() => {
         setLoading(false);
         alert('Error joining game. Please check your connection and try again.');
+        console.log('Error joining game: ', error);
       })
   }
 

@@ -1,12 +1,114 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageBackground, StyleSheet, View, SafeAreaView, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import firebase from 'firebase';
 
 import { HeaderText, TextButton } from '../components/StyledText';
+import store from '../redux/store';
+import Loader from '../components/Loader';
+import { dealCards, sortCards, findStartingPlayer, HAND_TYPES } from '../functions/HelperFunctions';
 
 export default function HomeScreen({ navigation }) {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(store.getState().userData.user);
+
+  useEffect(() => {
+    return store.subscribe(() => {
+      setUser(store.getState().userData.user);
+    })
+  }, [])
+
+  function generateUID() {
+    let s4 = () => {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+    return s4() + s4() + '-' + + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+
+  function joinPlayNowGame() {
+    setLoading(true);
+    firebase.firestore().collection('PlayNowGames').where('playersLeftToJoin', '>', 0).limit(1).get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+          let hands = dealCards(false, 2, 1);
+          hands.forEach(array => sortCards(array.cards));
+
+          let randUID = generateUID();
+
+          const gameData = {
+            gameName: randUID,
+            password: '',
+            numberOfPlayers: 2,
+            numberOfComputers: 0,
+            useJoker: false,
+            cardsPerPlayer: 1,
+            players: { [user.uid]: 0 },
+            playersLeftToJoin: 1,
+            hands: hands,
+            lastPlayed: [],
+            lastPlayerToPlay: {},
+            playedCards: [],
+            currentPlayerTurnIndex: findStartingPlayer(hands),
+            currentHandType: HAND_TYPES.START_OF_GAME,
+            places: [],
+            playersTurnHistory: { [user.uid]: {} },
+            overallTurnHistory: {},
+            displayNames: { [user.uid]: user.displayName },
+            playersPlayingAgain: {},
+            playersNotPlayingAgain: {},
+            gamesPlayed: 0,
+            gamesWon: { [user.uid]: 0 },
+            turnLength: 30,
+            localGame: false
+          };
+
+          firebase.firestore().collection('PlayNowGames').doc(randUID).set(gameData)
+            .then((docRef) => {
+              setLoading(false);
+              navigation.navigate('Game', gameData);
+            })
+            .catch((error) => {
+              setLoading(false);
+              alert('Error uploading game to database. Please check your connection and try again.');
+              console.log('Error creating game: ', error);
+            });
+
+        } else {
+          querySnapshot.forEach(doc => {
+            const data = doc.data();
+
+            let updates = {};
+            updates[`players.${user.uid}`] = data.numberOfPlayers - data.playersLeftToJoin;
+            updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
+            updates[`playersTurnHistory.${user.uid}`] = {};
+            updates[`displayNames.${user.uid}`] = user.displayName;
+            updates[`gamesWon.${user.uid}`] = 0;
+            firebase.firestore().collection('PlayNowGames').doc(doc.id).update(updates)
+              .then(() => {
+                setLoading(false);
+                navigation.navigate('Game', data);
+              })
+              .catch((error) => {
+                setLoading(false);
+                alert('Error joining game. Please check your connection and try again.');
+                console.log('Error joining game: ', error);
+              })
+          })
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        alert('Error joining game. Please check your connection and try again.');
+        console.log('Error joining game: ', error);
+      })
+  }
+
   return (
     <View style={styles.container}>
+      <Loader loading={loading} message={'Joining Game'} />
       <View style={styles.headerContainer}>
         <ImageBackground
           source={require('../assets/images/dragon.png')}
@@ -20,7 +122,7 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.menuOptionContainer}>
-        <TextButton onPress={() => navigation.navigate('Game')}>Play Now</TextButton>
+        <TextButton onPress={() => joinPlayNowGame()}>Play Now</TextButton>
         <TextButton onPress={() => navigation.navigate('HostGameOptions')}>Host Game</TextButton>
         <TextButton onPress={() => navigation.navigate('JoinGameMenu')}>Join Game</TextButton>
         <TextButton onPress={() => navigation.navigate('Stats')}>Stats</TextButton>
