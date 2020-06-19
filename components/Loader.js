@@ -5,11 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { HeaderText } from "../components/StyledText";
 
-export default function Loader({ loading, message, exitAction }) {
+export default function Loader({ loading, message, exitAction, style }) {
   const windowDimensions = useWindowDimensions();
 
   return (
-    <View style={{ position: 'absolute', zIndex: 99999, elevation: 99999, width: loading ? windowDimensions.width : 0, height: loading ? windowDimensions.height : 0 }}>
+    <View style={[{ position: 'absolute', zIndex: 99999, elevation: 99999, width: loading ? windowDimensions.width : 0, height: loading ? windowDimensions.height : 0 }, style]}>
       {loading && <View style={styles.modalBackground}>
         {exitAction && <HeaderText style={styles.backArrow}><Ionicons size={40} name='md-arrow-round-back' onPress={() => exitAction()} /></HeaderText>}
         <HeaderText style={styles.loaderMessage}>{message}</HeaderText>
