@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { View, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
 import store from '../redux/store';
 
 export default function NavBar({ numPages, scrollRef }) {
@@ -20,7 +19,7 @@ export default function NavBar({ numPages, scrollRef }) {
   return (
     <View style={styles.navBar}>
       {[...Array(numPages)].map((num, index) => {
-        return <FontAwesome key={index} name={getName(index)} color={'red'} onPress={() => { scrollRef(index * windowWidth) }} size={15} style={styles.navBarItem} />
+        return <TouchableOpacity key={index} onPress={() => { scrollRef(index * windowWidth) }} style={[styles.navBarItem, { backgroundColor: currentSection === index ? 'rgb(217, 56, 27)' : 'rgba(96,100,109, 1)' }]} />
       })}
     </View>
   )
@@ -29,13 +28,16 @@ export default function NavBar({ numPages, scrollRef }) {
 const styles = StyleSheet.create({
   navBar: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 15,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
   },
   navBarItem: {
-    marginRight: 10
+    marginRight: 10,
+    width: 12,
+    height: 12,
+    borderRadius: 6
   }
 })
