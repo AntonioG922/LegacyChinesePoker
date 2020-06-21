@@ -1,4 +1,4 @@
-const { isBetterHand, HAND_TYPES, getLowestCard, sortCards } = require('./HelperFunctions');
+import { isBetterHand, HAND_TYPES, getLowestCard, sortCards } from './HelperFunctions';
 
 function get13RandomCards() {
   let deck = Array.from({ length: 52 }, (v, i) => i);
@@ -334,8 +334,7 @@ function getLowestStartOfRoundCardsExclusive(cards, startOfGame) {
 }
 
 
-
-function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCardsPlayed, exclusive) {
+export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCardsPlayed, exclusive) {
   /* inputs:
         cards: array of cards in hand
         lastCardsPlayed: array of the last cards played
@@ -405,5 +404,3 @@ function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCard
 
   return false;
 }
-
-module.exports = { getLowestPlayableCards };

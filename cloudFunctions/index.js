@@ -1,25 +1,28 @@
-const functions = require('firebase-functions');
-const firebase = require('firebase');
-const { getLowestPlayableCards } = require('../functions/AIFunctions');
+import functions from 'firebase-functions';
+import firebase from 'firebase';
+import { getLowestPlayableCards } from '../functions/AIFunctions';
+import { getNextNonEmptyHandIndex, getHandType } from '../functions/HelperFunctions';
 
 exports.computerTakeTurn = functions.firestore.document('/CustomGames/{gameName}')
-  .onWrite((snap, context) => {
-    const gameData = snap.data();
+  .onWrite((change, context) => {
+    const gameData = change.after.exists ? change.after.data() : null;
     const gameName = context.params.gameName;
     const currentPlayerUID = (Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex));
-    const computerPlaysNext = ['AIEasy', 'AIMedi', 'AIHard', 'AIMast'].includes(currentPlayerUID.slice(0, 6));
+    const computerPlaysNext = ['BotEasy', 'BotMedi', 'BotHard', 'BotMast'].includes(currentPlayerUID.slice(0, 7));
 
     if (computerPlaysNext) {
       const player = gameData.currentPlayerTurnIndex;
       let hands = gameData.hands;
-      const AIDifficulty = currentPlayerUID.slice(2, currentPlayerUID.length - 1);
-      const selectedCards = getLowestPlayableCards(hands[player], gameData.currentHandType, gameData.lastPlayed, AIDifficulty === 'Easy' ? false : true);
+      const AIDifficulty = currentPlayerUID.slice(3, 7);
+      const exclusive = AIDifficulty === 'Easy' ? false : true;
+      const selectedCards = getLowestPlayableCards(hands[player].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, exclusive);
+      const playedHandType = getHandType(selectedCards);
       hands[player].cards = hands[player].cards.filter(card => !selectedCards.includes(card));
 
       let overallTurnHistory = gameData.overallTurnHistory;
+      let playersTurnHistory = gameData.playersTurnHistory;
       const turnsTaken = Object.keys(overallTurnHistory).length;
       overallTurnHistory[turnsTaken] = selectedCards;
-      let playersTurnHistory = gameData.playersTurnHistory;
       playersTurnHistory[currentPlayerUID][turnsTaken] = selectedCards;
 
       const handIsEmpty = hands[player].cards.length === 0;
@@ -29,7 +32,7 @@ exports.computerTakeTurn = functions.firestore.document('/CustomGames/{gameName}
         lastPlayed: selectedCards,
         lastPlayerToPlay: { [currentPlayerUID]: gameData.displayNames[currentPlayerUID] },
         hands: hands,
-        currentPlayerTurnIndex: getNextNonEmptyHandIndexLocal(),
+        currentPlayerTurnIndex: getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers,
         currentHandType: playedHandType,
         playersTurnHistory: playersTurnHistory,
         overallTurnHistory: overallTurnHistory
@@ -48,12 +51,13 @@ exports.computerTakeTurn = functions.firestore.document('/CustomGames/{gameName}
         }
       }
 
-      let updatedHandsPlayed = handsPlayed;
-      updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + 1;
-      setHandsPlayed(updatedHandsPlayed);
-
-
-      return firebase.firestore().collection('CustomGames').doc(gameName).update(data);
+      firebase.firestore().collection('CustomGames').doc(gameName).update(data)
+        .then(() => {
+          alert('Computer played!');
+        })
+        .catch((error) => {
+          alert('Error with computer playing: ' + error);
+        });
     }
   })
 
