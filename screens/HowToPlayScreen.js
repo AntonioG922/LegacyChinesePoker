@@ -129,7 +129,7 @@ function Rounds({ scrollToX }) {
     <HowToPlaySection
       pageTitle={'Rounds'}
     >
-      <Text style={[pageStyles.iconText, { fontFamily: font }]}>Play takes place in rounds{'\n\n'}A round starts with a player
+      <Text style={[pageStyles.iconText, { fontFamily: font }]}>Gameplay takes place in rounds{'\n\n'}A round starts with a player
            playing a playable hand type (see <Text style={{ textDecorationLine: 'underline' }}
           onPress={() => { scrollToX(windowWidth * 3) }}>"Hand Types"</Text>)
            {'\n\n'}Play continues clockwise and the next player must either play higher cards of the same hand type or pass
@@ -167,8 +167,7 @@ function HandTypes({ scrollToX }) {
       <View style={[pageStyles.handTypeRow, { justifyContent: 'space-around' }]}>
         <View style={[pageStyles.handType, { left: -25 }]}>
           <PlainCardContainer cards={getUnion()} style={{ left: 0, width: 80 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Four of a Kind{'\n'}(See
-              <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 5) }}>"Unions"</Text>)</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Four of a Kind{'\n'}(See <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 5) }}>"Unions"</Text>)</Text>
         </View>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getFullHouse()} style={{ left: 0, width: 100 }} />
@@ -256,8 +255,8 @@ function Dragons() {
     >
       <View>
         <Text style={[pageStyles.iconText, { fontFamily: font }]}>A Dragon is a 13 card straight{'\n\n'}If youre dealt a dragon
-            you can immediately play your cards and win the game{'\n\n'}You can only play a dragon in a
-            game with exactly 13 cards dealt</Text>
+            you can immediately play your cards and win the game{'\n\n'}A dragon can only be played in a game where 13 cards are dealt
+            {'\n\n'}Dragons are extremely rare</Text>
       </View>
       <View style={{ alignItems: 'center' }}>
         <PlainCardContainer cards={releaseTheDragon()} style={{ left: 0, width: 300 }} />
