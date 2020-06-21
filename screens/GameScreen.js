@@ -631,7 +631,7 @@ export default function GameScreen({ route, navigation }) {
               <View style={styles.avatarsContainer}>
                 <Loader loading={loading} style={{ width: loading ? '100%' : 0, height: loading ? '100%' : 0 }} />
                 {Object.keys(AVATARS).map((avatar) => {
-                  return <TouchableOpacity disabled={isTakenAvatar(avatar)} onPress={() => { setPlayerAvatar(avatar) }}>
+                  return <TouchableOpacity key={avatar} disabled={isTakenAvatar(avatar)} onPress={() => { setPlayerAvatar(avatar) }}>
                     <Image source={getAvatarImage(avatar)}
                       style={[styles.avatarImage, currentAvatar === AVATARS[avatar] ? styles.currentAvatar : null, isTakenAvatar(avatar) ? styles.takenAvatar : null]} />
                   </TouchableOpacity>
