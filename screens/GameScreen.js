@@ -18,7 +18,7 @@ import {
   HAND_TYPES,
   isBetterHand, isLegalPlay,
   dealCards, findStartingPlayer, GAME_TYPE_BY_NUMBER_OF_PLAYERS, GAME_TYPES,
-  AI_DIFFICULTIES, AVATARS
+  AI_UID_PREFIXES, AVATARS
 } from '../functions/HelperFunctions';
 import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
@@ -42,8 +42,6 @@ export default function GameScreen({ route, navigation }) {
   const user = store.getState().userData.user;
   const db = firebase.firestore();
   const isLocalGame = gameData.localGame;
-  const computerDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
-  const computerPrefixUID = computerDifficulties.map(difficulty => 'Bot' + difficulty.slice(0, 4));
 
   const menuPosition = useRef(new Animated.Value(-225)).current;
   const screenShaderOpacity = useRef(new Animated.Value(0)).current;
@@ -101,7 +99,7 @@ export default function GameScreen({ route, navigation }) {
       }
       let playersPlayingAgain = gameData.playersPlayingAgain;
       Object.keys(gameData.displayNames).forEach(uid => {
-        if (computerPrefixUID.includes(uid.slice(0, 7))) {
+        if (AI_UID_PREFIXES.includes(uid.slice(0, 7))) {
           playersPlayingAgain[uid] = gameData.displayNames[uid];
         }
       });
@@ -214,7 +212,7 @@ export default function GameScreen({ route, navigation }) {
     const lastPlayerLeft = gameData.places.length === gameData.numberOfPlayers;
     if (isLocalGame && !lastPlayerLeft) {
       const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
-      const computerPlaysNext = computerPrefixUID.includes(currentPlayerUID.slice(0, 7));
+      const computerPlaysNext = AI_UID_PREFIXES.includes(currentPlayerUID.slice(0, 7));
 
       if (computerPlaysNext) {
         const AIDifficulty = currentPlayerUID.slice(3, 7);
@@ -383,7 +381,7 @@ export default function GameScreen({ route, navigation }) {
     };
 
     let updatedHandsPlayed = handsPlayed;
-    updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + 1;
+    updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + selectedCards.length;
     setHandsPlayed(updatedHandsPlayed);
 
     if (isLocalGame) {
@@ -424,7 +422,14 @@ export default function GameScreen({ route, navigation }) {
     if (isLocalGame) {
       setGameData({ ...gameData, ...update });
     } else {
-      db.collection(gameLobby).doc(gameData.gameName).update(update);
+      db.collection(gameLobby).doc(gameData.gameName).update(update)
+        .then(() => {
+
+        })
+        .catch(error => {
+          setErrorMessage('Error passing. Please try again.');
+          console.log('Error passing: ', error);
+        });
     }
 
     setErrorMessage('');
@@ -453,7 +458,7 @@ export default function GameScreen({ route, navigation }) {
   function playAgain() {
     let playersPlayingAgain = gameData.playersPlayingAgain;
     playersPlayingAgain[user.uid] = user.displayName;
-    let updates = {};
+    let updates = { playersPlayingAgain: gameData.playersPlayingAgain };
     isLocalGame ? updates = { playersPlayingAgain: playersPlayingAgain } : updates[`playersPlayingAgain.${user.uid}`] = user.displayName;
 
     if (isLocalGame) {
@@ -590,7 +595,7 @@ export default function GameScreen({ route, navigation }) {
         borderRadius: 20
       },
       takenAvatar: {
-        opacity: .5
+        opacity: .3
       }
     });
 
@@ -623,54 +628,56 @@ export default function GameScreen({ route, navigation }) {
     return (
       <Animated.View style={[styles.menu, { right: menuPosition }]}>
 
-        {gameStarted &&
-          <View style={styles.mainContent}>
-            <View>
-              <HeaderText style={[styles.text, { alignSelf: 'center' }]} >Favorite Icon</HeaderText>
-              <DividerLine width={140} />
-              <View style={styles.avatarsContainer}>
-                <Loader loading={loading} style={{ width: loading ? '100%' : 0, height: loading ? '100%' : 0 }} />
-                {Object.keys(AVATARS).map((avatar) => {
-                  return <TouchableOpacity key={avatar} disabled={isTakenAvatar(avatar)} onPress={() => { setPlayerAvatar(avatar) }}>
-                    <Image source={getAvatarImage(avatar)}
-                      style={[styles.avatarImage, currentAvatar === AVATARS[avatar] ? styles.currentAvatar : null, isTakenAvatar(avatar) ? styles.takenAvatar : null]} />
-                  </TouchableOpacity>
-                })}
+        {typeof (gameData.players[user.uid]) === 'number' &&
+          <View style={{ flex: 1 }}>
+            <View style={styles.mainContent}>
+              <View>
+                <HeaderText style={[styles.text, { alignSelf: 'center' }]} >Favorite Icon</HeaderText>
+                <DividerLine width={140} />
+                <View style={styles.avatarsContainer}>
+                  <Loader loading={loading} style={{ width: loading ? '100%' : 0, height: loading ? '100%' : 0 }} />
+                  {Object.keys(AVATARS).map((avatar) => {
+                    return <TouchableOpacity key={avatar} disabled={isTakenAvatar(avatar)} onPress={() => { setPlayerAvatar(avatar) }}>
+                      <Image source={getAvatarImage(avatar)}
+                        style={[styles.avatarImage, currentAvatar === AVATARS[avatar] ? styles.currentAvatar : null, isTakenAvatar(avatar) ? styles.takenAvatar : null]} />
+                    </TouchableOpacity>
+                  })}
+                </View>
+              </View>
+
+              <View>
+                <TouchableOpacity style={styles.row} onPress={() => setVibrateOnTurn(!vibrateOnTurn)}>
+                  <HeaderText style={[styles.text]} >Vibrate</HeaderText>
+                  <HeaderText style={styles.iconContainer}>
+                    <FontAwesome5 name={vibrateOnTurn ? 'check' : 'times'} style={[styles.text, { color: vibrateOnTurn ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
+                  </HeaderText>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.row} onPress={() => setShowDisplayNames(!showDisplayNames)}>
+                  <HeaderText style={[styles.text]} >Display Names</HeaderText>
+                  <HeaderText style={styles.iconContainer}>
+                    <FontAwesome5 name={showDisplayNames ? 'check' : 'times'} style={[styles.text, { color: showDisplayNames ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
+                  </HeaderText>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HowToPlay')}>
+                  <HeaderText style={[styles.text]} >How To Play</HeaderText>
+                  <HeaderText style={styles.iconContainer}>
+                    <FontAwesome5 name={'question'} style={styles.text} />
+                  </HeaderText>
+                </TouchableOpacity>
               </View>
             </View>
 
-            <View>
-              <TouchableOpacity style={styles.row} onPress={() => setVibrateOnTurn(!vibrateOnTurn)}>
-                <HeaderText style={[styles.text]} >Vibrate</HeaderText>
-                <HeaderText style={styles.iconContainer}>
-                  <FontAwesome5 name={vibrateOnTurn ? 'check' : 'times'} style={[styles.text, { color: vibrateOnTurn ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
-                </HeaderText>
-              </TouchableOpacity>
+            <DividerLine width={140} />
 
-              <TouchableOpacity style={styles.row} onPress={() => setShowDisplayNames(!showDisplayNames)}>
-                <HeaderText style={[styles.text]} >Display Names</HeaderText>
-                <HeaderText style={styles.iconContainer}>
-                  <FontAwesome5 name={showDisplayNames ? 'check' : 'times'} style={[styles.text, { color: showDisplayNames ? 'rgb(80, 189, 68)' : 'rgb(217, 56, 27)' }]} />
-                </HeaderText>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HowToPlay')}>
-                <HeaderText style={[styles.text]} >How To Play</HeaderText>
-                <HeaderText style={styles.iconContainer}>
-                  <FontAwesome5 name={'question'} style={styles.text} />
-                </HeaderText>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
+              <HeaderText style={[styles.text]} >Exit Game</HeaderText>
+              <HeaderText style={styles.iconContainer}>
+                <MaterialCommunityIcons name={'logout'} style={styles.text} />
+              </HeaderText>
+            </TouchableOpacity>
           </View>}
-
-        <DividerLine width={140} />
-
-        <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
-          <HeaderText style={[styles.text]} >Exit Game</HeaderText>
-          <HeaderText style={styles.iconContainer}>
-            <MaterialCommunityIcons name={'logout'} style={styles.text} />
-          </HeaderText>
-        </TouchableOpacity>
 
       </Animated.View>
     )
@@ -690,7 +697,7 @@ export default function GameScreen({ route, navigation }) {
     <ImageBackground source={require('../assets/images/felt.jpg')} style={styles.headerImage}>
 
       <Loader loading={!gameStarted}
-        message={leavingGame ? 'Exiting Game' : `Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${gameData.playersLeftToJoin === 1 ? '' : 's'}`}
+        message={leavingGame ? 'Exiting Game' : `Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${(Object.keys(gameData.playersPlayingAgain).length ? ((gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) === 1) : (gameData.playersLeftToJoin === 1)) ? '' : 's'}`}
         exitAction={leavingGame ? (() => { }) : loaderExitFunction}
       />
       <PopUpMessage showPopUp={showPopUp} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >

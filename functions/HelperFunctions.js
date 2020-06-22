@@ -97,6 +97,7 @@ export const AI_DIFFICULTIES = {
   EASY: 'Easy',
   MEDIUM: 'Medium'
 }
+export const AI_UID_PREFIXES = Object.keys(AI_DIFFICULTIES).map(difficulty => 'Bot' + AI_DIFFICULTIES[difficulty].slice(0, 4));
 
 export function getRandomAvatars(numAvatars) {
   let avatars = [];

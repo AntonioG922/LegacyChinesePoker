@@ -1,0 +1,17 @@
+[debug] [2020-06-22T02:41:32.988Z] ----------------------------------------------------------------------
+[debug] [2020-06-22T02:41:32.990Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\justi\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2020-06-22T02:41:32.991Z] CLI Version:   8.4.3
+[debug] [2020-06-22T02:41:32.991Z] Platform:      win32
+[debug] [2020-06-22T02:41:32.991Z] Node Version:  v13.7.0
+[debug] [2020-06-22T02:41:32.992Z] Time:          Sun Jun 21 2020 22:41:32 GMT-0400 (Eastern Daylight Time)
+[debug] [2020-06-22T02:41:32.992Z] ----------------------------------------------------------------------
+[debug] [2020-06-22T02:41:32.992Z] 
+[debug] [2020-06-22T02:41:33.005Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-06-22T02:41:33.005Z] > authorizing via signed-in user
+[debug] [2020-06-22T02:41:33.006Z] [iam] checking project chinesepoker-d0082 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2020-06-22T02:41:33.008Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2020-06-22T02:41:33.008Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2020-06-22T02:41:33.152Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Mon, 22 Jun 2020 02:41:29 GMT","server":"scaffolding on HTTPServer2","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-28=\":443\"; ma=2592000,h3-27=\":443\"; ma=2592000,h3-25=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2020-06-22T02:41:33.164Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/chinesepoker-d0082:testIamPermissions  
+ {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
