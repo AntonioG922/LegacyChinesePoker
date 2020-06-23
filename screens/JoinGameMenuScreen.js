@@ -40,14 +40,15 @@ export default function JoinGameMenuScreen({ navigation }) {
     const gameName = game.gameName;
     const docRef = db.collection('CustomGames').doc(gameName);
     let queueUpdate = {};
-    queueUpdate[`queue.${user.uid}`] = Date.now();
+    queueUpdate[`queue.${user.uid}`] = firebase.firestore.FieldValue.serverTimestamp();
 
     docRef.update(queueUpdate)
       .then(() => {
         docRef.get()
           .then(doc => {
             const data = doc.data();
-            const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1] - b[1] }).findIndex(array => array[0] === user.uid);
+            console.log(Object.entries(data.queue).sort((a, b) => { return a[1].toMillis() - b[1].toMillis() }));
+            const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1].toMillis() - b[1].toMillis() }).findIndex(array => array[0] === user.uid);
 
             if (queueSpot < data.numberOfPlayers) {
               let updates = {};

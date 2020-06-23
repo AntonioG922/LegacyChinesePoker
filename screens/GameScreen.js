@@ -134,7 +134,7 @@ export default function GameScreen({ route, navigation }) {
         playersTurnHistory[uid] = {};
         displayNames[uid] = gameData.playersPlayingAgain[uid];
         gamesWon[uid] = gameData.gamesWon[uid];
-        queue[uid] = Date.now();
+        queue[uid] = firebase.firestore.FieldValue.serverTimestamp();
         playersLeftToJoin--;
       });
 

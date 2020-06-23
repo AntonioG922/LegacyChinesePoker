@@ -59,7 +59,7 @@ export default function HomeScreen({ navigation }) {
       gamesWon: { [user.uid]: 0 },
       turnLength: 30,
       localGame: false,
-      queue: { [user.uid]: Date.now() },
+      queue: { [user.uid]: firebase.firestore.FieldValue.serverTimestamp() },
       gameStartTime: Date.now(),
       gameCreationTime: Date.now()
     };
@@ -87,7 +87,7 @@ export default function HomeScreen({ navigation }) {
           querySnapshot.forEach(doc => {
             const docRef = collRef.doc(doc.id);
             let queueUpdate = {};
-            queueUpdate[`queue.${user.uid}`] = Date.now();
+            queueUpdate[`queue.${user.uid}`] = firebase.firestore.FieldValue.serverTimestamp();
             docRef.update(queueUpdate)
               .then(() => {
                 docRef.get()
