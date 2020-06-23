@@ -125,6 +125,7 @@ export default function GameScreen({ route, navigation }) {
       let players = {};
       let playersTurnHistory = {};
       let displayNames = {};
+      let queue = {};
       let playersLeftToJoin = gameData.numberOfPlayers;
       let gamesWon = gameData.gamesWon;
       Object.keys(gameData.playersPlayingAgain).forEach((uid, index) => {
@@ -133,6 +134,7 @@ export default function GameScreen({ route, navigation }) {
         playersTurnHistory[uid] = {};
         displayNames[uid] = gameData.playersPlayingAgain[uid];
         gamesWon[uid] = gameData.gamesWon[uid];
+        queue[uid] = Date.now();
         playersLeftToJoin--;
       });
 
@@ -151,7 +153,8 @@ export default function GameScreen({ route, navigation }) {
         displayNames: displayNames,
         playersPlayingAgain: {},
         playersNotPlayingAgain: {},
-        gamesWon: gamesWon
+        gamesWon: gamesWon,
+        queue: queue
       };
 
       if (isLocalGame) {
@@ -519,6 +522,7 @@ export default function GameScreen({ route, navigation }) {
       updates[`playersTurnHistory.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates[`gamesWon.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates[`displayNames.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`queue.${user.uid}`] = firebase.firestore.FieldValue.delete();
       updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(1);
       db.collection(gameLobby).doc(gameData.gameName).update(updates)
         .then(() => {
@@ -611,7 +615,6 @@ export default function GameScreen({ route, navigation }) {
           .then(() => {
             setCurrentAvatar(avatar);
             setLoading(false);
-            console.log('Avatar changed!');
           })
           .catch((error) => {
             setLoading(false);

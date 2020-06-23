@@ -35,32 +35,57 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   function joinGame(game) {
+    // add player to queue; check that they entered queue before game full; add to game
     setLoading(true);
     const gameName = game.gameName;
-    const playerNumber = game.numberOfPlayers - game.playersLeftToJoin;
+    const docRef = db.collection('CustomGames').doc(gameName);
+    let queueUpdate = {};
+    queueUpdate[`queue.${user.uid}`] = Date.now();
 
-    let updates = {};
-    updates[`players.${user.uid}`] = playerNumber;
-    updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
-    updates[`playersTurnHistory.${user.uid}`] = {};
-    updates[`displayNames.${user.uid}`] = user.displayName;
-    updates[`gamesWon.${user.uid}`] = 0;
-    db.collection('CustomGames').doc(gameName).update(updates)
+    docRef.update(queueUpdate)
       .then(() => {
-        const index = activeGames.findIndex(x => x.gameName === gameName);
-        if (activeGames[index].playersLeftToJoin === 0) {
-          setLoading(false);
-          navigation.navigate('Game', activeGames[index]);
-        } else {
-          setLoading(false);
-          navigation.navigate('Game', activeGames[index]);
-        }
+        docRef.get()
+          .then(doc => {
+            const data = doc.data();
+            const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1] - b[1] }).findIndex(array => array[0] === user.uid);
+
+            if (queueSpot < data.numberOfPlayers) {
+              let updates = {};
+              updates[`players.${user.uid}`] = queueSpot;
+              updates['playersLeftToJoin'] = firebase.firestore.FieldValue.increment(-1);
+              updates[`playersTurnHistory.${user.uid}`] = {};
+              updates[`displayNames.${user.uid}`] = user.displayName;
+              updates[`gamesWon.${user.uid}`] = 0;
+
+              db.collection('CustomGames').doc(gameName).update(updates)
+                .then(() => {
+                  const index = activeGames.findIndex(x => x.gameName === gameName);
+                  setLoading(false);
+                  navigation.navigate('Game', activeGames[index]);
+                })
+                .catch(error => {
+                  setLoading(false);
+                  alert('Error joining game. Please check your connection and try again.');
+                  console.log('Error joining game: ', error);
+                });
+            } else {
+              setLoading(false);
+              alert('Game is full. Ya gotta be quicker then that!');
+            }
+          })
+          .catch(error => {
+            setLoading(false);
+            alert('Error joining game. Please check your connection and try again.');
+            console.log('Error getting doc after adding to queue: ', error);
+          })
       })
-      .catch(() => {
+      .catch(error => {
         setLoading(false);
         alert('Error joining game. Please check your connection and try again.');
-        console.log('Error joining game: ', error);
+        console.log('Error adding to queue: ', error);
       })
+
+    return true;
   }
 
   useEffect(() => {
