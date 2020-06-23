@@ -93,7 +93,7 @@ export default function HomeScreen({ navigation }) {
                 docRef.get()
                   .then(doc => {
                     const data = doc.data();
-                    const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1] - b[1] }).findIndex(array => array[0] === user.uid);
+                    const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1].toMilli() - b[1].toMilli() }).findIndex(array => array[0] === user.uid);
 
                     if (queueSpot < data.numberOfPlayers) {
                       let updates = {};
