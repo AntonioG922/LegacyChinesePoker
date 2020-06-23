@@ -214,7 +214,7 @@ function JoinableGame({ game, joinGame }) {
             </HeaderText>
           </Animated.View>
           <Animated.View style={passwordInputStyle}>
-            <PasswordTextInput onChangeText={text => { setShowPasswordError(false); setPassword(text); }} submit={checkPassword} />
+            <PasswordTextInput disabled={!showPasswordInput} onChangeText={text => { setShowPasswordError(false); setPassword(text); }} submit={checkPassword} />
           </Animated.View>
         </Animated.View>}
       </View>

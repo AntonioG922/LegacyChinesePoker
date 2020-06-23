@@ -50,7 +50,7 @@ export function PasswordTextInput(props) {
       {!props.outline && <FlatTextInput {...props} secureTextEntry={!showPassword} onSubmitEditing={props.submit} />}
       {props.outline && <OutlineTextInput {...props} secureTextEntry={!showPassword} />}
       {!props.submit && <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={20} onPress={() => setShowPassword(!showPassword)} style={styles.passwordIcon} />}
-      {props.submit && <FontAwesome5 name={'arrow-right'} size={20} onPress={props.submit} style={[styles.passwordIcon, { color: 'rgb(217, 56, 27)' }]} />}
+      {props.submit && <FontAwesome5 name={'arrow-right'} size={20} onPress={props.disabled ? null : props.submit} style={[styles.passwordIcon, { color: 'rgb(217, 56, 27)' }]} />}
     </View>
   )
 }
