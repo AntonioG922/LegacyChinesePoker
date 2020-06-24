@@ -33,7 +33,7 @@ export function UserCardContainer({ cards, place, currentHandType, errorMessage,
       </View>
       {place >= 0
         ? <Place place={place} />
-        : <View>
+        : <View style={{}}>
           <View style={styles.actionsContainer}>
             {!selectingJoker &&
               <ContainedButton
@@ -51,7 +51,7 @@ export function UserCardContainer({ cards, place, currentHandType, errorMessage,
             }
           </View>
           {selectingJoker && <JokerSelector setJoker={setJoker} />}
-          <View style={styles.cardContainer}>
+          <View style={[styles.cardContainer, { alignSelf: 'center', width: 100 - (cards.length < 6 ? 100 / cards.length : 0) + '%' }]}>
             {sortCards(cards).map((rank, index) => (
               <Card key={rank} rank={rank === JOKER ? jokerValue : rank} toggleSelected={toggleSelected}
                 style={{ left: `${(100 / cards.length * (index + 1 / cards.length * index))}%` }} />
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     top: 75,
-    height: 75,
+    height: 75
   },
   actionsContainer: {
     justifyContent: 'center',
