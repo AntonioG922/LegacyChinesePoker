@@ -47,7 +47,6 @@ export default function JoinGameMenuScreen({ navigation }) {
         docRef.get()
           .then(doc => {
             const data = doc.data();
-            console.log(Object.entries(data.queue).sort((a, b) => { return a[1].toMillis() - b[1].toMillis() }));
             const queueSpot = Object.entries(data.queue).sort((a, b) => { return a[1].toMillis() - b[1].toMillis() }).findIndex(array => array[0] === user.uid);
 
             if (queueSpot < data.numberOfPlayers) {
@@ -71,7 +70,7 @@ export default function JoinGameMenuScreen({ navigation }) {
                 });
             } else {
               setLoading(false);
-              alert('Game is full. Ya gotta be quicker then that!');
+              alert(`Game is full.${'\n'}Ya gotta be quicker then that!`);
             }
           })
           .catch(error => {

@@ -16,39 +16,116 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-exports.computerTakeTurn = functions.firestore.document('CustomGames/{gameName}')
+exports.subBotForLeaver = functions.firestore.document('CustomGames/{gameName}')
   .onUpdate((change, context) => {
+    const gameData = change.after.data();
+    const gameName = context.params.gameName;
+    const gameStarted = Object.keys(gameData.players).length === gameData.numberOfPlayers;
+    const gameEnded = Object.keys(gameData.places).length === gameData.numberOfPlayers;
+    const turnLength = gameData.turnLength;
+    const currentPlayerUID = (Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex)) || '';
+    const computerPlaysNext = AI_UID_PREFIXES.includes(currentPlayerUID.slice(0, 7));
+    const isFirstPlayOfGame = gameData.playedCards.length === 0;
 
-    function everyonePassAfterWinner() {
-      // called while last player needed to pass is passing
-      if (gameData.places.length === 0)
-        return false;
+    function subBot(gameData) {
+      const gameName = gameData.gameName;
+      const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
 
-      const lastUIDToPlay = Object.keys(gameData.lastPlayerToPlay)[0];
-      const lastUIDToPlayTurnIndex = gameData.players[lastUIDToPlay];
-      if (gameData.hands[lastUIDToPlayTurnIndex].cards.length)
-        return false;
+      const nextPlayerStillInUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers);
+      const everyonePassed = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0] || everyonePassAfterWinner(gameData);
 
-      const lastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop());
-      let index = 0;
-      for (let hand of gameData.hands) {
-        if (hand.cards.length) {
-          const remainingPlayerUID = Object.keys(gameData.players).find(key => gameData.players[key] === index);
-          const remainingPlayerLastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop());
-          const remainingPlayerLastPlay = gameData.playersTurnHistory[remainingPlayerUID][remainingPlayerLastPlayTurnNum];
-          const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
+      const update = {};
+      // delete leaving players data
+      update[`displayNames.${currentPlayerUID}`] = firebase.firestore.FieldValue.delete();
+      update[`gamesWon.${currentPlayerUID}`] = firebase.firestore.FieldValue.delete();
+      update[`players.${currentPlayerUID}`] = firebase.firestore.FieldValue.delete();
+      update[`playersTurnHistory.${currentPlayerUID}`] = firebase.firestore.FieldValue.delete();
+      update[`queue.${currentPlayerUID}`] = firebase.firestore.FieldValue.delete();
 
-          if ((remainingPlayerLastPlayTurnNum < lastPlayTurnNum ||
-            (remainingPlayerLastPlayTurnNum > lastPlayTurnNum && remainingPlayerLastPlay !== 'PASS')) &&
-            remainingPlayerUID !== currentPlayerUID) {
-            return false;
+      // add bots data
+      const botUID = 'BotMedium' + (gameData.numberOfComputers + 1);
+      const botDisplayName = 'Bot Med ' + (gameData.numberOfComputers + 1);
+      update[`displayNames.${botUID}`] = botDisplayName;
+      update[`gamesWon.${botUID}`] = 0;
+      update[`players.${botUID}`] = gameData.players[currentPlayerUID];
+      update[`queue.${botUID}`] = gameData.queue[currentPlayerUID];
+      update['numberOfComputers'] = gameData.numberOfComputers + 1;
+      update[`rejoinablePlayers.${currentPlayerUID}`] = botUID;
+
+      const turnIndex = gameData.currentPlayerTurnIndex;
+      const selectedCards = getLowestPlayableCards(gameData.hands[turnIndex].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, true);
+
+      const turnsTaken = Object.keys(gameData.overallTurnHistory).length;
+      let tempOverallTurnHistory = gameData.overallTurnHistory;
+      let tempPlayersTurnHistory = gameData.playersTurnHistory[currentPlayerUID];
+      tempOverallTurnHistory[turnsTaken] = selectedCards || 'PASS';
+      tempPlayersTurnHistory[turnsTaken] = selectedCards || 'PASS';
+      update['overallTurnHistory'] = tempOverallTurnHistory;
+      update[`playersTurnHistory.${botUID}`] = tempPlayersTurnHistory;
+      update['currentHandType'] = selectedCards ? getHandType(selectedCards) : (everyonePassed ? HAND_TYPES.START_OF_ROUND : gameData.currentHandType);
+      update['currentPlayerTurnIndex'] = getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers;
+      if (selectedCards || gameData.lastPlayerToPlay === currentPlayerUID) {
+        update[`lastPlayerToPlay`] = { [botUID]: botDisplayName };
+      }
+
+      let hands = gameData.hands;
+      if (selectedCards) {
+        hands[turnIndex].cards = hands[turnIndex].cards.filter(card => !selectedCards.includes(card));
+        update['playedCards'] = firebase.firestore.FieldValue.arrayUnion(...selectedCards);
+        update['lastPlayed'] = selectedCards;
+        update['hands'] = hands;
+
+        const handIsEmpty = hands[turnIndex].cards.length === 0;
+
+        if (handIsEmpty) {
+          update['places'] = firebase.firestore.FieldValue.arrayUnion(botUID);
+
+          if (!gameData.places.length) {
+            update[`gamesWon.${botUID}`] = 1;
+            update['gamesPlayed'] = firebase.firestore.FieldValue.increment(1);
+          }
+
+          if (gameData.places.length === gameData.numberOfPlayers - 2) {
+            const lastPlaceUID = Object.keys(gameData.players).find((playerUid) => playerUid !== currentPlayerUID && !gameData.places.includes(playerUid));
+            update['places'] = firebase.firestore.FieldValue.arrayUnion(botUID, lastPlaceUID);
           }
         }
-        index++;
-      };
+      }
 
-      return true;
+      firebase.firestore().collection('CustomGames').doc(gameName).update(update)
+        .then(() => {
+          console.log('The AI is taking over!');
+        })
+        .catch(error => {
+          console.log('Error with AI taking over: ', error);
+        });
     }
+
+    if (gameStarted && !gameEnded && turnLength && !computerPlaysNext && !isFirstPlayOfGame) {
+      const numberOfPlaysPrev = Object.keys(gameData.playersTurnHistory[currentPlayerUID]).length;
+
+      setTimeout(() => {
+        firebase.firestore().collection('CustomGames').doc(gameName).get()
+          .then(doc => {
+            const newGameData = doc.data();
+            const numberOfPlaysCurr = Object.keys(newGameData.playersTurnHistory[currentPlayerUID]).length;
+            const playerHasntPlayed = numberOfPlaysPrev === numberOfPlaysCurr;
+
+            if (playerHasntPlayed) {
+              subBot(newGameData);
+            }
+          })
+          .catch(error => {
+            console.log('Error getting doc to check for sub AI: ', error);
+          })
+      }, (turnLength + 5) * 1000);
+    }
+
+    return true;
+  });
+
+exports.computerTakeTurn = functions.firestore.document('CustomGames/{gameName}')
+  .onUpdate((change, context) => {
 
     function playCards(selectedCards) {
       const gameName = context.params.gameName;
@@ -104,62 +181,95 @@ exports.computerTakeTurn = functions.firestore.document('CustomGames/{gameName}'
       return true;
     }
 
-    function pass() {
-      const gameName = context.params.gameName;
-      const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
-
-      const nextPlayerStillInUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers);
-      const everyonePassed = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0] || everyonePassAfterWinner();
-
-      let overallTurnHistory = gameData.overallTurnHistory;
-      let playersTurnHistory = gameData.playersTurnHistory;
-      const turnsTaken = Object.keys(overallTurnHistory).length;
-      overallTurnHistory[turnsTaken] = 'PASS';
-      playersTurnHistory[currentPlayerUID][turnsTaken] = 'PASS';
-
-      const update = {
-        currentHandType: everyonePassed ? HAND_TYPES.START_OF_ROUND : gameData.currentHandType,
-        currentPlayerTurnIndex: getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers,
-        playersTurnHistory: playersTurnHistory,
-        overallTurnHistory: overallTurnHistory
-      };
-
-      const onlyBotsLeft = (gameData.numberOfPlayers - gameData.numberOfComputers) === gameData.places.length;
-      setTimeout(() => {
-        firebase.firestore().collection('CustomGames').doc(gameName).update(update)
-          .then(() => {
-            console.log('Computer passed!');
-          })
-          .catch(error => {
-            console.log('Error passing for computer: ', error);
-          });
-      }, onlyBotsLeft ? 500 : 1500);
-
-      return true;
-    }
-
     const gameData = change.after.data();
     const gameStarted = Object.keys(gameData.players).length === gameData.numberOfPlayers;
     const gameEnded = Object.keys(gameData.places).length === gameData.numberOfPlayers;
-    if (gameStarted && !gameEnded) {
-      const currentPlayerUID = (Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex));
-      const computerPlaysNext = AI_UID_PREFIXES.includes(currentPlayerUID.slice(0, 7));
+    const currentPlayerUID = (Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex));
+    const computerPlaysNext = AI_UID_PREFIXES.includes(currentPlayerUID.slice(0, 7));
 
-      if (computerPlaysNext) {
-        const turnIndex = gameData.currentPlayerTurnIndex;
-        const AIDifficulty = currentPlayerUID.slice(3, 7);
-        const exclusive = AIDifficulty === 'Easy' ? false : true;
-        const selectedCards = getLowestPlayableCards(gameData.hands[turnIndex].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, exclusive);
-        if (selectedCards) {
-          playCards(selectedCards);
-        } else {
-          pass();
-        }
+    if (gameStarted && !gameEnded && computerPlaysNext) {
+      const turnIndex = gameData.currentPlayerTurnIndex;
+      const AIDifficulty = currentPlayerUID.slice(3, 7);
+      const exclusive = AIDifficulty === 'Easy' ? false : true;
+      const selectedCards = getLowestPlayableCards(gameData.hands[turnIndex].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, exclusive);
+
+      if (selectedCards) {
+        playCards(selectedCards);
+      } else {
+        pass(gameData);
       }
     }
 
     return true;
-  })
+  });
+
+
+
+function everyonePassAfterWinner(gameData) {
+  // called while last player needed to pass is passing
+  if (gameData.places.length === 0)
+    return false;
+
+  const lastUIDToPlay = Object.keys(gameData.lastPlayerToPlay)[0];
+  const lastUIDToPlayTurnIndex = gameData.players[lastUIDToPlay];
+  if (gameData.hands[lastUIDToPlayTurnIndex].cards.length)
+    return false;
+
+  const lastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop());
+  let index = 0;
+  for (let hand of gameData.hands) {
+    if (hand.cards.length) {
+      const remainingPlayerUID = Object.keys(gameData.players).find(key => gameData.players[key] === index);
+      const remainingPlayerLastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[remainingPlayerUID]).pop());
+      const remainingPlayerLastPlay = gameData.playersTurnHistory[remainingPlayerUID][remainingPlayerLastPlayTurnNum];
+      const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
+
+      if ((remainingPlayerLastPlayTurnNum < lastPlayTurnNum ||
+        (remainingPlayerLastPlayTurnNum > lastPlayTurnNum && remainingPlayerLastPlay !== 'PASS')) &&
+        remainingPlayerUID !== currentPlayerUID) {
+        return false;
+      }
+    }
+    index++;
+  };
+
+  return true;
+}
+
+function pass(gameData) {
+  const gameName = gameData.gameName;
+  const currentPlayerUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === gameData.currentPlayerTurnIndex);
+
+  const nextPlayerStillInUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers);
+  const everyonePassed = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0] || everyonePassAfterWinner(gameData);
+
+  let overallTurnHistory = gameData.overallTurnHistory;
+  let playersTurnHistory = gameData.playersTurnHistory;
+  const turnsTaken = Object.keys(overallTurnHistory).length;
+  overallTurnHistory[turnsTaken] = 'PASS';
+  playersTurnHistory[currentPlayerUID][turnsTaken] = 'PASS';
+
+  const update = {
+    currentHandType: everyonePassed ? HAND_TYPES.START_OF_ROUND : gameData.currentHandType,
+    currentPlayerTurnIndex: getNextNonEmptyHandIndex(gameData.hands, gameData.currentPlayerTurnIndex, gameData.numberOfPlayers) % gameData.numberOfPlayers,
+    playersTurnHistory: playersTurnHistory,
+    overallTurnHistory: overallTurnHistory
+  };
+
+  const onlyBotsLeft = (gameData.numberOfPlayers - gameData.numberOfComputers) === gameData.places.length;
+  setTimeout(() => {
+    firebase.firestore().collection('CustomGames').doc(gameName).update(update)
+      .then(() => {
+        console.log('Passed!');
+      })
+      .catch(error => {
+        console.log('Error passing: ', error);
+      });
+  }, onlyBotsLeft ? 500 : 1500);
+
+  return true;
+}
+
 
 
 const AI_DIFFICULTIES = {
@@ -663,7 +773,6 @@ function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCard
   cards = sortCards(cards);
 
   if (harnessedTheDragon(cards, cardsPerPlayer)) {
-    console.log(cards);
     return cards;
   }
 
@@ -713,7 +822,6 @@ function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCard
       set = [set];
     }
     if (isBetterHand(set, lastCardsPlayed)) {
-      console.log(set);
       return set;
     }
   }

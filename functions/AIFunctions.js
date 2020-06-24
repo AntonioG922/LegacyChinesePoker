@@ -347,7 +347,6 @@ export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, l
   cards = sortCards(cards);
 
   if (harnessedTheDragon(cards, cardsPerPlayer)) {
-    console.log(cards);
     return cards;
   }
 
@@ -397,7 +396,6 @@ export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, l
       set = [set];
     }
     if (isBetterHand(set, lastCardsPlayed)) {
-      console.log(set);
       return set;
     }
   }

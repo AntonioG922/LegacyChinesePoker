@@ -26,7 +26,7 @@ export function UserCardContainer({ cards, place, currentHandType, errorMessage,
 
   return (
     <View key={cards} style={[styles.horizontalContainer, style]}>
-      <Image source={avatarImage} style={[styles.avatar, { bottom: 60, right: -20 }, isCurrentPlayer && styles.currentPlayerAvatar]} />
+      <Image source={avatarImage} style={[styles.avatar, isCurrentPlayer && styles.currentPlayerAvatar, { bottom: 60, right: isCurrentPlayer ? -20 : -12.5 }]} />
       <View style={styles.errorMessage}>
         <HeaderText style={{ fontSize: 18 }}>{errorMessage}</HeaderText>
         {errorCards.map(cardNumber => <SuitAndRank cardNumber={cardNumber} containerStyle={styles.suitAndRank} numberStyle={styles.suitAndRankText} />)}
@@ -173,7 +173,8 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
   const delay = 1000;
 
   useEffect(() => {
-    if (isCurrentPlayer && turnLength) {
+    let timeout, interval;
+    if (isCurrentPlayer && turnLength && currentHandType !== HAND_TYPES.START_OF_GAME) {
       Animated.timing(strokePercentLeft, {
         toValue: 1,
         duration: time,
@@ -181,9 +182,8 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
         useNativeDriver: true
       }).start();
 
-      let interval;
       const intervalDelay = 1050;
-      let timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         interval = setInterval(() => {
           Animated.sequence([
             Animated.parallel([
@@ -219,11 +219,12 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
           }
         }, intervalDelay);
       }, time + delay - intervalDelay * (countdownNum + 1));
-      return () => { clearTimeout(timeout), clearInterval(interval) };
     } else {
       setStrokePercentLeft(new Animated.Value(0));
       setCountdownNum(5);
     }
+
+    return () => { (timeout ? clearTimeout(timeout) : null), (interval ? clearInterval(interval) : null) };
   }, [isCurrentPlayer])
 
   let fadeAnim = useRef(new Animated.Value(0)).current;
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     position: 'absolute',
-    right: -40,
+    right: -45,
     bottom: 10,
     width: 30,
     height: 30,
@@ -379,9 +380,10 @@ const styles = StyleSheet.create({
   currentPlayerAvatar: {
     width: 45,
     height: 45,
+    right: -52.5
   },
   displayName: {
-    width: 150,
+    width: 170,
     position: 'absolute',
     left: 0,
     bottom: 10,
@@ -402,7 +404,7 @@ const styles = StyleSheet.create({
   lastPlayed: {
     position: 'absolute',
     width: 250,
-    top: -140,
+    top: -170,
   },
   lastPlayedCards: {
     paddingVertical: 10,

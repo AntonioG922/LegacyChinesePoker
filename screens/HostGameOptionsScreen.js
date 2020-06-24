@@ -82,9 +82,9 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   async function createGame() {
     if (gameName) {
-      const localGame = (numberOfComputers === numberOfPlayers - 1) ? true : false;
+      const isLocalGame = (numberOfComputers === numberOfPlayers - 1) ? true : false;
 
-      if (!localGame) {
+      if (!isLocalGame) {
         const exists = await gameExists(gameName);
         if (exists) {
           setErrorMessage(' Game ' + gameName + ' already exists');
@@ -141,11 +141,12 @@ export default function HostGameOptionsScreen({ navigation }) {
         gamesPlayed: 0,
         gamesWon: gamesWon,
         turnLength: turnLength,
-        localGame: localGame,
-        queue: queue
+        isLocalGame: isLocalGame,
+        queue: queue,
+        rejoinablePlayers: {}
       };
 
-      if (localGame) {
+      if (isLocalGame) {
         setLoading(false);
         navigation.navigate('Game', gameData)
       } else {

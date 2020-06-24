@@ -58,7 +58,7 @@ export default function HomeScreen({ navigation }) {
       gamesPlayed: 0,
       gamesWon: { [user.uid]: 0 },
       turnLength: 30,
-      localGame: false,
+      isLocalGame: false,
       queue: { [user.uid]: firebase.firestore.FieldValue.serverTimestamp() },
       gameStartTime: Date.now(),
       gameCreationTime: Date.now()
