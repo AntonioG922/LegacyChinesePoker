@@ -147,7 +147,8 @@ export default function HostGameOptionsScreen({ navigation }) {
         turnLength: turnLength,
         isLocalGame: isLocalGame,
         queue: queue,
-        rejoinablePlayers: {}
+        rejoinablePlayers: {},
+        rejoinedPlayers: {}
       };
 
       if (isLocalGame) {

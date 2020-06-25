@@ -165,7 +165,8 @@ export default function GameScreen({ route, navigation }) {
         gamesWon: gamesWon,
         queue: queue,
         isLocalGame: gameData.numberOfPlayers === (gameData.numberOfComputers + 1),
-        rejoinablePlayers: {}
+        rejoinablePlayers: {},
+        rejoinedPlayers: {}
       };
 
       if (isLocalGame) {
@@ -424,7 +425,9 @@ export default function GameScreen({ route, navigation }) {
     }
 
     const nextPlayerStillInUID = Object.keys(gameData.players).find(uid => gameData.players[uid] === getNextNonEmptyHandIndexLocal());
-    const everyonePassed = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0] || everyonePassAfterWinner();
+    const nextPlayerPlayedLast = nextPlayerStillInUID === Object.keys(gameData.lastPlayerToPlay)[0];
+    const nextPlayerHadBotPlayForThemLast = gameData.rejoinedPlayers[nextPlayerStillInUID] === Object.keys(gameData.lastPlayerToPlay)[0];
+    const everyonePassed = nextPlayerPlayedLast || nextPlayerHadBotPlayForThemLast || everyonePassAfterWinner();
 
     let overallTurnHistory = gameData.overallTurnHistory;
     const turnsTaken = Object.keys(overallTurnHistory).length;
@@ -731,7 +734,6 @@ export default function GameScreen({ route, navigation }) {
       setLoading(true);
 
       const botUID = gameData.rejoinablePlayers[user.uid];
-      console.log(botUID, gameData.players);
 
       const updates = {};
       // delete bot data
@@ -743,17 +745,20 @@ export default function GameScreen({ route, navigation }) {
 
       // add player data
       updates[`displayNames.${user.uid}`] = user.displayName;
-      updates[`gamesWon.${user.uid}`] = 0;
+      updates[`gamesWon.${user.uid}`] = gameData.gamesWon[botUID];
       updates[`players.${user.uid}`] = gameData.players[botUID];
       updates[`queue.${user.uid}`] = gameData.queue[botUID];
       updates['numberOfComputers'] = gameData.numberOfComputers - 1;
       updates[`playersTurnHistory.${user.uid}`] = gameData.playersTurnHistory[botUID];
       updates[`rejoinablePlayers.${user.uid}`] = firebase.firestore.FieldValue.delete();
-      if (gameData.lastPlayerToPlay === botUID) {
+      updates[`rejoinedPlayers.${user.uid}`] = gameData.rejoinablePlayers[user.uid];
+      if (Object.keys(gameData.lastPlayerToPlay)[0] === botUID) {
         updates[`lastPlayerToPlay`] = { [user.uid]: user.displayName };
       }
+      let tempPlaces = gameData.places;
       if (gameData.places.includes(botUID)) {
-        updates[`places[${gameData.places.findIndex(uid => uid === botUID)}]`] = user.uid;
+        tempPlaces[gameData.places.findIndex(uid => uid === botUID)] = user.uid;
+        updates['places'] = tempPlaces;
       }
 
       firebase.firestore().collection(gameLobby).doc(gameData.gameName).update(updates)
