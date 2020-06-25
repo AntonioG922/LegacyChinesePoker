@@ -375,7 +375,7 @@ export default function GameScreen({ route, navigation }) {
       places = isLocalGame ? [...places, currentPlayerUID] : firebase.firestore.FieldValue.arrayUnion(user.uid);
 
       if (!gameData.places.length) {
-        gamesWon[currentPlayerUID] = isLocalGame ? (gameData.gamesWon[currentPlayerUID] + 1) : firebase.firestore.FieldValue.increment(1);
+        gamesWon[currentPlayerUID] += 1;
         gamesPlayed = isLocalGame ? (gameData.gamesPlayed + 1) : firebase.firestore.FieldValue.increment(1);
       }
 
