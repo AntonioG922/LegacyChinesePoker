@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, ScrollView, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, Animated, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Button, Checkbox } from 'react-native-paper';
 import firebase from 'firebase';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -34,11 +34,13 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [numberOfComputers, setNumberOfComputers] = useState(0);
   const [computerDifficulties, setComputerDifficulties] = useState([]);
+  const [scrollHeight, setScrollHeight] = useState(0);
 
   const computerPossibleDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
 
   const scrollRef = useRef();
-  const advancedOptionsHeight = useRef(new Animated.Value(-200)).current;
+  const windowHeight = useWindowDimensions().height;
+  const advancedOptionsY = useRef(new Animated.Value(-200)).current;
   const advancedOptionsHiderHeight = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
@@ -58,10 +60,10 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   useEffect(() => {
     const duration = 300;
-    const height = -200 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 33 : 0);
+    const y = -200 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 35 : 0);
     Animated.parallel([
-      Animated.timing(advancedOptionsHeight, {
-        toValue: showAdvancedOptions ? 0 : height,
+      Animated.timing(advancedOptionsY, {
+        toValue: showAdvancedOptions ? 0 : y,
         duration: duration,
         useNativeDriver: true
       }),
@@ -71,7 +73,8 @@ export default function HostGameOptionsScreen({ navigation }) {
       })
     ]).start();
 
-    scrollRef.current.scrollTo({ y: showAdvancedOptions ? -height : 0, animated: true });
+    const scrollPos = (windowHeight - (scrollHeight - y)) < 0 ? (scrollHeight - y - 280) - windowHeight : 0;
+    scrollRef.current.scrollTo({ y: showAdvancedOptions ? -scrollPos : 0, animated: true });
   }, [showAdvancedOptions, numberOfComputers, numberOfPlayers]);
 
   async function gameExists(gameName) {
@@ -185,6 +188,13 @@ export default function HostGameOptionsScreen({ navigation }) {
 
 
     setComputerDifficulties(temp);
+  }
+
+  function onLayoutScrollArea(event) {
+    const bottomY = event.nativeEvent.layout.y + event.nativeEvent.layout.height - 300;
+    setScrollHeight(bottomY);
+
+    return true;
   }
 
   return (
@@ -330,7 +340,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
           </View>
 
-          <Animated.View style={{ transform: [{ translateY: advancedOptionsHeight }], backgroundColor: '#fafafa' }}>
+          <Animated.View style={{ transform: [{ translateY: advancedOptionsY }], backgroundColor: '#fafafa' }} onLayout={event => onLayoutScrollArea(event)} >
             <DividerLine />
             <TextButton style={styles.createButton} onPress={createGame} >Create Game</TextButton>
             <Animated.View style={{ height: advancedOptionsHiderHeight }} />
