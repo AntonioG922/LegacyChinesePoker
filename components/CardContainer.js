@@ -182,34 +182,36 @@ export function PlayedCardsContainer({ cards, avatarImage, currentHandType, last
         useNativeDriver: true
       }).start();
 
-      const intervalDelay = 1050;
+      const intervalDelay = 1000;
       timeout = setTimeout(() => {
         interval = setInterval(() => {
-          Animated.sequence([
-            Animated.parallel([
+          if (reducingNum > 0) {
+            Animated.sequence([
+              Animated.parallel([
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 375,
+                  useNativeDriver: true
+                }),
+                Animated.timing(countdownNumY, {
+                  toValue: -35,
+                  duration: 375,
+                  useNativeDriver: true
+                })
+              ]),
               Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 375,
+                toValue: 0,
+                duration: 300,
+                delay: 175,
                 useNativeDriver: true
               }),
               Animated.timing(countdownNumY, {
-                toValue: -35,
-                duration: 375,
+                toValue: -75,
+                duration: 0,
                 useNativeDriver: true
               })
-            ]),
-            Animated.timing(fadeAnim, {
-              toValue: 0,
-              duration: 300,
-              delay: 175,
-              useNativeDriver: true
-            }),
-            Animated.timing(countdownNumY, {
-              toValue: -75,
-              duration: 0,
-              useNativeDriver: true
-            })
-          ]).start();
+            ]).start();
+          }
 
           setCountdownNum(reducingNum);
           reducingNum--;

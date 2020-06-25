@@ -307,7 +307,7 @@ export default function GameScreen({ route, navigation }) {
 
     const lastUIDToPlay = Object.keys(gameData.lastPlayerToPlay)[0];
     const lastUIDToPlayTurnIndex = gameData.players[lastUIDToPlay];
-    if (gameData.hands[lastUIDToPlayTurnIndex].cards.length)
+    if (lastUIDToPlayTurnIndex && gameData.hands[lastUIDToPlayTurnIndex].cards.length)
       return false;
 
     const lastPlayTurnNum = Number(Object.keys(gameData.playersTurnHistory[lastUIDToPlay]).pop());
