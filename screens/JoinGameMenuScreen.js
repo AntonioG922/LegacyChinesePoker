@@ -14,11 +14,9 @@ import { ScrollView } from "react-native-gesture-handler";
 import Loader from '../components/Loader';
 
 export default function JoinGameMenuScreen({ navigation }) {
-  const db = firebase.firestore();
-  const user = store.getState().userData.user;
-
   const [loading, setLoading] = useState(false);
   const [gamesFetched, setGamesFetched] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const [activeGames, dispatch] = useReducer((activeGames, { type, value }) => {
     switch (type) {
       case "add":
@@ -33,6 +31,9 @@ export default function JoinGameMenuScreen({ navigation }) {
         return activeGames;
     }
   }, []);
+
+  const db = firebase.firestore();
+  const user = store.getState().userData.user;
 
   function joinGame(game) {
     // add player to queue; check that they entered queue before game full; add to game
@@ -109,8 +110,12 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#fafafa', flexDirection: 'column', justifyContent: 'center', }} behavior={Platform.OS == "ios" ? "padding" : "height"}>
-      <ScrollView>
-        <Loader loading={loading} message={'Entering Game'} />
+      <ScrollView
+        scrollEnabled={!loading}
+        onScroll={event => { setScrollY(event.nativeEvent.contentOffset.y) }}
+        scrollEventThrottle={16}
+      >
+        <Loader loading={loading} message={'Entering Game'} style={{ top: scrollY }} />
         <TitledPage pageTitle={"Join Game"} navigation={navigation} contentStyleContainer={styles.container}>
           <View style={styles.iconInfo}>
             <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>

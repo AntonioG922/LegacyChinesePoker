@@ -34,7 +34,8 @@ export default function HostGameOptionsScreen({ navigation }) {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [numberOfComputers, setNumberOfComputers] = useState(0);
   const [computerDifficulties, setComputerDifficulties] = useState([]);
-  const [scrollHeight, setScrollHeight] = useState(0);
+  const [createGameY, setCreateGameY] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
 
   const computerPossibleDifficulties = Object.keys(AI_DIFFICULTIES).map(key => AI_DIFFICULTIES[key]);
 
@@ -73,7 +74,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       })
     ]).start();
 
-    const scrollPos = (windowHeight - (scrollHeight - y)) < 0 ? (scrollHeight - y - 280) - windowHeight : 0;
+    const scrollPos = (windowHeight - (createGameY - y)) < 0 ? (createGameY - y - 280) - windowHeight : 0;
     scrollRef.current.scrollTo({ y: showAdvancedOptions ? -scrollPos : 0, animated: true });
   }, [showAdvancedOptions, numberOfComputers, numberOfPlayers]);
 
@@ -191,16 +192,22 @@ export default function HostGameOptionsScreen({ navigation }) {
   }
 
   function onLayoutScrollArea(event) {
-    const bottomY = event.nativeEvent.layout.y + event.nativeEvent.layout.height - 300;
-    setScrollHeight(bottomY);
+    const bottomY = event.nativeEvent.layout.y + event.nativeEvent.layout.height - (showAdvancedOptions ? 0 : 300);
+    setCreateGameY(bottomY);
 
     return true;
   }
 
   return (
     <View style={styles.container}>
-      <ScrollView style={{ height: '100%' }} scrollEnabled={showAdvancedOptions} ref={scrollRef}>
-        <Loader loading={loading} message={'Creating Game'} />
+      <ScrollView
+        style={{ height: '100%' }}
+        scrollEnabled={showAdvancedOptions && !loading}
+        ref={scrollRef}
+        onScroll={event => { setScrollY(event.nativeEvent.contentOffset.y) }}
+        scrollEventThrottle={16}
+      >
+        <Loader loading={loading} message={'Creating Game'} style={{ top: scrollY }} />
         <TitledPage pageTitle={'Host Game'} navigation={navigation}>
           <View style={styles.form}>
 
