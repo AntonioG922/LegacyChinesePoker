@@ -1,4 +1,4 @@
-import { isBetterHand, HAND_TYPES, getLowestCard, sortCards } from './HelperFunctions';
+import { isBetterHand, HAND_TYPES, getLowestCard, sortCards, getHandType } from './HelperFunctions';
 
 function get13RandomCards() {
   let deck = Array.from({ length: 52 }, (v, i) => i);
@@ -334,7 +334,7 @@ function getLowestStartOfRoundCardsExclusive(cards, startOfGame) {
 }
 
 
-export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, lastCardsPlayed, exclusive) {
+export function getLowestPlayableCards(cards, cardsPerPlayer, numPlayersStillIn, currentHandType, lastCardsPlayed, exclusive) {
   /* inputs:
         cards: array of cards in hand
         lastCardsPlayed: array of the last cards played
@@ -343,6 +343,31 @@ export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, l
       outputs:
         if they have a playable hand, an array of the cards to play. otherwise, false
   */
+
+  function getHandTypeSets(cards, exclusive) {
+    switch (currentHandType) {
+      case HAND_TYPES.START_OF_GAME:
+        return getLowestStartOfRoundCardsExclusive(cards, true);
+      case HAND_TYPES.START_OF_ROUND:
+        return getLowestStartOfRoundCardsExclusive(cards, false);
+      case HAND_TYPES.SINGLE:
+        return handTypeSets = exclusive ? getAllSinglesExclusive(cards) : cards;
+      case HAND_TYPES.PAIR:
+        return handTypeSets = exclusive ? getAllPairsExclusive(cards) : getAllPairs(cards);
+      case HAND_TYPES.THREE_OF_A_KIND:
+        return handTypeSets = exclusive ? getAllTriplesExclusive(cards) : getAllTriples(cards);
+      case HAND_TYPES.UNION:
+        return handTypeSets = getAllUnions(cards);
+      case HAND_TYPES.FULL_HOUSE:
+        return handTypeSets = getAllFullHousesExclusive(cards);
+      case HAND_TYPES.STRAIGHT:
+        return handTypeSets = exclusive ? getAllStraightsExclusive(cards) : getAllStraights(cards);
+      case HAND_TYPES.STRAIGHT_FLUSH:
+        return handTypeSets = exclusive ? getAllStraightFlushesExclusive(cards) : getAllStraightFlushes(cards);
+      default:
+        return false;
+    }
+  }
 
   cards = sortCards(cards);
 
@@ -354,41 +379,34 @@ export function getLowestPlayableCards(cards, cardsPerPlayer, currentHandType, l
   if (exclusive) {
     while (getAllStraightsExclusive(cardsMinusStraights).length) {
       cardsMinusStraights = cardsMinusStraights.filter(card => {
-        getAllStraightsExclusive(cardsMinusStraights)[0].includes(card)
+        return !getAllStraightsExclusive(cardsMinusStraights)[0].includes(card)
       });
     }
   }
 
   let handTypeSets;
 
-  switch (currentHandType) {
-    case HAND_TYPES.START_OF_GAME:
-      return getLowestStartOfRoundCardsExclusive(cards, true);
-    case HAND_TYPES.START_OF_ROUND:
-      return getLowestStartOfRoundCardsExclusive(cards, false);
-    case HAND_TYPES.SINGLE:
-      handTypeSets = exclusive ? getAllSinglesExclusive(cardsMinusStraights) : cards;
-      break;
-    case HAND_TYPES.PAIR:
-      handTypeSets = exclusive ? getAllPairsExclusive(cardsMinusStraights) : getAllPairs(cards);
-      break;
-    case HAND_TYPES.THREE_OF_A_KIND:
-      handTypeSets = exclusive ? getAllTriplesExclusive(cardsMinusStraights) : getAllTriples(cards);
-      break;
-    case HAND_TYPES.UNION:
-      handTypeSets = getAllUnions(cards);
-      break;
-    case HAND_TYPES.FULL_HOUSE:
-      handTypeSets = getAllFullHousesExclusive(cardsMinusStraights);
-      break;
-    case HAND_TYPES.STRAIGHT:
-      handTypeSets = exclusive ? getAllStraightsExclusive(cards) : getAllStraights(cards);
-      break;
-    case HAND_TYPES.STRAIGHT_FLUSH:
-      handTypeSets = exclusive ? getAllStraightFlushesExclusive(cards) : getAllStraightFlushes(cards);
-      break;
-    default:
-      return false;
+  if (currentHandType === HAND_TYPES.START_OF_GAME || currentHandType === HAND_TYPES.START_OF_ROUND) {
+    handTypeSets = getHandTypeSets(cards, exclusive);
+  } else if (exclusive && numPlayersStillIn > 2) {
+    handTypeSets = getHandTypeSets(cardsMinusStraights, exclusive);
+  } else if (exclusive && numPlayersStillIn <= 2) {
+    const exclusiveCards = getHandTypeSets(cardsMinusStraights, exclusive);
+    const nonStriaghtCards = getHandTypeSets(cardsMinusStraights, false);
+
+    if (exclusiveCards.length) {
+      handTypeSets = exclusiveCards;
+    } else if (nonStriaghtCards.length) {
+      handTypeSets = nonStriaghtCards;
+    } else {
+      handTypeSets = getHandTypeSets(cards, false);
+    }
+  } else {
+    handTypeSets = getHandTypeSets(cards, exclusive);
+  }
+
+  if (currentHandType === HAND_TYPES.START_OF_GAME || currentHandType === HAND_TYPES.START_OF_ROUND) {
+    return handTypeSets;
   }
 
   for (let set of handTypeSets) {

@@ -232,7 +232,9 @@ export default function GameScreen({ route, navigation }) {
       if (computerPlaysNext) {
         const AIDifficulty = currentPlayerUID.slice(3, 7);
         const exclusive = AIDifficulty === 'Easy' ? false : true;
-        const computerSelectedCards = getLowestPlayableCards(gameData.hands[gameData.players[currentPlayerUID]].cards, gameData.cardsPerPlayer, gameData.currentHandType, gameData.lastPlayed, exclusive);
+        const numPlayersStillIn = gameData.numberOfPlayers - gameData.places.length;
+        const botCards = gameData.hands[gameData.players[currentPlayerUID]].cards;
+        const computerSelectedCards = getLowestPlayableCards(botCards, gameData.cardsPerPlayer, numPlayersStillIn, gameData.currentHandType, gameData.lastPlayed, exclusive);
         setTimeout(() => {
           if (computerSelectedCards) {
             playCards(computerSelectedCards);
@@ -402,7 +404,6 @@ export default function GameScreen({ route, navigation }) {
     let updatedHandsPlayed = handsPlayed;
     updatedHandsPlayed[playedHandType] = (handsPlayed[playedHandType] || 0) + selectedCards.length;
     setHandsPlayed(updatedHandsPlayed);
-    console.log(gameData);
 
     if (isLocalGame) {
       setGameData({ ...gameData, ...data });
@@ -858,14 +859,15 @@ export default function GameScreen({ route, navigation }) {
               avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
               isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
 
-            /* <FaceUpCardContainer key={playerIndex}
-            cards={gameData.hands[playerIndex].cards}
-            style={[styles.opposingPlayerHand, getStyle(index + 2), { width: '60%' }]}
-            displayName={displayName}
-            displayNameStyling={{ transform: [{ rotateZ: getDisplayNameRotation(index) }] }}
-            avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
-            avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
-            isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} /> */
+            /*  <FaceUpCardContainer key={playerIndex}
+              cards={gameData.hands[playerIndex].cards}
+              style={[styles.opposingPlayerHand, getStyle(index + 2), { width: '60%' }]}
+              displayName={displayName}
+              displayNameStyling={{ transform: [{ rotateZ: getDisplayNameRotation(index) }] }}
+              avatarImage={getAvatarImage(gameData.hands[playerIndex].avatar)}
+              avatarStyling={{ transform: [{ rotateZ: getAvatarRotation(index) }] }}
+              isCurrentPlayer={playerIndex === gameData.currentPlayerTurnIndex} />
+            */
           })}
         </View>}
 
