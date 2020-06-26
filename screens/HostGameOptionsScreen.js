@@ -61,7 +61,7 @@ export default function HostGameOptionsScreen({ navigation }) {
 
   useEffect(() => {
     const duration = 300;
-    const y = -200 - ((numberOfComputers - 1) * 33) + (numberOfComputers === (numberOfPlayers - 1) ? 35 : 0);
+    const y = -200 - ((numberOfComputers - 1) * 33) + ((numberOfComputers === (numberOfPlayers - 1)) ? 33 : 0);
     Animated.parallel([
       Animated.timing(advancedOptionsY, {
         toValue: showAdvancedOptions ? 0 : y,
@@ -74,8 +74,8 @@ export default function HostGameOptionsScreen({ navigation }) {
       })
     ]).start();
 
-    const scrollPos = (windowHeight - (createGameY - y)) < 0 ? (createGameY - y - 280) - windowHeight : 0;
-    scrollRef.current.scrollTo({ y: showAdvancedOptions ? -scrollPos : 0, animated: true });
+    const scrollPos = ((createGameY - y) > windowHeight) ? (createGameY - y - windowHeight) : 0;
+    scrollRef.current.scrollTo({ y: showAdvancedOptions ? scrollPos : 0, animated: true });
   }, [showAdvancedOptions, numberOfComputers, numberOfPlayers]);
 
   async function gameExists(gameName) {
