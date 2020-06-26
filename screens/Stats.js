@@ -17,13 +17,12 @@ import {
 } from '../functions/HelperFunctions';
 
 const ALL = 'All';
-const sliderValues = [ALL, 2, 3, 4, 5];
+const sliderValues = [ALL, 2, 3, 4];
 const displayValueMap = {
   All: '',
   2: '2 player ',
   3: '3 player ',
   4: '4 player ',
-  5: '5 player ',
 };
 
 export default function StatsScreen({ navigation }) {
@@ -192,7 +191,7 @@ const styles = StyleSheet.create({
   },
   slider: {
     backgroundColor: 'white',
-    width: 320,
+    width: 260,
     height: 45,
     alignSelf: 'center',
     borderRadius: 20,
