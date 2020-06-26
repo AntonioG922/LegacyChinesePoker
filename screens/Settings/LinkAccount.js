@@ -192,7 +192,7 @@ export default function AcountRecoveryScreen({ navigation }) {
         <Loader loading={loading} />
         <TitledPage pageTitle='Link Account' navigation={navigation} >
           <Animated.View style={{ opacity: headerTextOpacity, transform: [{ translateY: headerTextY }] }} onLayout={(event) => onLayoutHeader(event)} >
-            <Text style={styles.infoText}>Linking allows you to use the same account across all your devices</Text>
+            <Text style={styles.infoText}>Linking allows you to recover your stats on another device</Text>
           </Animated.View>
 
           <Animated.View style={{ marginTop: 10, transform: [{ translateY: buttonsAndInputsY }] }}>
