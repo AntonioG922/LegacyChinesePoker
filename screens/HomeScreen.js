@@ -16,7 +16,7 @@ export default function HomeScreen({ navigation }) {
     return store.subscribe(() => {
       setUser(store.getState().userData.user);
     })
-  }, [])
+  }, []);
 
   function generateUID() {
     let s4 = () => {

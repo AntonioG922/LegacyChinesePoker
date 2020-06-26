@@ -7,7 +7,8 @@ import store from '../redux/store';
 import {
   HeaderText,
   PasswordTextInput,
-  TextButton
+  TextButton,
+  DividerLine
 } from "../components/StyledText";
 import TitledPage from '../components/TitledPage';
 import { ScrollView } from "react-native-gesture-handler";
@@ -29,6 +30,20 @@ export default function JoinGameMenuScreen({ navigation }) {
         return activeGames.filter((doc) => doc.gameName !== value.gameName);
       default:
         return activeGames;
+    }
+  }, []);
+  const [rejoinableGames, dispatchRejoin] = useReducer((rejoinableGames, { type, value }) => {
+    switch (type) {
+      case "add":
+        return [...rejoinableGames, value];
+      case "modified":
+        const index = rejoinableGames.findIndex(x => x.gameName === value.gameName);
+        rejoinableGames.splice(index, 1, value);
+        return [...rejoinableGames];
+      case "remove":
+        return rejoinableGames.filter((doc) => doc.gameName !== value.gameName);
+      default:
+        return rejoinableGames;
     }
   }, []);
 
@@ -89,6 +104,66 @@ export default function JoinGameMenuScreen({ navigation }) {
     return true;
   }
 
+  function RejoinableGame({ game }) {
+    function rejoinGame(gameData) {
+      setLoading(true);
+
+      const botUID = gameData.rejoinablePlayers[user.uid];
+
+      const updates = {};
+      // delete bot data
+      updates[`displayNames.${botUID}`] = firebase.firestore.FieldValue.delete();
+      updates[`gamesWon.${botUID}`] = firebase.firestore.FieldValue.delete();
+      updates[`players.${botUID}`] = firebase.firestore.FieldValue.delete();
+      updates[`playersTurnHistory.${botUID}`] = firebase.firestore.FieldValue.delete();
+      updates[`queue.${botUID}`] = firebase.firestore.FieldValue.delete();
+
+      // add player data
+      updates[`displayNames.${user.uid}`] = user.displayName;
+      updates[`gamesWon.${user.uid}`] = gameData.gamesWon[botUID];
+      updates[`players.${user.uid}`] = gameData.players[botUID];
+      updates[`queue.${user.uid}`] = gameData.queue[botUID];
+      updates['numberOfComputers'] = gameData.numberOfComputers - 1;
+      updates[`playersTurnHistory.${user.uid}`] = gameData.playersTurnHistory[botUID];
+      updates[`rejoinablePlayers.${user.uid}`] = firebase.firestore.FieldValue.delete();
+      updates[`rejoinedPlayers.${user.uid}`] = gameData.rejoinablePlayers[user.uid];
+      if (Object.keys(gameData.lastPlayerToPlay)[0] === botUID) {
+        updates[`lastPlayerToPlay`] = { [user.uid]: user.displayName };
+      }
+      let tempPlaces = gameData.places;
+      if (gameData.places.includes(botUID)) {
+        tempPlaces[gameData.places.findIndex(uid => uid === botUID)] = user.uid;
+        updates['places'] = tempPlaces;
+      }
+
+      db.collection('CustomGames').doc(gameData.gameName).update(updates)
+        .then(() => {
+          db.collection('CustomGames').doc(gameData.gameName).get()
+            .then(doc => {
+              setLoading(false);
+              navigation.navigate('Game', doc.data());
+              console.log('Rejoined game!');
+            })
+            .catch(error => {
+              setLoading(false);
+              alert('Error rejoining game. Please check your internet connection and try again.');
+              console.log('Error getting document after rejoining game: ', error);
+            });
+        })
+        .catch(error => {
+          setLoading(false);
+          alert('Error rejoining game. Please check your internet connection and try again.');
+          console.log('Error rejoining game: ', error);
+        });
+    }
+
+    return (
+      <View style={styles.game} >
+        <TextButton labelStyle={styles.menuOption} onPress={() => rejoinGame(game)}>{game.gameName}</TextButton>
+      </View>
+    )
+  }
+
   useEffect(() => {
     return db.collection('CustomGames')
       .where('playersLeftToJoin', '>', 0)
@@ -108,6 +183,25 @@ export default function JoinGameMenuScreen({ navigation }) {
       });
   }, []);
 
+  useEffect(() => {
+    return db.collection('CustomGames')
+      .orderBy(`rejoinablePlayers.${user.uid}`)
+      .onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          console.log(change.doc.data().gameName);
+          if (change.type === "added") {
+            dispatchRejoin({ type: "add", value: change.doc.data() });
+          }
+          if (change.type === "modified") {
+            dispatchRejoin({ type: "modified", value: change.doc.data() });
+          }
+          if (change.type === "removed") {
+            dispatchRejoin({ type: "remove", value: change.doc.data() });
+          }
+        });
+      });
+  }, []);
+
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#fafafa', flexDirection: 'column', justifyContent: 'center', }} behavior={Platform.OS == "ios" ? "padding" : "height"}>
       <ScrollView
@@ -121,6 +215,13 @@ export default function JoinGameMenuScreen({ navigation }) {
             <HeaderText style={styles.useJoker}><MaterialCommunityIcons size={15} name={'cards-playing-outline'} /> {'\uFF1D'} Joker </HeaderText>
             <HeaderText style={styles.password}><MaterialCommunityIcons size={15} name={'lock'} /> {'\uFF1D'} Password </HeaderText>
           </View>
+          {(gamesFetched && Boolean(rejoinableGames.length)) &&
+            <View>
+              <HeaderText style={{ fontSize: 35, alignSelf: 'center' }}>Rejoin Game:</HeaderText>
+              {rejoinableGames.map(game => <RejoinableGame key={game.gameName} game={game} />)}
+              <DividerLine />
+            </View>
+          }
           {gamesFetched ? activeGames.length ? activeGames.filter(game => game.playersLeftToJoin !== 0).map((game) =>
             <JoinableGame key={game.gameName} game={game} joinGame={joinGame} />)
             : <HeaderText style={styles.noGames}>No active games. Try making one in the 'Host Game' menu!</HeaderText>
