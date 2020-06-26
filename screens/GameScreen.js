@@ -666,6 +666,11 @@ export default function GameScreen({ route, navigation }) {
           <View style={{ flex: 1 }}>
             <View style={styles.mainContent}>
               <View>
+                <HeaderText style={{ alignSelf: 'center', fontSize: 30 }}>{gameData.gameName}</HeaderText>
+                <DividerLine width={180} height={2} />
+              </View>
+
+              <View>
                 <HeaderText style={[styles.text, { alignSelf: 'center' }]} >Favorite Icon</HeaderText>
                 <DividerLine width={140} />
                 <View style={styles.avatarsContainer}>
@@ -703,7 +708,7 @@ export default function GameScreen({ route, navigation }) {
               </View>
             </View>
 
-            <DividerLine width={140} />
+            <DividerLine width={180} height={2} />
 
             <TouchableOpacity style={styles.row} onPress={() => leaveGame()}>
               <HeaderText style={[styles.text]} >Exit Game</HeaderText>

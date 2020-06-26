@@ -105,7 +105,7 @@ export default function HostGameOptionsScreen({ navigation }) {
       let displayNames = { [user.uid]: user.displayName };
       let playersTurnHistory = { [user.uid]: {} };
       let gamesWon = { [user.uid]: 0 };
-      let queue = { [user.uid]: firebase.firestore.FieldValue.serverTimestamp() };
+      let queue = { [user.uid]: isLocalGame ? Date.now() : firebase.firestore.FieldValue.serverTimestamp() };
       let numOfEachDifficulty = {};
       computerPossibleDifficulties.forEach((difficulty) => {
         numOfEachDifficulty[difficulty] = 0;
@@ -118,7 +118,7 @@ export default function HostGameOptionsScreen({ navigation }) {
         displayNames[cpuUID] = cpuDisplayName;
         playersTurnHistory[cpuUID] = {};
         gamesWon[cpuUID] = 0;
-        queue[cpuUID] = firebase.firestore.FieldValue.serverTimestamp();
+        queue[cpuUID] = isLocalGame ? Date.now() : firebase.firestore.FieldValue.serverTimestamp();
       });
 
       const gameData = {

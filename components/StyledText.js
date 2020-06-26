@@ -143,9 +143,9 @@ export function Divider({ subtitle, style }) {
   );
 }
 
-export function DividerLine({ width, color, style }) {
+export function DividerLine({ width, height, color, style }) {
   return (
-    <View style={[{ width: width || 250, height: 1, backgroundColor: color || 'grey', marginVertical: 15, alignSelf: 'center' }, style]} />
+    <View style={[{ width: width || 250, height: height || 1, backgroundColor: color || 'grey', marginVertical: 15, alignSelf: 'center', borderRadius: 2 }, style]} />
   )
 }
 
