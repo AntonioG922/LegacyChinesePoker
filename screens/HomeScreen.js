@@ -61,7 +61,9 @@ export default function HomeScreen({ navigation }) {
       isLocalGame: false,
       queue: { [user.uid]: firebase.firestore.FieldValue.serverTimestamp() },
       gameStartTime: Date.now(),
-      gameCreationTime: Date.now()
+      gameCreationTime: Date.now(),
+      rejoinablePlayers: {},
+      rejoinedPlayers: {}
     };
 
     collRef.doc(randUID).set(gameData)
