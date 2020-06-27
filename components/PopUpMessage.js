@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, StyleSheet, Text, TouchableHighlight } from 'react-native';
 import store from '../redux/store';
+import ConfettiDrop from './ConfettiDrop';
 
-export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confirmAction, confirmMessage, children }) {
+export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confirmAction, confirmMessage, children, confetti }) {
   const [font, setFont] = useState(store.getState().globalFont);
+  const [showConfetti, setShowConfetti] = useState(confetti);
 
   useEffect(() => {
     return store.subscribe(() => {
@@ -11,6 +13,10 @@ export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confi
       setFont(storeFont);
     })
   }, []);
+
+  useEffect(() => {
+    setShowConfetti(confetti);
+  }, [confetti]);
 
   const styles = StyleSheet.create({
     modalBackground: {
@@ -67,14 +73,15 @@ export default function PopUpMessage({ showPopUp, exitAction, exitMessage, confi
             {children}
           </View>
           <View style={styles.buttons}>
-            <TouchableHighlight underlayColor='rgb(150, 56, 27)' style={[styles.button, styles.exitButton]} onPress={() => exitAction()} >
+            <TouchableHighlight underlayColor='rgb(150, 56, 27)' style={[styles.button, styles.exitButton]} onPress={() => { setShowConfetti(false); exitAction(); }} >
               <Text style={styles.buttonText}>{exitMessage}</Text>
             </TouchableHighlight>
-            <TouchableHighlight underlayColor='rgb(80, 120, 68)' style={[styles.button, styles.confirmButton]} onPress={() => confirmAction()} >
+            <TouchableHighlight underlayColor='rgb(80, 120, 68)' style={[styles.button, styles.confirmButton]} onPress={() => { setShowConfetti(false); confirmAction(); }} >
               <Text style={styles.buttonText}>{confirmMessage}</Text>
             </TouchableHighlight>
           </View>
         </View>
+        {showConfetti && <ConfettiDrop count={25} fallSpeed={5000} style={{ alignSelf: 'flex-start' }} />}
       </View>
     </Modal>
   )

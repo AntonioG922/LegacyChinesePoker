@@ -24,6 +24,7 @@ import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
 import { HeaderText, DividerLine } from '../components/StyledText';
 import { getLowestPlayableCards } from '../functions/AIFunctions';
+import ConfettiDrop from '../components/ConfettiDrop';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -802,7 +803,7 @@ export default function GameScreen({ route, navigation }) {
           message={leavingGame ? 'Exiting Game' : `Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${(Object.keys(gameData.playersPlayingAgain).length ? ((gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) === 1) : (gameData.playersLeftToJoin === 1)) ? '' : 's'}`}
           exitAction={leavingGame ? (() => { }) : loaderExitFunction}
         />
-        <PopUpMessage showPopUp={showPopUp} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+        <PopUpMessage showPopUp={showPopUp} confetti={gameData.places[0] === user.uid} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
           {gameData.places.map((player, index) => {
             const displayName = gameData.displayNames[player];
             const currentUser = player === user.uid;
