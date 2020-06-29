@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity, Vibration, TouchableHighlight, Image } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text, SafeAreaView, Animated, TouchableOpacity, Vibration, TouchableHighlight, Image, Easing, useWindowDimensions } from 'react-native';
 import firebase from 'firebase';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import store from '../redux/store';
@@ -24,7 +24,6 @@ import PopUpMessage from '../components/PopUpMessage';
 import TrophyPlaceDisplay from '../components/TrophyPlaceDisplay';
 import { HeaderText, DividerLine } from '../components/StyledText';
 import { getLowestPlayableCards } from '../functions/AIFunctions';
-import ConfettiDrop from '../components/ConfettiDrop';
 
 export default function GameScreen({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState('');
@@ -490,7 +489,7 @@ export default function GameScreen({ route, navigation }) {
       let tempNumComps = gameData.numberOfComputers;
       let usedBotUIDs = [];
       while (tempNumComps--) {
-        const botUID = Object.keys(gameData.players).find(uid => AI_UID_PREFIXES.includes(uid.slice(0, 7) && !usedBotUIDs.includes(uid)));
+        const botUID = Object.keys(gameData.players).find(uid => AI_UID_PREFIXES.includes(uid.slice(0, 7)) && !usedBotUIDs.includes(uid));
         const botDisplayName = gameData.displayNames[botUID];
         usedBotUIDs.push(botUID);
         updates[`playersPlayingAgain.${botUID}`] = botDisplayName;
@@ -917,6 +916,7 @@ function PlayAgainTimer({ dontPlayAgain }) {
     <HeaderText style={{ fontSize: 20 }}>{countdownNum}</HeaderText>
   )
 }
+
 
 const styles = StyleSheet.create({
   container: {
