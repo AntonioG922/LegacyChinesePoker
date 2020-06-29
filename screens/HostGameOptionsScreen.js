@@ -147,8 +147,8 @@ export default function HostGameOptionsScreen({ navigation }) {
         turnLength: turnLength,
         isLocalGame: isLocalGame,
         queue: queue,
-        gameStartTime: isLocalGame ? Date.now() : firebase.firestore.FieldValue.serverTimestamp(),
-        gameCreationTime: isLocalGame ? Date.now() : firebase.firestore.FieldValue.serverTimestamp(),
+        gameStartTime: Date.now(),
+        gameCreationTime: Date.now(),
         rejoinablePlayers: {},
         rejoinedPlayers: {}
       };

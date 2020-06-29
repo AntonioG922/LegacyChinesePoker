@@ -165,6 +165,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }
 
   useEffect(() => {
+    // get joinable games
     return db.collection('CustomGames')
       .where('playersLeftToJoin', '>', 0)
       .onSnapshot((snapshot) => {
@@ -184,6 +185,7 @@ export default function JoinGameMenuScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
+    // get rejoinable games
     return db.collection('CustomGames')
       .orderBy(`rejoinablePlayers.${user.uid}`)
       .onSnapshot(snapshot => {
@@ -200,6 +202,26 @@ export default function JoinGameMenuScreen({ navigation }) {
           }
         });
       });
+  }, []);
+
+  useEffect(() => {
+    // delete games older than 30 minutes
+    const minutesTillDeletion = 30;
+    const deleteTime = Date.now() - (minutesTillDeletion * 60 * 1000);
+    return db.collection('CustomGames')
+      .where('gameStartTime', '<', deleteTime)
+      .onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          const gameName = change.doc.data().gameName;
+          db.collection('CustomGames').doc(gameName).delete()
+            .then(() => {
+              console.log('Deleted game: ', gameName)
+            })
+            .catch(error => {
+              console.log('Error deleting game: ', gameName, 'Error: ', error);
+            })
+        })
+      })
   }, []);
 
   return (
