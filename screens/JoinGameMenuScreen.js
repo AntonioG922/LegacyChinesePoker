@@ -49,6 +49,8 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   const db = firebase.firestore();
   const user = store.getState().userData.user;
+  const minutesTillDeletion = 30;
+  const deleteTime = Date.now() - (minutesTillDeletion * 60 * 1000);
 
   function joinGame(game) {
     // add player to queue; check that they entered queue before game full; add to game
@@ -171,14 +173,17 @@ export default function JoinGameMenuScreen({ navigation }) {
       .onSnapshot((snapshot) => {
         setGamesFetched(true);
         snapshot.docChanges().forEach((change) => {
+          const data = change.doc.data();
           if (change.type === "added") {
-            dispatch({ type: "add", value: change.doc.data() });
+            if (data.gameStartTime >= deleteTime) {
+              dispatch({ type: "add", value: data });
+            }
           }
           if (change.type === "modified") {
-            dispatch({ type: "modified", value: change.doc.data() });
+            dispatch({ type: "modified", value: data });
           }
           if (change.type === "removed") {
-            dispatch({ type: "remove", value: change.doc.data() });
+            dispatch({ type: "remove", value: data });
           }
         });
       });
@@ -206,19 +211,17 @@ export default function JoinGameMenuScreen({ navigation }) {
 
   useEffect(() => {
     // delete games older than 30 minutes
-    const minutesTillDeletion = 30;
-    const deleteTime = Date.now() - (minutesTillDeletion * 60 * 1000);
-    return db.collection('CustomGames')
+    db.collection('CustomGames')
       .where('gameStartTime', '<', deleteTime)
-      .onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-          const gameName = change.doc.data().gameName;
-          db.collection('CustomGames').doc(gameName).delete()
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          db.collection('CustomGames').doc(doc.id).delete()
             .then(() => {
-              console.log('Deleted game: ', gameName)
+              console.log('Deleted game: ', doc.id)
             })
             .catch(error => {
-              console.log('Error deleting game: ', gameName, 'Error: ', error);
+              console.log('Error deleting game: ', doc.id, 'Error: ', error);
             })
         })
       })

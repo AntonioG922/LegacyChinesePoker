@@ -141,6 +141,26 @@ export default function HomeScreen({ navigation }) {
       })
   }
 
+  useEffect(() => {
+    // delete play now games older than 30 minutes
+    const minutesTillDeletion = 30;
+    const deleteTime = Date.now() - (minutesTillDeletion * 60 * 1000);
+    firebase.firestore().collection('PlayNowGames')
+      .where('gameStartTime', '<', deleteTime)
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          firebase.firestore().collection('PlayNowGames').doc(doc.id).delete()
+            .then(() => {
+              console.log('Deleted game: ', doc.id)
+            })
+            .catch(error => {
+              console.log('Error deleting game: ', doc.id, 'Error: ', error);
+            })
+        })
+      })
+  }, []);
+
   return (
     <View style={styles.container}>
       <Loader loading={loading} message={'Joining Game'} style={{ top: 0 }} />
