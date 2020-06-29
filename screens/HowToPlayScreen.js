@@ -41,13 +41,14 @@ export default function HowToPlayScreen({ navigation }) {
         <MainPage />
         <Objective />
         <Rounds scrollToX={scrollToX} />
+        <StartOfGame />
         <HandTypes scrollToX={scrollToX} />
         <CardRanks />
         <Unions />
         <Dragons />
       </ScrollView>
 
-      <NavBar numPages={7} scrollRef={scrollToX} />
+      <NavBar numPages={8} scrollRef={scrollToX} />
       <HeaderText style={styles.backArrow}>
         <Ionicons size={40} name='md-arrow-round-back' onPress={() => navigation.goBack()} />
       </HeaderText>
@@ -132,11 +133,11 @@ function Rounds({ scrollToX }) {
       pageTitle={'Rounds'}
     >
       <Text style={[pageStyles.iconText, { fontFamily: font }]}>Gameplay takes place in rounds{'\n\n'}A round starts with a player
-           playing a playable hand type (see <Text style={{ textDecorationLine: 'underline' }}
-          onPress={() => { scrollToX(windowWidth * 3) }}>"Hand Types"</Text>)
+           playing a hand type of their choice (see <Text style={{ textDecorationLine: 'underline' }}
+          onPress={() => { scrollToX(windowWidth * 4) }}>"Hand Types"</Text>)
            {'\n\n'}Play continues clockwise and the next player must either play higher cards of the same hand type or pass
            {'\n'}(see <Text style={{ textDecorationLine: 'underline' }}
-          onPress={() => { scrollToX(windowWidth * 4) }}>"Card Ranks"</Text>)
+          onPress={() => { scrollToX(windowWidth * 5) }}>"Card Ranks"</Text>)
            {'\n\n'}Play continues like this until all other players pass on someones play, at which point the player
             with the winning hand starts a new round</Text>
     </HowToPlaySection>
@@ -169,7 +170,7 @@ function HandTypes({ scrollToX }) {
       <View style={[pageStyles.handTypeRow, { justifyContent: 'space-around' }]}>
         <View style={[pageStyles.handType, { left: -25 }]}>
           <PlainCardContainer cards={getUnion()} style={{ left: 0, width: 80 }} />
-          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Four of a Kind{'\n'}(See <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 5) }}>"Unions"</Text>)</Text>
+          <Text style={[pageStyles.iconText, { top: 55, flexShrink: 1, fontFamily: font }]}>Four of a Kind{'\n'}(See <Text style={{ textDecorationLine: 'underline' }} onPress={() => { scrollToX(windowWidth * 6) }}>"Unions"</Text>)</Text>
         </View>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getFullHouse()} style={{ left: 0, width: 100 }} />
@@ -263,6 +264,25 @@ function Dragons() {
       <View style={{ alignItems: 'center' }}>
         <PlainCardContainer cards={releaseTheDragon()} style={{ left: 0, width: 300 }} />
       </View>
+    </HowToPlaySection>
+  )
+}
+
+function StartOfGame() {
+  const font = store.getState().globalFont;
+
+  return (
+    <HowToPlaySection pageTitle={`Game Start`}>
+      <Text style={[pageStyles.iconText, { fontFamily: font }]}>
+        Each game is started by the player dealt the lowest card in the game
+      </Text>
+      <Text style={[pageStyles.iconText, { fontFamily: font }]}>
+        They may start the game with any hand type, so long as it contains the lowest card in the game
+      </Text>
+      <Text style={[pageStyles.iconText, { fontFamily: font }]}>
+        In a standard game with all cards dealt, this will be the:
+      </Text>
+      <PlainCardContainer cards={[1]} style={{ left: 0, alignSelf: 'center' }} />
     </HowToPlaySection>
   )
 }
