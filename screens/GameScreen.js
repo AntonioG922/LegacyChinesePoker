@@ -803,7 +803,7 @@ export default function GameScreen({ route, navigation }) {
           message={leavingGame ? 'Exiting Game' : `Waiting for ${(Object.keys(gameData.playersPlayingAgain).length ? (gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) : false) || gameData.playersLeftToJoin} more player${(Object.keys(gameData.playersPlayingAgain).length ? ((gameData.numberOfPlayers - Object.keys(gameData.playersPlayingAgain).length) === 1) : (gameData.playersLeftToJoin === 1)) ? '' : 's'}`}
           exitAction={leavingGame ? (() => { }) : loaderExitFunction}
         />
-        <PopUpMessage showPopUp={showPopUp} confetti={gameData.places[0] === user.uid} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
+        <PopUpMessage showPopUp={showPopUp} exitAction={leavingGame ? (() => { }) : dontPlayAgain} exitMessage='No' confirmAction={playAgain} confirmMessage='Yes' >
           {gameData.places.map((player, index) => {
             const displayName = gameData.displayNames[player];
             const currentUser = player === user.uid;
@@ -822,6 +822,7 @@ export default function GameScreen({ route, navigation }) {
 
           <DividerLine style={{ marginVertical: 25 }} />
           <Text style={{ textAlign: 'center', fontSize: 30, fontFamily: store.getState().globalFont, }}>Play again?</Text>
+          {!(gameData.numberOfComputers === gameData.numberOfPlayers - 1) && <PlayAgainTimer dontPlayAgain={dontPlayAgain} />}
         </PopUpMessage>
 
         <PlayedCardsContainer
@@ -887,6 +888,33 @@ export default function GameScreen({ route, navigation }) {
       </View>}
       {showRejoinScreen && <RejoinScreen />}
     </ImageBackground>
+  )
+}
+
+function PlayAgainTimer({ dontPlayAgain }) {
+  const [countdownNum, setCountdownNum] = useState(30);
+  let reducingNum = 30;
+  let interval;
+
+  useEffect(() => {
+    interval = setInterval(() => {
+      if (reducingNum > 0) {
+        setCountdownNum(--reducingNum);
+      }
+    }, 1000);
+
+    return () => { console.log('dismounting'); clearInterval(interval) };
+  }, []);
+
+  useEffect(() => {
+    if (countdownNum === 0) {
+      clearInterval(interval);
+      dontPlayAgain();
+    }
+  }, [countdownNum]);
+
+  return (
+    <HeaderText style={{ fontSize: 20 }}>{countdownNum}</HeaderText>
   )
 }
 
