@@ -40,7 +40,7 @@ export default function StatsScreen({ navigation }) {
   }, []);
 
   return (
-    <View style={{ flexGrow: 1 }}>
+    <View style={{ flexGrow: 1, backgroundColor: '#fafafa' }}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TitledPage navigation={navigation} pageTitle={'Stats'} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
           <Slider onSliderSelect={setSliderValue} />
@@ -130,19 +130,43 @@ function UserPlacementStat({ userStats = {}, gameType }) {
 }
 
 function UserHandsStats({ handsStats }) {
-  const totalHands = Object.values(handsStats).length > 0 ? Object.values(handsStats).reduce((n1, n2) => n1 + n2) : 0;
+  let totalCards = 0;
+  if (Object.keys(handsStats).length) {
+    Object.keys(handsStats).forEach(key => {
+      if (key === HAND_TYPES.PAIR) {
+        totalCards += handsStats[key] * 2;
+      } else if (key === HAND_TYPES.THREE_OF_A_KIND) {
+        totalCards += handsStats[key] * 3;
+      } else if (key === HAND_TYPES.FULL_HOUSE || key === HAND_TYPES.STRAIGHT || key === HAND_TYPES.STRAIGHT_FLUSH) {
+        totalCards += handsStats[key] * 5;
+      } else if (key === HAND_TYPES.UNION) {
+        totalCards += handsStats[key] * 4;
+      } else {
+        totalCards += handsStats[key];
+      }
+    });
+  }
 
   function HandStat({ label, handType }) {
-    const timesPlayed = handsStats[handType] || 0;
+    let timesPlayed = handsStats[handType] || 0;
+    if (handType === HAND_TYPES.PAIR) {
+      timesPlayed *= 2;
+    } else if (handType === HAND_TYPES.THREE_OF_A_KIND) {
+      timesPlayed *= 3;
+    } else if (handType === HAND_TYPES.FULL_HOUSE || handType === HAND_TYPES.STRAIGHT || handType === HAND_TYPES.STRAIGHT_FLUSH) {
+      timesPlayed *= 5;
+    } else if (handType === HAND_TYPES.UNION) {
+      timesPlayed *= 4;
+    }
 
     return (
-      <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / (totalHands || 1)) * 100)} style={{ flexGrow: 1 }} />
+      <NumberStat label={label} number={timesPlayed} percent={Math.round((timesPlayed / (totalCards || 1)) * 100)} style={{ flexGrow: 1 }} />
     )
   }
 
   return (
     <View>
-      <NumberStat label={'Total Hands'} number={totalHands} />
+      <NumberStat label={'Cards Played'} number={totalCards} />
       <View style={styles.row}>
         <HandStat label={'Singles'} handType={HAND_TYPES.SINGLE} />
         <HandStat label={'Pairs'} handType={HAND_TYPES.PAIR} />
