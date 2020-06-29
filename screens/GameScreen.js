@@ -945,7 +945,7 @@ const styles = StyleSheet.create({
   },
   opposingPlayerHand: {
     position: 'absolute',
-    width: '40%',
+    width: '40%'
   },
   player2Hand: {
     left: -30,

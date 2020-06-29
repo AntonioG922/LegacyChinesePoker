@@ -196,7 +196,7 @@ export default function AcountRecoveryScreen({ navigation }) {
           </Animated.View>
 
           <Animated.View style={{ marginTop: 10, transform: [{ translateY: buttonsAndInputsY }] }}>
-            <View>
+            <View style={{ alignItems: 'center' }}>
               <LogInOptionButton
                 icon={'google'}
                 textColor={'gray'}

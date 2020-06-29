@@ -116,7 +116,9 @@ function Objective() {
       pageTitle={'Objective'}
       sectionText={'The goal of the game is to get rid of all your cards before your opponents do'}
     >
-      <PlainCardContainer cards={dealCards(false)[0].cards} style={{ width: '80%' }} />
+      <View style={{ alignItems: 'center' }}>
+        <PlainCardContainer cards={dealCards(false)[0].cards} style={{ left: 0, width: 300 }} />
+      </View>
     </HowToPlaySection>
   )
 }
@@ -150,7 +152,7 @@ function HandTypes({ scrollToX }) {
       pageTitle={'Hand Types'}
       bottomSpacer={false}
     >
-      <View style={pageStyles.handTypeRow}>
+      <View style={[pageStyles.handTypeRow, { justifyContent: windowWidth > 500 ? 'space-around' : 'space-between' }]}>
         <View style={pageStyles.handType}>
           <PlainCardContainer cards={getRandomCard()} style={{ left: 0 }} />
           <Text style={[pageStyles.iconText, { top: 55, fontFamily: font }]}>Single</Text>
@@ -200,8 +202,8 @@ function CardRanks() {
       <View>
         <Text style={[pageStyles.iconText, { fontFamily: font }]}>Cards are ranked in the following order from{'\n'}lowest(3) to highest(2)</Text>
       </View>
-      <View style={{ marginVertical: 50 }}>
-        <PlainCardContainer cards={releaseTheDragon()} style={{ width: '80%' }} />
+      <View style={{ marginVertical: 50, alignItems: 'center' }}>
+        <PlainCardContainer cards={releaseTheDragon()} style={{ left: 0, width: 300 }} />
       </View>
       <View>
         <Text style={[pageStyles.iconText, { fontFamily: font }]}>Suits also matter. Suits are ranked alphabetically</Text>

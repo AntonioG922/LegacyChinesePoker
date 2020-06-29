@@ -214,10 +214,10 @@ export default function HostGameOptionsScreen({ navigation }) {
         <TitledPage pageTitle={'Host Game'} navigation={navigation}>
           <View style={styles.form}>
 
-            <View style={{ paddingHorizontal: 30 }}>
+            <View style={{ paddingHorizontal: 30, flex: 1, alignItems: 'center' }}>
               <HeaderText style={styles.errorMessage}>{errorMessage}</HeaderText>
-              <FlatTextInput label={'Game Name'} maxLength={16} onChangeText={text => setGameName(text)} />
-              <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} />
+              <FlatTextInput label={'Game Name'} maxLength={16} onChangeText={text => setGameName(text)} style={{ width: 300 }} />
+              <FlatTextInput label={'Password'} placeholder={'Optional'} textContentType={'password'} onChangeText={text => setPassword(text)} style={{ width: 300 }} />
             </View>
 
             <View style={[styles.row, { marginTop: 25 }]}>
