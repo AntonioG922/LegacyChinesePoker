@@ -22,6 +22,7 @@ import InitialLoadScreen from './screens/InitialLoadScreen';
 import StatsScreen from './screens/Stats';
 import SettingsScreen from './screens/Settings/SettingsScreen';
 import LinkAccountScreen from './screens/Settings/LinkAccount';
+import WelcomeScreen from './screens/WelcomeScreen';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -92,6 +93,7 @@ export default function App(props) {
             <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
               <Stack.Navigator initialRouteName={'InitialLoadScreen'} screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="InitialLoadScreen" component={InitialLoadScreen} />
+                <Stack.Screen name="Welcome" options={{ gestureEnabled: false }} component={WelcomeScreen} />
                 <Stack.Screen name="Home" options={{ gestureEnabled: false }} component={HomeScreen} />
                 <Stack.Screen name="HowToPlay" options={{ gestureEnabled: false }} component={HowToPlayScreen} />
                 <Stack.Screen name="HostGameOptions" component={HostGameOptionsScreen} />

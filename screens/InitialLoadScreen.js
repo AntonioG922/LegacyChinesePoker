@@ -7,10 +7,12 @@ import { setUserData } from '../redux/store';
 export default function InitialLoaderScreen({ navigation }) {
   useEffect(() => {
     setTimeout(() => {
+      let displayName;
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           console.log(user);
-          const { displayName, email, photoURL, providerData, uid } = user;
+          const { email, photoURL, providerData, uid } = user;
+          displayName = user.displayName;
           store.dispatch(setUserData({
             displayName: displayName,
             email: email,
@@ -18,6 +20,7 @@ export default function InitialLoaderScreen({ navigation }) {
             providerData: providerData,
             uid: uid
           }));
+          navigation.navigate('Home');
         } else {
           firebase.auth().signInAnonymously()
             .catch((error) => {
@@ -31,9 +34,9 @@ export default function InitialLoaderScreen({ navigation }) {
                   });
               }, 10000)
             });
+          navigation.navigate('Welcome');
         }
       });
-      navigation.navigate('Home');
     }, 1000)
   }, []);
 
