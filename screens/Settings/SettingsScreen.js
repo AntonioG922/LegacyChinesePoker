@@ -5,6 +5,7 @@ import store, { updateUserData, toggleStyledText, setGlobalFont } from '../../re
 import { FontAwesome5 } from '@expo/vector-icons';
 import { HeaderText, OutlineTextInput, DividerLine } from '../../components/StyledText';
 import TitledPage from '../../components/TitledPage';
+import Filter from 'bad-words';
 
 export default function SettingsScreen({ navigation }) {
   const user = store.getState().userData.user;
@@ -17,25 +18,41 @@ export default function SettingsScreen({ navigation }) {
 
   function saveSettings() {
     if (displayName && displayName !== store.getState().userData.user.displayName) {
-      firebase.auth().currentUser.updateProfile({
-        displayName: displayName
-      })
-        .then(() => {
-          store.dispatch(updateUserData({
-            displayName: displayName
-          }));
+      if (displayNameContainsBadWord()) {
+        alert('Please refrain from using bad words in your display name');
+      } else {
+        firebase.auth().currentUser.updateProfile({
+          displayName: displayName
         })
-        .catch((error) => {
-          if (error.message === 'Attempting to change configurable attribute of unconfigurable property.') {
+          .then(() => {
             store.dispatch(updateUserData({
               displayName: displayName
             }));
-          } else {
-            alert('Error saving preferences. Please check your internet connection and try again.');
-            console.log('Error saving preferences: ', error);
-          }
-        });
+          })
+          .catch((error) => {
+            if (error.message === 'Attempting to change configurable attribute of unconfigurable property.') {
+              store.dispatch(updateUserData({
+                displayName: displayName
+              }));
+            } else {
+              alert('Error saving preferences. Please check your internet connection and try again.');
+              console.log('Error saving preferences: ', error);
+            }
+          });
+      }
     }
+  }
+
+  function displayNameContainsBadWord() {
+    const displayNameWords = displayName.split(' ');
+    let flag = false;
+    let filter = new Filter();
+    displayNameWords.forEach(word => {
+      if (filter.isProfane(word)) {
+        flag = true;
+      }
+    })
+    return flag;
   }
 
   function SettingsLink({ icon, text, linkScreen }) {
