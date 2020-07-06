@@ -69,7 +69,13 @@ export default function WelcomeScreen({ navigation }) {
             Welcome to Chinese Poker!{'\n'}Go ahead and choose a <Text style={{ fontWeight: 'bold' }}>Display Name</Text> to get started!
             {'\n\n'}You can change this anytime in the future
           </Text>
-          <OutlineTextInput maxLength={12} style={{ marginTop: 50, width: 250 }} placeholder={'Display Name'} onChangeText={text => setDisplayName(text)} />
+          <OutlineTextInput
+            maxLength={12}
+            style={{ marginTop: 50, width: 250 }}
+            placeholder={'Display Name'}
+            onChangeText={text => setDisplayName(text)}
+            onSubmitEditing={() => saveDisplayName()}
+          />
           <Text style={styles.errorMessage}>{errorMessage}</Text>
           <TextButton onPress={() => saveDisplayName()}>Next</TextButton>
         </TitledPage>
