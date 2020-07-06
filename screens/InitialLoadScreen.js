@@ -20,7 +20,11 @@ export default function InitialLoaderScreen({ navigation }) {
             providerData: providerData,
             uid: uid
           }));
-          navigation.navigate('Home');
+          if (displayName) {
+            navigation.navigate('Home');
+          } else {
+            navigation.navigate('Welcome');
+          }
         } else {
           firebase.auth().signInAnonymously()
             .catch((error) => {
@@ -34,7 +38,6 @@ export default function InitialLoaderScreen({ navigation }) {
                   });
               }, 10000)
             });
-          navigation.navigate('Welcome');
         }
       });
     }, 1000)
