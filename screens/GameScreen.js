@@ -106,8 +106,6 @@ export default function GameScreen({ route, navigation }) {
             setGameData(docData);
           }
         });
-    } else {
-      console.log("We local bitch: ", gameData);
     }
 
     return () => {
@@ -483,7 +481,7 @@ export default function GameScreen({ route, navigation }) {
       !everyonePassed &&
       !isBetterHand(selectedCards, gameData.lastPlayed)
     ) {
-      setErrorMessage("Get that weak shit out");
+      setErrorMessage("Card(s) too low");
       return false;
     }
 
